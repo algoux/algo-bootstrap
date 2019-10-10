@@ -1,0 +1,11 @@
+node_modules
+dist
+src/renderer/pages/.umi
+src/renderer/pages/.umi-production
+release
+yarn-error.log
+yarn.lock
+package-lock.json
+.history
+.vscode
+.DS_Store

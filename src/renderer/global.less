@@ -1,0 +1,43 @@
+html,
+body,
+#root {
+  height: 100%;
+  background: transparent !important;
+}
+
+body {
+  margin: 0;
+}
+
+.ant-layout.ant-layout-has-sider {
+  // -webkit-backdrop-filter: saturate(180%) blur(20px);
+  // backdrop-filter: saturate(180%) blur(20px);
+  // background-color: rgba(255, 255, 255, 0.3);
+  height: 100%;
+  background-color: transparent !important;
+
+  .sidebar.ant-layout-sider {
+    background-color: transparent !important;
+
+    .ant-layout-sider-children {
+      overflow-x: hidden;
+    }
+  }
+}
+
+.ant-layout {
+  background-color: #fff;
+}
+
+.ant-menu-inline,
+.ant-menu-vertical,
+.ant-menu-vertical-left {
+  border-right: none;
+}
+
+.ant-menu-vertical .ant-menu-item:after,
+.ant-menu-vertical-left .ant-menu-item:after,
+.ant-menu-vertical-right .ant-menu-item:after,
+.ant-menu-inline .ant-menu-item:after {
+  border-right: none;
+}
