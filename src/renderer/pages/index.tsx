@@ -7,6 +7,7 @@ import yay from '@/assets/yay.jpg';
 import config from '@/config/config';
 import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
+import Test from '../components/test';
 
 interface Props {
 }
@@ -64,6 +65,13 @@ export default class Index extends Component<IIndexProps, State> {
         <h4>test common: {ipcKeys.getResPack}</h4>
         <h4>test dva: {this.props.global.name}</h4>
         <h4>test image: <img src={yay} style={{ width: '25px', height: '25px' }} /></h4>
+
+        <Test
+          count={3}
+          // size={2}
+          // global={{ name: '123' }}
+          // xxx={3}
+        />
       </div>
     );
   }

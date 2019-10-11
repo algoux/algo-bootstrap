@@ -18,7 +18,8 @@
     "interface-name": false,
     "no-empty-interface": false,
     "no-unused-variable": false,
-    "variable-name": false
+    "variable-name": false,
+    "trailing-comma": false
   },
 
   "jsRules": {

@@ -57,13 +57,13 @@ export default {
     if (load.includes(request)) {
       isExternal = `require("${request}")`;
     }
-    // const appDeps = Object.keys(require('../../../package').dependencies);
-    // if (appDeps.includes(request)) {
-    //   console.log(request, appDeps);
-    //   const orininalPath = slash(path.join(__dirname, '../../../node_modules', request));
-    //   const requireAbsolute = `require('${orininalPath}')`;
-    //   isExternal = isDev ? requireAbsolute : `require('${request}')`;
-    // }
+    const appDeps = Object.keys(require('../../../package').dependencies);
+    if (appDeps.includes(request)) {
+      console.log(request, appDeps);
+      const orininalPath = slash(path.join(__dirname, '../../../node_modules', request));
+      const requireAbsolute = `require('${orininalPath}')`;
+      isExternal = isDev ? requireAbsolute : `require('${request}')`;
+    }
     callback(null, isExternal);
   },
 };
