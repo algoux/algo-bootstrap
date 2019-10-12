@@ -1,4 +1,4 @@
-interface ApplicationState {
+interface AppState {
   global: {
     name: string;
   };

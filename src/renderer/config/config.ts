@@ -59,11 +59,11 @@ export default {
     }
     const appDeps = Object.keys(require('../../../package').dependencies);
     if (appDeps.includes(request)) {
-      console.log(request, appDeps);
       const orininalPath = slash(path.join(__dirname, '../../../node_modules', request));
       const requireAbsolute = `require('${orininalPath}')`;
       isExternal = isDev ? requireAbsolute : `require('${request}')`;
     }
+    isExternal && console.log('external dependency:', request);
     callback(null, isExternal);
   },
 };

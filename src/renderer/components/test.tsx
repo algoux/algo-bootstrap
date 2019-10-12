@@ -4,14 +4,14 @@ import { connect } from '@/utils/dva';
 
 export interface ITestProps {
   count: number;
-  size: number;
+  size?: number;
 }
 
 interface State {
   s: string;
 }
 
-function mapStateToProps(state: any) {
+function mapStateToProps(state: AppState) {
   console.log('mapState', state);
   return {
     global: {
