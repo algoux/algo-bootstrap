@@ -4,6 +4,11 @@ import * as url from 'url';
 import { ipcMain } from 'electron-better-ipc';
 import ipcKeys from 'common/configs/ipc';
 import x from '@/test';
+import req from './utils/request';
+import _modules from './modules';
+
+// 将需要共享到渲染进程的模块暴露到 global
+global.modules = _modules;
 
 // console.log(1, systemPreferences.isDarkMode());
 // console.log(2, systemPreferences.getEffectiveAppearance());
@@ -86,6 +91,15 @@ app.on('activate', () => {
   }
 });
 
+app.on('gpu-process-crashed', function () {
+  console.error('GPU进程崩溃，程序退出');
+  app.exit(1);
+});
+
 ipcMain.answerRenderer(ipcKeys.getResPack, async (param) => {
-  return param + ' haha';
+  const ret = await global.modules.req.get<{ apis: string[], help: string }>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
+  // console.log('in main ret', ret);
+  // return param + ' haha' + ret.data!.help;
+  console.log('modules', global.modules);
+  return  param + ' ha';
 });

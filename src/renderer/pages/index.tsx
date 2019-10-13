@@ -8,6 +8,9 @@ import config from '@/config/config';
 import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
 import Test from '../components/test';
+import { remote } from 'electron';
+import sm from '@/utils/modules';
+import log from 'electron-log';
 
 interface Props {
 }
@@ -22,6 +25,7 @@ export type IIndexProps = Props & StoreStateProps;
 
 interface State {
   ipc: string;
+  remoteGlobal: string;
 }
 
 @connect((state: any) => {
@@ -35,6 +39,7 @@ export default class Index extends Component<IIndexProps, State> {
     super(props);
     this.state = {
       ipc: '',
+      remoteGlobal: '',
     };
   }
 
@@ -44,13 +49,25 @@ export default class Index extends Component<IIndexProps, State> {
     // });
 
     // ipc.send('get-emoji', 'unicorn');
-    this.test();
+    this.testIpc();
+    this.testRemoteGlobal();
   }
 
-  async test() {
+  async testIpc() {
     const ret = await ipc.callMain<string>(ipcKeys.getResPack, 'wa') as string;
     console.log('ipc ret:', ret);
     this.setState({ ipc: ret });
+  }
+
+  async testRemoteGlobal() {
+    log.warn('go log');
+    const req = sm.req;
+    const ret = await req.get<IApiResp<{ apis: string[], help: string }>>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
+    console.log('remote global api ret:', JSON.parse(JSON.stringify(ret)));
+    log.warn('get ret', ret);
+    this.setState({
+      remoteGlobal: ret.data!.help,
+    });
   }
 
   render() {
@@ -60,6 +77,7 @@ export default class Index extends Component<IIndexProps, State> {
         <p>接下来，向导将指引你完成安装和配置。</p>
         <Button style={{ marginTop: '20px' }}>开始</Button>
 
+        <h4>test remote require: {this.state.remoteGlobal}</h4>
         <h4>test ipc: {this.state.ipc}</h4>
         <h4>test @: {config.outputPath}</h4>
         <h4>test common: {ipcKeys.getResPack}</h4>

@@ -8,7 +8,7 @@
       "es2015",
       "es2016",
       "es2017"
-    ], 
+    ],
     "noImplicitAny": false,
     "sourceMap": true,
     "outDir": "dist",
@@ -17,6 +17,8 @@
     "allowJs": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
     "noEmit": false,
     "noUnusedLocals": false,
