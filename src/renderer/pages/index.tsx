@@ -63,7 +63,6 @@ export default class Index extends Component<IIndexProps, State> {
     log.warn('go log');
     const req = sm.req;
     const ret = await req.get<IApiResp<{ apis: string[], help: string }>>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
-    console.log('remote global api ret:', JSON.parse(JSON.stringify(ret)));
     log.warn('get ret', ret);
     this.setState({
       remoteGlobal: ret.data!.help,

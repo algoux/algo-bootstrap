@@ -97,9 +97,9 @@ app.on('gpu-process-crashed', function () {
 });
 
 ipcMain.answerRenderer(ipcKeys.getResPack, async (param) => {
-  const ret = await global.modules.req.get<{ apis: string[], help: string }>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
+  // const ret = await global.modules.req.get<{ apis: string[], help: string }>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
   // console.log('in main ret', ret);
   // return param + ' haha' + ret.data!.help;
-  console.log('modules', global.modules);
+  // console.log('modules', global.modules);
   return  param + ' ha';
 });

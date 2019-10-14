@@ -43,7 +43,7 @@ function checkStatus(reqId: number, mau: string, duration: number, response: Axi
  * Send a request and get API response
  * @param {string} url
  * @param {AxiosRequestConfig} options
- * @param {function} postprocess
+ * @param {function} postprocess **can not be used in renderer process**
  * @returns {Promise<IApiResp<any>>}
  */
 async function baseRequest<O = any>(url: string, options?: AxiosRequestConfig): Promise<O>;
