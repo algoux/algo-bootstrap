@@ -1,13 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import constants from 'common/configs/constants';
 import api from 'common/configs/apis';
-import moment from 'moment';
+import log from 'electron-log';
 
+log.transports.file.level = false;
 let requestTaskId = 1;
-
-function now() {
-  return moment().format('YYYY-MM-DD HH:mm:ss');
-}
 
 function initAxios(): AxiosInstance {
   const axiosInstance: AxiosInstance = axios.create({
@@ -25,7 +22,7 @@ function initAxios(): AxiosInstance {
 }
 
 function checkStatus(reqId: number, mau: string, duration: number, response: AxiosResponse) {
-  console.log(`[${now()} resp #${reqId}] ${mau} (${duration}ms)\n` + JSON.stringify({
+  log.info(`[resp #${reqId}] ${mau} (${duration}ms)\n` + JSON.stringify({
     status: `${response.status} ${response.statusText}`,
     headers: response.headers,
     data: response.data,
@@ -52,7 +49,7 @@ async function baseRequest<O = any, PO = O>(url: string, options: AxiosRequestCo
   const axiosInstance = initAxios();
   const reqId = requestTaskId++;
   const mau = `${options.method || 'GET'} ${url}`;
-  console.log(`[${now()}  req #${reqId}] ${mau}` + (options.data ? '\n' + JSON.stringify(options.data, null, '  ') : ''));
+  log.info(`[req  #${reqId}] ${mau}` + (options.data ? '\n' + JSON.stringify(options.data, null, '  ') : ''));
   const st = Date.now();
   const response = await axiosInstance({
     url,

@@ -4,7 +4,7 @@ import { url } from 'inspector';
 const sharedModules: _SharedModules = remote.getGlobal('modules');
 
 // 进行一次 JSON 转换，以避免返回的对象被 log 输出时显示为 '[Getter/Setter]'
-const reqHackWrapper = (f: (...args: any) => any) => (...args: any) => f(...args).then((r: any) => JSON.parse(JSON.stringify(r)));
+const reqHackWrapper = (f: (...args: any[]) => any) => (...args: any[]) => f(...args).then((r: any) => JSON.parse(JSON.stringify(r)));
 
 const sm = {
   ...sharedModules,

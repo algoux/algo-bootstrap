@@ -10,7 +10,7 @@ import { ipcRenderer as ipc } from 'electron-better-ipc';
 import Test from '../components/test';
 import { remote } from 'electron';
 import sm from '@/utils/modules';
-import log from 'electron-log';
+import { logRenderer } from 'common/utils/logger';
 
 interface Props {
 }
@@ -59,11 +59,12 @@ export default class Index extends Component<IIndexProps, State> {
     this.setState({ ipc: ret });
   }
 
-  async testRemoteGlobal() {
-    log.warn('go log');
+  testRemoteGlobal = async () => {
+    logRenderer.info('go req');
+    // logRenderer.warn('go log');
     const req = sm.req;
     const ret = await req.get<IApiResp<{ apis: string[], help: string }>>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
-    log.warn('get ret', ret);
+    logRenderer.warn('get ret', ret);
     this.setState({
       remoteGlobal: ret.data!.help,
     });
@@ -74,7 +75,7 @@ export default class Index extends Component<IIndexProps, State> {
       <div style={{ textAlign: 'center' }}>
         <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
         <p>接下来，向导将指引你完成安装和配置。</p>
-        <Button style={{ marginTop: '20px' }}>开始</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始</Button>
 
         <h4>test remote require: {this.state.remoteGlobal}</h4>
         <h4>test ipc: {this.state.ipc}</h4>
