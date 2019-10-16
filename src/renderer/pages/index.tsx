@@ -50,7 +50,7 @@ export default class Index extends Component<IIndexProps, State> {
 
     // ipc.send('get-emoji', 'unicorn');
     this.testIpc();
-    this.testRemoteGlobal();
+    // this.testRemoteGlobal();
   }
 
   async testIpc() {
