@@ -22,7 +22,8 @@
     "trailing-comma": false,
     "no-unused-expression": false,
     "only-arrow-functions": false,
-    "space-before-function-paren": false
+    "space-before-function-paren": false,
+    "no-empty": false
   },
 
   "jsRules": {

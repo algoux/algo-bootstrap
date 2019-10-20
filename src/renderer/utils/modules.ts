@@ -1,10 +1,10 @@
 import { remote } from 'electron';
-import { url } from 'inspector';
+import { cloneDeep } from 'lodash';
 
 const sharedModules: _SharedModules = remote.getGlobal('modules');
 
-// 进行一次 JSON 转换，以避免返回的对象被 log 输出时显示为 '[Getter/Setter]'
-const reqHackWrapper = (f: (...args: any[]) => any) => (...args: any[]) => f(...args).then((r: any) => JSON.parse(JSON.stringify(r)));
+// 避免返回的对象含有 electron 的 getter/setter
+const reqHackWrapper = (f: (...args: any[]) => any) => (...args: any[]) => f(...args).then((r: any) => cloneDeep(r));
 
 const sm = {
   ...sharedModules,

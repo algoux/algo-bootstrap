@@ -49,14 +49,14 @@ export default class Index extends Component<IIndexProps, State> {
     // });
 
     // ipc.send('get-emoji', 'unicorn');
-    this.testIpc();
+    // this.testIpc();
     // this.testRemoteGlobal();
   }
 
-  async testIpc() {
+  testIpc = async () => {
     const ret = await ipc.callMain<string>(ipcKeys.getResPack, 'wa') as string;
     console.log('ipc ret:', ret);
-    this.setState({ ipc: ret });
+    this.setState({ ipc: JSON.stringify(ret) });
   }
 
   testRemoteGlobal = async () => {
@@ -75,7 +75,8 @@ export default class Index extends Component<IIndexProps, State> {
       <div style={{ textAlign: 'center' }}>
         <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
         <p>接下来，向导将指引你完成安装和配置。</p>
-        <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.testIpc}>开始</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
 
         <h4>test remote require: {this.state.remoteGlobal}</h4>
         <h4>test ipc: {this.state.ipc}</h4>

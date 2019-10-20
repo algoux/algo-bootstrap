@@ -7,6 +7,7 @@ import x from '@/test';
 import req from './utils/request';
 import _modules from './modules';
 import checkEnvironment from './utils/env-checker';
+import { logMain } from 'common/utils/logger';
 
 // 将需要共享到渲染进程的模块暴露到 global
 global.modules = _modules;
@@ -102,6 +103,7 @@ ipcMain.answerRenderer(ipcKeys.getResPack, async (param) => {
   // console.log('in main ret', ret);
   // return param + ' haha' + ret.data!.help;
   // console.log('modules', global.modules);
-  checkEnvironment();
-  return  param + ' ha';
+  return {
+    checkEnvironment: await checkEnvironment(),
+  };
 });
