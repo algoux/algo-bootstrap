@@ -26,6 +26,7 @@ export type IIndexProps = Props & StoreStateProps;
 interface State {
   ipc: string;
   remoteGlobal: string;
+  respackPath: string;
 }
 
 @connect((state: any) => {
@@ -40,6 +41,7 @@ export default class Index extends Component<IIndexProps, State> {
     this.state = {
       ipc: '',
       remoteGlobal: '',
+      respackPath: '',
     };
   }
 
@@ -70,6 +72,19 @@ export default class Index extends Component<IIndexProps, State> {
     });
   }
 
+  openRespack = async () => {
+    const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      properties: ['openFile'],
+      filters: [
+        { name: 'Respack', extensions: ['respack'] },
+      ],
+    });
+    this.setState({
+      respackPath: res.filePaths ? res.filePaths[0] :  '',
+    });
+    logRenderer.info('open res', res);
+  }
+
   render() {
     return (
       <div style={{ textAlign: 'center' }}>
@@ -77,7 +92,9 @@ export default class Index extends Component<IIndexProps, State> {
         <p>接下来，向导将指引你完成安装和配置。</p>
         <Button style={{ marginTop: '20px' }} onClick={this.testIpc}>开始</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
 
+        <h4>test respack path: {this.state.respackPath}</h4>
         <h4>test remote require: {this.state.remoteGlobal}</h4>
         <h4>test ipc: {this.state.ipc}</h4>
         <h4>test @: {config.outputPath}</h4>

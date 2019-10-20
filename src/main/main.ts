@@ -9,6 +9,10 @@ import _modules from './modules';
 import checkEnvironment from './utils/env-checker';
 import { logMain } from 'common/utils/logger';
 
+if (module.hot) {
+  module.hot.accept();
+}
+
 // 将需要共享到渲染进程的模块暴露到 global
 global.modules = _modules;
 
