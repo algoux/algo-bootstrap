@@ -76,13 +76,17 @@ export default class Index extends Component<IIndexProps, State> {
     const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
       properties: ['openFile'],
       filters: [
-        { name: 'Respack', extensions: ['respack'] },
+        { name: 'Algo Bootstrap 资源包', extensions: ['respack'] },
       ],
     });
+    const respackPath = res.filePaths ? res.filePaths[0] : '';
     this.setState({
-      respackPath: res.filePaths ? res.filePaths[0] :  '',
+      respackPath,
     });
     logRenderer.info('open res', res);
+    if (respackPath) {
+      sm.respack.validateRespack(respackPath);
+    }
   }
 
   render() {
