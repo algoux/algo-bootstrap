@@ -4,14 +4,14 @@ import * as url from 'url';
 import { ipcMain } from 'electron-better-ipc';
 import ipcKeys from 'common/configs/ipc';
 import x from '@/test';
-import req from './utils/request';
-import _modules from './modules';
-import checkEnvironment from './utils/env-checker';
+import req from '@/utils/request';
+import _modules from '@/modules';
+import checkEnvironment from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
 
-if (module.hot) {
-  module.hot.accept();
-}
+// if (module.hot) {
+//   module.hot.accept();
+// }
 
 // 将需要共享到渲染进程的模块暴露到 global
 global.modules = _modules;

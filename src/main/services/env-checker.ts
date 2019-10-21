@@ -1,6 +1,6 @@
 import { logProcess, logMain } from 'common/utils/logger';
-import { isMac, SupportedPlatform, Platform } from './platform';
-import { spawn, ChildProcessOutput } from './child-process';
+import { isMac, SupportedPlatform, Platform } from '@/utils/platform';
+import { spawn, ChildProcessOutput } from '@/utils/child-process';
 
 function parseStringFromStd(s: ChildProcessOutput) {
   return (s || '').toString();
@@ -23,7 +23,7 @@ async function findPath(cmd: string) {
   try {
     const { stdout, stderr } = await spawn('[findPath]', cmdMap[process.platform], [cmd]);
     return matchOne(/(.*)/, stdout || stderr);
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -54,6 +54,16 @@ function genInstalled(
   };
 }
 
+export async function checkXCodeCLT(): Promise<boolean> {
+  try {
+    if (isMac) {
+      await spawn('[checkXCodeCLT]', 'xcode-select', ['-p']);
+      return true;
+    }
+  } catch (e) { }
+  return false;
+}
+
 export async function checkGcc(): Promise<ICheckEnvironmentResult> {
   const GCC_REG = /^gcc version (.*)$/m;
   const APPLE_CLANG_REG = /^Apple clang version (.*)$/m;
@@ -68,7 +78,7 @@ export async function checkGcc(): Promise<ICheckEnvironmentResult> {
     if (ver) {
       return genInstalled(ver, await findPath('gcc'));
     }
-  } catch (e) {}
+  } catch (e) { }
   return genNotInstalled();
 }
 
@@ -92,7 +102,7 @@ export async function checkPython(): Promise<ICheckEnvironmentResult> {
     if (ver) {
       return genInstalled(ver, await findPath('python'));
     }
-  } catch (e) {}
+  } catch (e) { }
   return genNotInstalled();
 }
 
@@ -125,7 +135,7 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
         if (ver) {
           return genInstalled(ver, binPath);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }
   return genNotInstalled();
@@ -133,7 +143,7 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
 
 async function checkEnvironment() {
   const [gcc, gdb, python, cpplint, code] = await Promise.all([
-    checkGcc(),
+    isMac ? (await checkXCodeCLT() ? checkGcc() : genNotInstalled()) : checkGcc(),
     isMac ? genNotInstalled() : checkGdb(),
     checkPython(),
     checkCpplint(),
