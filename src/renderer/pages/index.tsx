@@ -8,7 +8,7 @@ import config from '@/config/config';
 import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
 import Test from '../components/test';
-import { remote } from 'electron';
+import { remote, Accelerator } from 'electron';
 import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
 
@@ -85,7 +85,11 @@ export default class Index extends Component<IIndexProps, State> {
     });
     logRenderer.info('open res', res);
     if (respackPath) {
-      sm.respack.validateRespack(respackPath);
+      const valid = await sm.respack.validateRespack(respackPath);
+      if (!valid) {
+        alert('无效或已损坏的资源包，请尝试重新下载');
+        return;
+      }
     }
   }
 
