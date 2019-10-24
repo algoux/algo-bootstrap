@@ -85,10 +85,12 @@ export default class Index extends Component<IIndexProps, State> {
     });
     logRenderer.info('open res', res);
     if (respackPath) {
-      const valid = await sm.respack.validateRespack(respackPath);
-      if (!valid) {
-        alert('无效或已损坏的资源包，请尝试重新下载');
-        return;
+      try {
+        const respack = new sm.Respack(respackPath);
+        await respack.validate();
+      } catch (e) {
+        logRenderer.error(`[respack] open failed with code ${e.code}:`, e);
+        alert('无效或已损坏的资源包，请尝试重新下载' + (e.code ? `\n[code: ${e.code}]` : ''));
       }
     }
   }

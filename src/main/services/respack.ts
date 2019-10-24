@@ -1,8 +1,26 @@
-import Respack from "@/utils/respack";
-import { logMain, logRenderer } from "common/utils/logger";
+import AdmZip from 'adm-zip';
+import { SupportedPlatform } from '@/utils/platform';
+import { logMain } from 'common/utils/logger';
+import Codes from 'common/configs/codes';
+import generalError from 'common/utils/general-error';
+import req from '../utils/request';
+import api from 'common/configs/apis';
 import * as sha from 'sha';
-import req from '@/utils/request';
-import api from "common/configs/apis";
+
+export interface IRespackManifestFile {
+  id: string;
+  name: string;
+  version: string;
+  format: string;
+}
+
+export interface IRespackManifest {
+  id: string;
+  description: string;
+  version: string;
+  platform: SupportedPlatform;
+  files: IRespackManifestFile[];
+}
 
 interface IRespackCheckResult {
   _id: string;
@@ -14,21 +32,54 @@ function getFileId(id: string, platform: string, version: string) {
   return `${id}~${platform}~${version}`;
 }
 
-export async function validateRespack(filePath: string) {
-  try {
-    const respack = new Respack(filePath);
-    const manifest = respack.getManifest();
-    if (manifest.platform !== process.platform) {
-      throw new Error(`Respack platform "${manifest.platform}" is incompatible with "${process.platform}"`);
-    }
-    logMain.info('[respack] manifest:', manifest);
-    const fileId = getFileId(manifest.id, manifest.platform, manifest.version);
-    const checkInfo = await req.get<IRespackCheckResult>(`${api.respack.info}/${fileId}.json`);
-    logMain.info('[respack] respack checkInfo:', checkInfo);
-    sha.checkSync(filePath, checkInfo.sha1);
-    return true;
-  } catch (e) {
-    logMain.error('[respack] validateRespack', e);
+export default class Respack {
+  private readonly filePath: string;
+  private readonly zipInstance: AdmZip;
+  private readonly manifest: IRespackManifest;
+
+  constructor(filePath: string) {
+    this.filePath = filePath;
+    this.zipInstance = new AdmZip(filePath);
+    this.manifest = JSON.parse(this.zipInstance.getEntry('manifest.json').getData().toString());
+    logMain.info('[respack] manifest:', this.manifest);
   }
-  return false;
+
+  getManifest() {
+    return this.manifest;
+  }
+
+  async validate() {
+    const manifest = this.manifest;
+    if (manifest.platform !== process.platform) {
+      throw generalError(Codes.respackIncompatible, Error(`Respack platform "${manifest.platform}" is incompatible with "${process.platform}"`));
+    }
+    let sha1 = '';
+    try {
+      const fileId = getFileId(manifest.id, manifest.platform, manifest.version);
+      const checkInfo = await req.get<IRespackCheckResult>(`${api.respack.info}/${fileId}.json`);
+      logMain.info('[respack] respack checkInfo:', checkInfo);
+      sha1 = checkInfo.sha1;
+    } catch (e) {
+      throw generalError(Codes.respackInfoFetchFailed, e);
+    }
+    try {
+      sha.checkSync(this.filePath, sha1);
+    } catch (e) {
+      throw generalError(Codes.respackChecksumError, e);
+    }
+    return true;
+  }
+
+  extract(entry: string, to: string) {
+    return this.zipInstance.extractEntryTo(entry, to, true, true);
+  }
+
+  extractAll(to: string) {
+    return new Promise((resolve, reject) => {
+      this.zipInstance.extractAllToAsync(to, true, (e) => {
+        logMain.warn('eAll', e);
+        resolve();
+      });
+    });
+  }
 }

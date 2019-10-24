@@ -1,10 +1,10 @@
 // ** DO NOT use alias @ **
 import req from './utils/request';
-import * as respack from './services/respack';
+import Respack from './services/respack';
 
 const _modules = {
   req,
-  respack,
+  Respack,
 };
 
 export default _modules;
