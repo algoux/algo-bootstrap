@@ -23,7 +23,8 @@
     "no-unused-expression": false,
     "only-arrow-functions": false,
     "space-before-function-paren": false,
-    "no-empty": false
+    "no-empty": false,
+    "member-ordering": false
   },
 
   "jsRules": {

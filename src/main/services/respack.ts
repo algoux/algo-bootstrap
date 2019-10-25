@@ -3,9 +3,11 @@ import { SupportedPlatform } from '@/utils/platform';
 import { logMain } from 'common/utils/logger';
 import Codes from 'common/configs/codes';
 import generalError from 'common/utils/general-error';
-import req from '../utils/request';
+import req from '@/utils/request';
 import api from 'common/configs/apis';
 import * as sha from 'sha';
+import { app } from 'electron';
+import paths from 'common/configs/paths';
 
 export interface IRespackManifestFile {
   id: string;
@@ -44,11 +46,23 @@ export default class Respack {
     logMain.info('[respack] manifest:', this.manifest);
   }
 
-  getManifest() {
+  public getManifest() {
     return this.manifest;
   }
 
-  async validate() {
+  private extractAll(to: string) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.zipInstance.extractAllToAsync(to, true, (_e) => {
+          resolve();
+        });
+      } catch (e) {
+        reject(generalError(Codes.respackExtractFailed, e));
+      }
+    });
+  }
+
+  public async validate() {
     const manifest = this.manifest;
     if (manifest.platform !== process.platform) {
       throw generalError(Codes.respackIncompatible, Error(`Respack platform "${manifest.platform}" is incompatible with "${process.platform}"`));
@@ -70,16 +84,10 @@ export default class Respack {
     return true;
   }
 
-  extract(entry: string, to: string) {
-    return this.zipInstance.extractEntryTo(entry, to, true, true);
-  }
-
-  extractAll(to: string) {
-    return new Promise((resolve, reject) => {
-      this.zipInstance.extractAllToAsync(to, true, (e) => {
-        logMain.warn('eAll', e);
-        resolve();
-      });
-    });
+  public async extract() {
+    const target = app.getPath('userData') + paths.respack;
+    logMain.info('[respack] extract to:', target);
+    await this.extractAll(target);
+    logMain.info('[respack] extract completed');
   }
 }

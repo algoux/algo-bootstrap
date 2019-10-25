@@ -1,10 +1,10 @@
 export interface GeneralError extends Error {
-  code: number;
+  retCode: number;
 }
 
 export default function generalError(code: number, e: Error) {
   // @ts-ignore
   const err: GeneralError = e;
-  err.code = code;
+  err.retCode = code;
   return err;
 }

@@ -12,6 +12,8 @@ import { remote, Accelerator } from 'electron';
 import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
 
+const { req, Respack } = sm;
+
 interface Props {
 }
 
@@ -64,7 +66,6 @@ export default class Index extends Component<IIndexProps, State> {
   testRemoteGlobal = async () => {
     logRenderer.info('go req');
     // logRenderer.warn('go log');
-    const req = sm.req;
     const ret = await req.get<IApiResp<{ apis: string[], help: string }>>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
     logRenderer.warn('get ret', ret);
     this.setState({
@@ -86,11 +87,12 @@ export default class Index extends Component<IIndexProps, State> {
     logRenderer.info('open res', res);
     if (respackPath) {
       try {
-        const respack = new sm.Respack(respackPath);
+        const respack = new Respack(respackPath);
         await respack.validate();
+        await respack.extract();
       } catch (e) {
-        logRenderer.error(`[respack] open failed with code ${e.code}:`, e);
-        alert('无效或已损坏的资源包，请尝试重新下载' + (e.code ? `\n[code: ${e.code}]` : ''));
+        logRenderer.error(`[respack] open failed with code ${e.retCode}:`, e);
+        alert('无效或已损坏的资源包，请尝试重新下载' + (e.retCode ? `\n[code: ${e.retCode}]` : ''));
       }
     }
   }
