@@ -6,15 +6,24 @@ import ipcKeys from 'common/configs/ipc';
 import x from '@/test';
 import req from '@/utils/request';
 import _modules from '@/modules';
-import checkEnvironment from '@/services/env-checker';
+import { getEnvironment } from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
+import { isMac } from './utils/platform';
 
 // if (module.hot) {
 //   module.hot.accept();
 // }
 
+const PATH = process.env.PATH!;
+if (isMac && PATH.search('/usr/local/bin') === -1) {
+  process.env.PATH = PATH + ':/usr/local/bin';
+}
+
+logMain.info('PATH', process.env.PATH);
+
 // 将需要共享到渲染进程的模块暴露到 global
 global.modules = _modules;
+
 
 // console.log(1, systemPreferences.isDarkMode());
 // console.log(2, systemPreferences.getEffectiveAppearance());
@@ -107,7 +116,8 @@ ipcMain.answerRenderer(ipcKeys.getResPack, async (param) => {
   // console.log('in main ret', ret);
   // return param + ' haha' + ret.data!.help;
   // console.log('modules', global.modules);
+  // logMain.info('app.getLocale()', app.getLocale());
   return {
-    checkEnvironment: await checkEnvironment(),
+    checkEnvironment: await getEnvironment(true),
   };
 });

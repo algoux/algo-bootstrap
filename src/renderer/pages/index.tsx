@@ -1,5 +1,6 @@
-import { connect } from 'dva';
-import React, { Component } from 'react';
+import React from 'react';
+import { connect } from '@/utils/dva';
+
 import { formatMessage } from 'umi-plugin-locale';
 import { Button } from 'antd';
 import yay from '@/assets/yay.jpg';
@@ -7,23 +8,17 @@ import yay from '@/assets/yay.jpg';
 import config from '@/config/config';
 import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
-import Test from '../components/test';
-import { remote, Accelerator } from 'electron';
+import Test from '@/components/test';
+import { remote } from 'electron';
 import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
+import msg from '@/utils/msg';
+import { DispatchProp } from 'react-redux';
 
 const { req, Respack } = sm;
 
-interface Props {
+export interface IIndexProps {
 }
-
-interface StoreStateProps {
-  global: {
-    name: string;
-  };
-}
-
-export type IIndexProps = Props & StoreStateProps;
 
 interface State {
   ipc: string;
@@ -31,14 +26,10 @@ interface State {
   respackPath: string;
 }
 
-@connect((state: any) => {
-  console.log('mapState', state);
-  return state;
-})
-export default class Index extends Component<IIndexProps, State> {
-  static defaultProps: Props = {};
+type Props = IIndexProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
 
-  constructor(props: IIndexProps) {
+class Index extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       ipc: '',
@@ -63,6 +54,16 @@ export default class Index extends Component<IIndexProps, State> {
     this.setState({ ipc: JSON.stringify(ret) });
   }
 
+  getEnvironment = async () => {
+    const env = await this.props.dispatch!({
+      type: 'global/getEnvironment',
+      payload: {
+        force: true,
+      },
+    });
+    logRenderer.info('getEnvironment:', env);
+  }
+
   testRemoteGlobal = async () => {
     logRenderer.info('go req');
     // logRenderer.warn('go log');
@@ -74,6 +75,13 @@ export default class Index extends Component<IIndexProps, State> {
   }
 
   openRespack = async () => {
+    // const res = await remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+    //   buttons: [],
+    //   message: 'msg',
+    //   detail: 'detail2\ndetail3',
+    //   type: "error",
+    // });
+    // console.log('res', res);
     const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
       properties: ['openFile'],
       filters: [
@@ -91,8 +99,8 @@ export default class Index extends Component<IIndexProps, State> {
         await respack.validate();
         await respack.extract();
       } catch (e) {
-        logRenderer.error(`[respack] open failed with code ${e.retCode}:`, e);
-        alert('无效或已损坏的资源包，请尝试重新下载' + (e.retCode ? `\n[code: ${e.retCode}]` : ''));
+        logRenderer.error(`[openRespack] open failed:`, e);
+        msg.error('验证或应用资源包失败');
       }
     }
   }
@@ -102,12 +110,13 @@ export default class Index extends Component<IIndexProps, State> {
       <div style={{ textAlign: 'center' }}>
         <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
         <p>接下来，向导将指引你完成安装和配置。</p>
-        <Button style={{ marginTop: '20px' }} onClick={this.testIpc}>开始</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.getEnvironment}>开始</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
 
         <h4>test respack path: {this.state.respackPath}</h4>
         <h4>test remote require: {this.state.remoteGlobal}</h4>
+        <h4>test env: {JSON.stringify(this.props.global.environment)}</h4>
         <h4>test ipc: {this.state.ipc}</h4>
         <h4>test @: {config.outputPath}</h4>
         <h4>test common: {ipcKeys.getResPack}</h4>
@@ -124,3 +133,10 @@ export default class Index extends Component<IIndexProps, State> {
     );
   }
 }
+
+function mapStateToProps(state: IState) {
+  console.log('mapState', state);
+  return state;
+}
+
+export default connect(mapStateToProps)(Index);

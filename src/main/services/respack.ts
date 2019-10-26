@@ -8,6 +8,7 @@ import api from 'common/configs/apis';
 import * as sha from 'sha';
 import { app } from 'electron';
 import paths from 'common/configs/paths';
+import fs from 'fs-extra';
 
 export interface IRespackManifestFile {
   id: string;
@@ -87,6 +88,7 @@ export default class Respack {
   public async extract() {
     const target = app.getPath('userData') + paths.respack;
     logMain.info('[respack] extract to:', target);
+    await fs.remove(target);
     await this.extractAll(target);
     logMain.info('[respack] extract completed');
   }

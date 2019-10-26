@@ -1,5 +1,5 @@
 declare module NodeJS {
   interface Global {
-    modules: _SharedModules;
+    modules: _GlobalSharedModules;
   }
 }

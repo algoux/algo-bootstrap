@@ -11,7 +11,7 @@ interface State {
   s: string;
 }
 
-function mapStateToProps(state: AppState) {
+function mapStateToProps(state: IState) {
   console.log('mapState', state);
   return {
     global: {

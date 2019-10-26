@@ -2,6 +2,35 @@ import { logProcess, logMain } from 'common/utils/logger';
 import { isMac, SupportedPlatform, Platform } from '@/utils/platform';
 import { spawn, ChildProcessOutput } from '@/utils/child-process';
 
+const emptyEnvironment = genEmptyEnvironment();
+
+let environment = emptyEnvironment;
+
+function genNotInstalled(): ICheckEnvironmentResultNotInstalled {
+  return { installed: false };
+}
+
+function genInstalled(
+  version: ICheckEnvironmentResultInstalled['version'],
+  path: ICheckEnvironmentResultInstalled['path']
+): ICheckEnvironmentResultInstalled {
+  return {
+    installed: true,
+    version,
+    path,
+  };
+}
+
+export function genEmptyEnvironment(): IEnvironment {
+  return {
+    gcc: genNotInstalled(),
+    gdb: genNotInstalled(),
+    python: genNotInstalled(),
+    cpplint: genNotInstalled(),
+    code: genNotInstalled(),
+  };
+}
+
 function parseStringFromStd(s: ChildProcessOutput) {
   return (s || '').toString();
 }
@@ -25,33 +54,6 @@ async function findPath(cmd: string) {
     return matchOne(/(.*)/, stdout || stderr);
   } catch (e) { }
   return null;
-}
-
-export interface ICheckEnvironmentResultNotInstalled {
-  installed: false;
-}
-
-export interface ICheckEnvironmentResultInstalled {
-  installed: true;
-  version: string | null;
-  path: string | null;
-}
-
-export type ICheckEnvironmentResult = ICheckEnvironmentResultNotInstalled | ICheckEnvironmentResultInstalled;
-
-function genNotInstalled(): ICheckEnvironmentResultNotInstalled {
-  return { installed: false };
-}
-
-function genInstalled(
-  version: ICheckEnvironmentResultInstalled['version'],
-  path: ICheckEnvironmentResultInstalled['path']
-): ICheckEnvironmentResultInstalled {
-  return {
-    installed: true,
-    version,
-    path,
-  };
 }
 
 export async function checkXCodeCLT(): Promise<boolean> {
@@ -129,7 +131,7 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   } catch (e) {
     if (isMac) {
       try {
-        const binPath = '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code';
+        const binPath = '/Applications/Visual\\ Studio\\ Code.app/Contents/Resources/app/bin/code';
         const { stdout, stderr } = await spawn('[checkVSCode]', binPath, ['-v']);
         const ver = matchOne(CODE_REG, stderr || stdout);
         if (ver) {
@@ -141,7 +143,10 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   return genNotInstalled();
 }
 
-async function checkEnvironment() {
+export async function getEnvironment(force = false) {
+  if (!force && environment !== emptyEnvironment) {
+    return environment;
+  }
   const [gcc, gdb, python, cpplint, code] = await Promise.all([
     isMac ? (await checkXCodeCLT() ? checkGcc() : genNotInstalled()) : checkGcc(),
     isMac ? genNotInstalled() : checkGdb(),
@@ -149,15 +154,14 @@ async function checkEnvironment() {
     checkCpplint(),
     checkVSCode(),
   ]);
-  const environment = {
+  const environmentResult: IEnvironment = {
     gcc,
     gdb,
     python,
     cpplint,
     code,
   };
-  logMain.info('[checkEnvironment]', environment);
-  return environment;
+  logMain.info('[getEnvironment]', environmentResult);
+  environment = environmentResult;
+  return environmentResult;
 }
-
-export default checkEnvironment;

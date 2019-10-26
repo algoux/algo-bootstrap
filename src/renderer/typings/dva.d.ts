@@ -1,5 +1,8 @@
-interface AppState {
-  global: {
-    name: string;
-  };
+interface IState {
+  global: IGlobalState;
+}
+
+interface IGlobalState {
+  name: string;
+  environment: IEnvironment;
 }

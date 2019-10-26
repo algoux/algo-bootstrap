@@ -1,5 +1,6 @@
 const paths = {
-  respack: '/respack_cache',
+  respack: '/respack',
+  respackTemp: '/respack_temp',
 };
 
 export default paths;

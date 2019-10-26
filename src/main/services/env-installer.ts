@@ -37,6 +37,7 @@ export async function installCpplint() {
     // 解压 cpplint 项目代码包
     // 安装 cpplint
     const cpplintPath = '';
+    // Mac 且是 py2 时，使用 sudo 安装
     await spawn('[installCpplint]', 'python', [`${cpplintPath}/setup.py`, 'install']);
     return true;
   } catch (e) { }
