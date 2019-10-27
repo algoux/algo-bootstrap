@@ -1,28 +1,35 @@
 import { isMac, isWindows } from "@/utils/platform";
 import { spawn } from "@/utils/child-process";
+import { getEnvironment } from "./env-checker";
 
-export async function installXcodeCLT() {
-  try {
-    if (isMac) {
-      await spawn('[installXcodeCLT]', 'xcode-select', ['--install']);
-      return true;
-    }
-  } catch (e) { }
-  return false;
+async function isEnvInstalled(env: keyof IEnvironment) {
+  return (await getEnvironment())[env].installed;
 }
 
-export async function installGccAndGdb() {
+export async function installXCodeCLT() {
   if (isMac) {
-    return await installXcodeCLT();
+    await spawn('[installXcodeCLT]', 'xcode-select', ['--install']);
+  }
+}
+
+export async function installGccAndGdb(force = false) {
+  if (!force && await isEnvInstalled('gcc')) {
+    return;
+  }
+  if (isMac) {
+    await installXCodeCLT();
   } else if (isWindows) {
     // 解压 MinGW64
+
     // 设置 PATH
-    return true;
+    await spawn('[installGccAndGdb]', 'setx', ['PATH', '"%PATH%;C:\\MinGW64\\bin"']);
   }
-  return false;
 }
 
-export async function installPython() {
+export async function installPython(force = false) {
+  if (!force && await isEnvInstalled('python')) {
+    return;
+  }
   if (isMac) {
     return true;
   } else if (isWindows) {
@@ -32,7 +39,10 @@ export async function installPython() {
   return false;
 }
 
-export async function installCpplint() {
+export async function installCpplint(force = false) {
+  if (!force && await isEnvInstalled('cpplint')) {
+    return;
+  }
   try {
     // 解压 cpplint 项目代码包
     // 安装 cpplint
@@ -44,7 +54,10 @@ export async function installCpplint() {
   return false;
 }
 
-export async function installVSCode() {
+export async function installVSCode(force = false) {
+  if (!force && await isEnvInstalled('code')) {
+    return;
+  }
   if (isMac) {
     // 解压 zip
     // 复制 app 到 /Applications

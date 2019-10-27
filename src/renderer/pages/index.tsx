@@ -105,6 +105,15 @@ class Index extends React.Component<Props, State> {
     }
   }
 
+  install = async () => {
+    try {
+      await sm.envInstaller.installGccAndGdb();
+    } catch (e) {
+      logRenderer.error(`[install] install failed:`, e);
+      msg.error('安装环境时发生错误');
+    }
+  }
+
   render() {
     return (
       <div style={{ textAlign: 'center' }}>
@@ -113,6 +122,7 @@ class Index extends React.Component<Props, State> {
         <Button style={{ marginTop: '20px' }} onClick={this.getEnvironment}>开始</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.install}>安装</Button>
 
         <h4>test respack path: {this.state.respackPath}</h4>
         <h4>test remote require: {this.state.remoteGlobal}</h4>

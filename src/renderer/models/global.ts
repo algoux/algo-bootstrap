@@ -1,5 +1,6 @@
 import { DvaAction, DvaSagaEffect } from '@/utils/dva';
 import sm from '@/utils/modules';
+import { purifyObject } from '@/../common/utils/format';
 
 type CurrentState = IGlobalState;
 
@@ -14,7 +15,7 @@ export default {
   state: genInitialState(),
   reducers: {
     setEnvironment(state: CurrentState, { payload: { environment } }: DvaAction<Pick<CurrentState, 'environment'>>) {
-      state.environment = environment;
+      state.environment = purifyObject(environment);
     },
   },
   effects: {

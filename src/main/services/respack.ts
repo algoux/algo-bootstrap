@@ -10,21 +10,6 @@ import { app } from 'electron';
 import paths from 'common/configs/paths';
 import fs from 'fs-extra';
 
-export interface IRespackManifestFile {
-  id: string;
-  name: string;
-  version: string;
-  format: string;
-}
-
-export interface IRespackManifest {
-  id: string;
-  description: string;
-  version: string;
-  platform: SupportedPlatform;
-  files: IRespackManifestFile[];
-}
-
 interface IRespackCheckResult {
   _id: string;
   name: string;
@@ -54,8 +39,8 @@ export default class Respack {
   private extractAll(to: string) {
     return new Promise((resolve, reject) => {
       try {
-        this.zipInstance.extractAllToAsync(to, true, (_e) => {
-          resolve();
+        this.zipInstance.extractAllToAsync(to, true, e => {
+          e ? reject(generalError(Codes.respackExtractFailed, e)) : resolve();
         });
       } catch (e) {
         reject(generalError(Codes.respackExtractFailed, e));

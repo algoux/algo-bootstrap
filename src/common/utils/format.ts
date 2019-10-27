@@ -1,4 +1,5 @@
 import UrlAssembler from 'url-assembler';
+import { cloneDeep } from 'lodash';
 
 export interface IUrlFArg {
   param?: object;
@@ -108,4 +109,18 @@ export function alphabetToNumber(alphabet: string): number {
     p *= radix;
   });
   return res;
+}
+
+/**
+ * Purify object (for removing getter/setter, etc.)
+ * @param o original object
+ */
+export function purifyObject<T = object>(o: T): T {
+  try {
+    const prototype = Object.prototype.toString.call(o);
+    if (prototype === '[object Object]' || prototype === '[object Array]') {
+      return cloneDeep(o);
+    }
+  } catch (e) { }
+  return o;
 }
