@@ -1,5 +1,5 @@
-import sm from '@/utils/modules';
 import { DvaAction, DvaSagaEffect } from '@/utils/dva';
+import sm from '@/utils/modules';
 
 type CurrentState = IGlobalState;
 

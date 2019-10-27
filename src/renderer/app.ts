@@ -1,11 +1,20 @@
 import { createLogger } from 'redux-logger';
+import { logRenderer } from '../common/utils/logger';
+
+let extraConfig = {};
+
+if (process.env.NODE_ENV === 'development') {
+  extraConfig = {
+    onAction: createLogger(),
+  };
+}
 
 export const dva = {
   config: {
-    onError(err: ErrorEvent) {
-      err.preventDefault();
-      console.error(err.message);
+    onError(e: ErrorEvent) {
+      e.preventDefault();
+      logRenderer.error('[app.onError]', e);
     },
-    onAction: createLogger(),
+    ...extraConfig,
   },
 };
