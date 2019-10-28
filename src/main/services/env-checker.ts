@@ -1,6 +1,15 @@
-import { logProcess, logMain } from 'common/utils/logger';
+import { logMain } from 'common/utils/logger';
 import { isMac, SupportedPlatform, Platform } from '@/utils/platform';
 import { spawn, ChildProcessOutput } from '@/utils/child-process';
+
+export enum VSIXId {
+  'ms-vscode.cpptool' = 'ms-vscode.cpptool',
+  'formulahendry.code-runner' = 'formulahendry.code-runner',
+  'streetsidesoftware.code-spell-checker' = 'streetsidesoftware.code-spell-checker',
+  'mine.cpplint' = 'mine.cpplint',
+}
+
+export type SupportedVSIXId = keyof typeof VSIXId;
 
 const emptyEnvironment = genEmptyEnvironment();
 
@@ -21,6 +30,14 @@ function genInstalled(
   };
 }
 
+export function genEmptyVSIXMap() {
+  const map = {};
+  Object.keys(VSIXId).map(id => {
+    map[id] = genNotInstalled();
+  });
+  return map as Record<SupportedVSIXId, ICheckEnvironmentResult>;
+}
+
 export function genEmptyEnvironment(): IEnvironment {
   return {
     gcc: genNotInstalled(),
@@ -28,6 +45,7 @@ export function genEmptyEnvironment(): IEnvironment {
     python: genNotInstalled(),
     cpplint: genNotInstalled(),
     code: genNotInstalled(),
+    vsix: genEmptyVSIXMap(),
   };
 }
 
@@ -143,6 +161,17 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   return genNotInstalled();
 }
 
+export async function checkVSIX(codePath: string): Promise<ICheckEnvironmentResult> {
+  try {
+    const { stdout, stderr } = await spawn('[checkVSIX]', codePath, ['--list-extensions', '--show-versions']);
+    // const ver =
+    // if (ver) {
+    //   return genInstalled(ver, null);
+    // }
+  } catch (e) { }
+  return genNotInstalled();
+}
+
 export async function getEnvironment(force = false) {
   if (!force && environment !== emptyEnvironment) {
     return environment;
@@ -160,6 +189,7 @@ export async function getEnvironment(force = false) {
     python,
     cpplint,
     code,
+    vsix: genEmptyVSIXMap()
   };
   logMain.info('[getEnvironment]', environmentResult);
   environment = environmentResult;

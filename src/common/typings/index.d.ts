@@ -5,6 +5,7 @@ type _GlobalSharedModules = typeof import('common/../main/modules').default;
 // type _GlobalEnvironment = PromiseResolveType<ReturnType<typeof import('common/../main/services/env-checker').default>>;
 
 type SupportedPlatform = import('common/../main/utils/platform').SupportedPlatform;
+type SupportedVSIXId = import('common/../main/services/env-checker').SupportedVSIXId;
 
 interface IApiResp<T = undefined> {
   success: boolean;
@@ -31,6 +32,7 @@ interface IEnvironment {
   python: ICheckEnvironmentResult;
   cpplint: ICheckEnvironmentResult;
   code: ICheckEnvironmentResult;
+  vsix: Record<SupportedVSIXId, ICheckEnvironmentResult>;
 }
 
 interface IRespackManifestFile {
