@@ -3,13 +3,15 @@ import { isMac, SupportedPlatform, Platform } from '@/utils/platform';
 import { spawn, ChildProcessOutput } from '@/utils/child-process';
 
 export enum VSIXId {
-  'ms-vscode.cpptool' = 'ms-vscode.cpptool',
+  'ms-vscode.cpptools' = 'ms-vscode.cpptools',
   'formulahendry.code-runner' = 'formulahendry.code-runner',
   'streetsidesoftware.code-spell-checker' = 'streetsidesoftware.code-spell-checker',
   'mine.cpplint' = 'mine.cpplint',
 }
 
 export type SupportedVSIXId = keyof typeof VSIXId;
+
+export const VSIXIds = Object.keys(VSIXId) as SupportedVSIXId[];
 
 const emptyEnvironment = genEmptyEnvironment();
 
@@ -161,15 +163,20 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   return genNotInstalled();
 }
 
-export async function checkVSIX(codePath: string): Promise<ICheckEnvironmentResult> {
+export async function checkVsix(codePath: string): Promise<Record<SupportedVSIXId, ICheckEnvironmentResult>> {
   try {
-    const { stdout, stderr } = await spawn('[checkVSIX]', codePath, ['--list-extensions', '--show-versions']);
-    // const ver =
-    // if (ver) {
-    //   return genInstalled(ver, null);
-    // }
+    const vsixMap = genEmptyVSIXMap();
+    const { stdout, stderr } = await spawn('[checkVSIX]', `"${codePath}"`, ['--list-extensions', '--show-versions']);
+    VSIXIds.forEach(vsixId => {
+      const reg = new RegExp(`^${vsixId}@([.\\w]+)$`, 'm');
+      const ver = matchOne(reg, stderr || stdout);
+      if (ver) {
+        vsixMap[vsixId] = genInstalled(ver, null);
+      }
+    });
+    return vsixMap;
   } catch (e) { }
-  return genNotInstalled();
+  return genEmptyVSIXMap();
 }
 
 export async function getEnvironment(force = false) {
@@ -189,7 +196,7 @@ export async function getEnvironment(force = false) {
     python,
     cpplint,
     code,
-    vsix: genEmptyVSIXMap()
+    vsix: code.installed && code.path ? await checkVsix(code.path) : genEmptyVSIXMap(),
   };
   logMain.info('[getEnvironment]', environmentResult);
   environment = environmentResult;

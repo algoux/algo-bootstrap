@@ -21,6 +21,33 @@ function getFileId(id: string, platform: string, version: string) {
 }
 
 export default class Respack {
+  public static defaultResPath = app.getPath('userData') + paths.respack;
+
+  public static async readLocalManifest(filePath: string = '') {
+    const usedPath = filePath || this.defaultResPath + '/manifest.json';
+    return await fs.readJSON(usedPath) as IRespackManifest;
+  }
+
+  public static async readResFromLocalManifest(id: string, prefix: string = '', filePath: string = '') {
+    const manifest = await this.readLocalManifest(filePath);
+    for (const file of manifest.files) {
+      const usedId = prefix ? `${prefix}/${id}` : id;
+      if (file.id === usedId) {
+        return file;
+      }
+    }
+    return null;
+  }
+
+  public static async readResFromLocalManifestOrThrow(id: string, prefix: string = '', filePath: string = '') {
+    const res = await this.readResFromLocalManifest(id, prefix, filePath);
+    if (res) {
+      return res;
+    }
+    throw new Error(`Resource {prefix: "${prefix}", id: "${id}"} not found in manifest`);
+  }
+
+
   private readonly filePath: string;
   private readonly zipInstance: AdmZip;
   private readonly manifest: IRespackManifest;
@@ -34,18 +61,6 @@ export default class Respack {
 
   public getManifest() {
     return this.manifest;
-  }
-
-  private extractAll(to: string) {
-    return new Promise((resolve, reject) => {
-      try {
-        this.zipInstance.extractAllToAsync(to, true, e => {
-          e ? reject(generalError(Codes.respackExtractFailed, e)) : resolve();
-        });
-      } catch (e) {
-        reject(generalError(Codes.respackExtractFailed, e));
-      }
-    });
   }
 
   public async validate() {
@@ -74,7 +89,7 @@ export default class Respack {
     const target = app.getPath('userData') + paths.respack;
     logMain.info('[respack] extract to:', target);
     await fs.remove(target);
-    await this.extractAll(target);
+    this.zipInstance.extractAllTo(target, true);
     logMain.info('[respack] extract completed');
   }
 }
