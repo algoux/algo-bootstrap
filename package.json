@@ -61,6 +61,7 @@
     "moment": "^2.24.0",
     "promisify-child-process": "^3.1.1",
     "sha": "^3.0.0",
+    "unzipper": "^0.10.5",
     "url-assembler": "^2.1.0"
   },
   "devDependencies": {
@@ -72,6 +73,7 @@
     "@types/react-redux": "^5.0.21",
     "@types/redux-logger": "^3.0.7",
     "@types/sha": "^3.0.0",
+    "@types/unzipper": "^0.10.0",
     "@types/url-assembler": "^1.2.1",
     "antd": "3.11.6",
     "awesome-typescript-loader": "^5.2.1",

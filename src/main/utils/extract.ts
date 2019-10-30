@@ -1,26 +1,102 @@
-import AdmZip from 'adm-zip';
 import fs from 'fs-extra';
+import unzipper, { File } from 'unzipper';
+import * as path from 'path';
 import { logMain } from 'common/utils/logger';
 
-// TODO: ADM 只有同步 API 可用，改用异步的 zip 库
+// defunct. ref: https://github.com/ZJONSSON/node-unzipper/issues/104
+function extractEntry(file: File, targetDir: string): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const targetPath = path.join(targetDir, file.path);
+      logMain.info('[extractEntry]', file.type, file.path, targetPath);
+      if (file.type === 'Directory') {
+        await fs.ensureDir(targetPath);
+        resolve();
+        return;
+      }
+      await fs.ensureDir(path.dirname(targetPath));
+      file
+        .stream()
+        .pipe(fs.createWriteStream(targetPath, { flags: 'w+' }))
+        .on('error', reject)
+        .on('finish', resolve);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 /**
  * Extract all files in zip
  * @param filePath zip file path
- * @param to where to extract
- * @param removeFolderFirst whether remove the "to" folder first
+ * @param targetDir where to extract
+ * @param clearTargetDir whether remove the targetDir first
  */
-export async function extractAll(filePath: string, to: string, removeFolderFirst = false) {
-  logMain.info('[extractAll.start]', filePath, to, removeFolderFirst);
-  try {
-    const __start = Date.now();
-    const zipInstance = new AdmZip(filePath);
-    if (removeFolderFirst) {
-      await fs.remove(to);
+export function extractAll(filePath: string, targetDir: string, clearTargetDir = false): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      logMain.info('[extractAll.start]', filePath, targetDir, clearTargetDir);
+      const __start = Date.now();
+      // defunct
+      // const directory = await unzipper.Open.file(filePath);
+      // clearTargetDir && await fs.emptyDir(targetDir);
+      // for (const file of directory.files) {
+      //   file.type === 'File' && await extractEntry(file, targetDir);
+      // }
+      // logMain.info('[extractAll.done]', filePath, targetDir);
+      // resolve();
+      clearTargetDir && await fs.emptyDir(targetDir);
+      fs.createReadStream(filePath)
+        .pipe(unzipper.Extract({ path: targetDir }))
+        .promise()
+        .then(r => {
+          logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`, filePath, targetDir);
+          resolve(r);
+        }, e => {
+          logMain.error('[extractAll.error]', filePath, targetDir, e);
+          reject(e);
+        });
+    } catch (e) {
+      logMain.error('[extractAll.error]', filePath, targetDir, e);
+      reject(e);
     }
-    zipInstance.extractAllTo(to, true);
-    logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`);
-  } catch (e) {
-    logMain.error('[extractAll.error]', e);
-    throw e;
-  }
+  });
+}
+
+/**
+ * Load one entry content in zip
+ * @param filePath zip file path
+ * @param entry entry path
+ * @param format return format
+ */
+export function loadOne(filePath: string, entry: string, format?: 'buffer'): Promise<Buffer>;
+export function loadOne(filePath: string, entry: string, format: 'string'): Promise<string>;
+export function loadOne<T = any>(filePath: string, entry: string, format: 'json'): Promise<T>;
+export function loadOne(filePath: string, entry: string, format: 'buffer' | 'string' | 'json' = 'buffer'): Promise<Buffer | string | any> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      logMain.info('[loadOne]', filePath, entry);
+      const directory = await unzipper.Open.file(filePath);
+      const file = directory.files.find(f => f.type === 'File' && f.path === entry);
+      if (!file) {
+        reject(Error('No such entry: ' + entry));
+        return;
+      }
+      const content = await file.buffer();
+      switch (format) {
+        case 'string':
+          resolve(content.toString());
+          break;
+        case 'json':
+          resolve(JSON.parse(content.toString()));
+          break;
+        default:
+          resolve(content);
+      }
+      logMain.info('[loadOne.done]', filePath, entry, format);
+    } catch (e) {
+      logMain.error('[loadOne.error]', filePath, entry, format, e);
+      reject(e);
+    }
+  });
 }
