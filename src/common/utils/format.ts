@@ -1,5 +1,6 @@
 import UrlAssembler from 'url-assembler';
 import { cloneDeep } from 'lodash';
+import { ChildProcessOutput } from '@/utils/child-process';
 
 export interface IUrlFArg {
   param?: object;
@@ -123,4 +124,12 @@ export function purifyObject<T = object>(o: T): T {
     }
   } catch (e) { }
   return o;
+}
+
+/**
+ * Parse process output as string
+ * @param s child process output
+ */
+export function parseStringFromProcessOutput(s: ChildProcessOutput) {
+  return (s || '').toString();
 }

@@ -1,6 +1,8 @@
 import { logMain } from 'common/utils/logger';
 import { isMac, SupportedPlatform, Platform } from '@/utils/platform';
-import { spawn, ChildProcessOutput } from '@/utils/child-process';
+import { spawn } from '@/utils/child-process';
+import { matchOne } from 'common/utils/regexp';
+import { parseStringFromProcessOutput } from 'common/utils/format';
 
 export enum VSIXId {
   'ms-vscode.cpptools' = 'ms-vscode.cpptools',
@@ -51,18 +53,6 @@ export function genEmptyEnvironment(): IEnvironment {
   };
 }
 
-function parseStringFromStd(s: ChildProcessOutput) {
-  return (s || '').toString();
-}
-
-function matchOne(reg: RegExp, str: ChildProcessOutput) {
-  const regResult = reg.exec(parseStringFromStd(str));
-  if (regResult && regResult[1]) {
-    return regResult[1].trim();
-  }
-  return null;
-}
-
 async function findPath(cmd: string) {
   const cmdMap: Record<SupportedPlatform, string> = {
     [Platform.win32]: 'where',
@@ -71,7 +61,7 @@ async function findPath(cmd: string) {
   };
   try {
     const { stdout, stderr } = await spawn('[findPath]', cmdMap[process.platform], [cmd]);
-    return matchOne(/(.*)/, stdout || stderr);
+    return matchOne(/(.*)/, parseStringFromProcessOutput(stdout || stderr));
   } catch (e) { }
   return null;
 }
@@ -93,9 +83,11 @@ export async function checkGcc(): Promise<ICheckEnvironmentResult> {
     const { stdout, stderr } = await spawn('[checkGcc]', 'gcc', ['-v']);
     let ver: string | null = null;
     if (isMac) {
-      ver = matchOne(APPLE_CLANG_REG, stderr || stdout) || matchOne(GCC_REG, stderr || stdout);
+      ver =
+        matchOne(APPLE_CLANG_REG, parseStringFromProcessOutput(stderr || stdout)) ||
+        matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout));
     } else {
-      ver = matchOne(GCC_REG, stderr || stdout);
+      ver = matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout));
     }
     if (ver) {
       return genInstalled(ver, await findPath('gcc'));
@@ -108,7 +100,7 @@ export async function checkGdb(): Promise<ICheckEnvironmentResult> {
   const GDB_REG = /^GNU gdb \(GDB\) (.*)$/m;
   try {
     const { stdout, stderr } = await spawn('[checkGdb]', 'gdb', ['-v']);
-    const ver = matchOne(GDB_REG, stderr || stdout);
+    const ver = matchOne(GDB_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       return genInstalled(ver, await findPath('gdb'));
     }
@@ -120,7 +112,7 @@ export async function checkPython(): Promise<ICheckEnvironmentResult> {
   const PYTHON_REG = /^Python (.*)$/m;
   try {
     const { stdout, stderr } = await spawn('[checkPython]', 'python', ['-V']);
-    const ver = matchOne(PYTHON_REG, stderr || stdout);
+    const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       return genInstalled(ver, await findPath('python'));
     }
@@ -132,7 +124,7 @@ export async function checkCpplint(): Promise<ICheckEnvironmentResult> {
   const CPPLINT_REG = /^cpplint (.*)$/m;
   try {
     const { stdout, stderr } = await spawn('[checkCpplint]', 'cpplint', ['--version']);
-    const ver = matchOne(CPPLINT_REG, stderr || stdout);
+    const ver = matchOne(CPPLINT_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       return genInstalled(ver, await findPath('cpplint'));
     }
@@ -144,7 +136,7 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   const CODE_REG = /(\d+.\d+.\d+)/;
   try {
     const { stdout, stderr } = await spawn('[checkVSCode]', 'code', ['-v']);
-    const ver = matchOne(CODE_REG, stderr || stdout);
+    const ver = matchOne(CODE_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       return genInstalled(ver, await findPath('code'));
     }
@@ -153,7 +145,7 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
       try {
         const binPath = '/Applications/Visual\\ Studio\\ Code.app/Contents/Resources/app/bin/code';
         const { stdout, stderr } = await spawn('[checkVSCode]', binPath, ['-v']);
-        const ver = matchOne(CODE_REG, stderr || stdout);
+        const ver = matchOne(CODE_REG, parseStringFromProcessOutput(stderr || stdout));
         if (ver) {
           return genInstalled(ver, binPath);
         }
@@ -169,7 +161,7 @@ export async function checkVsix(codePath: string): Promise<Record<SupportedVSIXI
     const { stdout, stderr } = await spawn('[checkVSIX]', `"${codePath}"`, ['--list-extensions', '--show-versions']);
     VSIXIds.forEach(vsixId => {
       const reg = new RegExp(`^${vsixId}@([.\\w]+)$`, 'm');
-      const ver = matchOne(reg, stderr || stdout);
+      const ver = matchOne(reg, parseStringFromProcessOutput(stderr || stdout));
       if (ver) {
         vsixMap[vsixId] = genInstalled(ver, null);
       }

@@ -6,6 +6,9 @@ import { extractAll } from '@/utils/extract';
 import { app } from 'electron';
 import paths from 'common/configs/paths';
 import * as path from 'path';
+import { matchOne } from 'common/utils/regexp';
+import { parseStringFromProcessOutput } from 'common/utils/format';
+import { logMain } from 'common/utils/logger';
 
 const RESPACK_PATH = app.getPath('userData') + paths.respack;
 const RESPACK_TEMP_PATH = app.getPath('userData') + paths.respackTemp;
@@ -35,8 +38,10 @@ export async function installGccAndGdb(force = false) {
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
     await extractAll(path.join(RESPACK_PATH, res.name), installPath);
-    // 设置 PATH TODO: 避免 PATH 重复问题
-    await spawn('[installGccAndGdb]', 'setx', ['PATH', `"%PATH%;${installPath}\\bin"`]);
+    const { stdout, stderr } = await spawn('[installGccAndGdb]', 'reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', 'PATH']);
+    const userPath = matchOne(/PATH    REG_EXPAND_SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr)) || '%PATH%';
+    logMain.info('[installGccAndGdb] userPath:', userPath);
+    await spawn('[installGccAndGdb]', 'setx', ['PATH', `"${userPath}${userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
   }
 }
 
