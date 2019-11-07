@@ -64,6 +64,24 @@ export function extractAll(filePath: string, targetDir: string, clearTargetDir =
 }
 
 /**
+ * Get uncompressed size of zip file
+ * @param filePath zip file path
+ */
+export function getUncompressedSize(filePath: string): Promise<number> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const directory = await unzipper.Open.file(filePath);
+      const size = directory.files.reduce((acc, cur) => acc + cur.uncompressedSize, 0);
+      logMain.info(`[getUncompressedSize.done]`, filePath, size);
+      resolve(size);
+    } catch (e) {
+      logMain.error('[getUncompressedSize.error]', filePath, e);
+      reject(e);
+    }
+  })
+}
+
+/**
  * Load one entry content in zip
  * @param filePath zip file path
  * @param entry entry path

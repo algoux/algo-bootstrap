@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from '@/utils/dva';
 
 import { formatMessage } from 'umi-plugin-locale';
-import { Button } from 'antd';
+import { Button, Progress } from 'antd';
 import yay from '@/assets/yay.jpg';
 
 import config from '@/config/config';
@@ -14,6 +14,9 @@ import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
 import { DispatchProp } from 'react-redux';
+// @ts-ignore
+import filesize from 'filesize';
+import { formatPercentage } from 'common/utils/format';
 
 const { req, Respack } = sm;
 
@@ -24,17 +27,23 @@ interface State {
   ipc: string;
   remoteGlobal: string;
   respackPath: string;
+  mingwTotalSize: number;
+  mingwUncompressedSize: number;
 }
 
 type Props = IIndexProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
 
 class Index extends React.Component<Props, State> {
+  _pollMingwSizeTimer?: NodeJS.Timeout;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       ipc: '',
       remoteGlobal: '',
       respackPath: '',
+      mingwTotalSize: 0,
+      mingwUncompressedSize: 0,
     };
   }
 
@@ -105,12 +114,37 @@ class Index extends React.Component<Props, State> {
     }
   }
 
+  getMingwTotalSize = async () => {
+    const size = await sm.envInstaller.getMingwTotalSize();
+    this.setState({
+      mingwTotalSize: size,
+    });
+  }
+
+  pollMingwUncompressedSize = async () => {
+    try {
+      const size = await sm.envInstaller.getMingwUncompressedSize();
+      this.setState({
+        mingwUncompressedSize: size,
+      });
+    } catch (e) { }
+    this._pollMingwSizeTimer = setTimeout(() => {
+      this.pollMingwUncompressedSize();
+    }, 1000);
+  }
+
   install = async () => {
     try {
+      if (sm.platform.isWindows) {
+        await this.getMingwTotalSize();
+        this.pollMingwUncompressedSize();
+      }
       await sm.envInstaller.installGccAndGdb();
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
+    } finally {
+      clearTimeout(this._pollMingwSizeTimer!);
     }
   }
 
@@ -124,6 +158,8 @@ class Index extends React.Component<Props, State> {
         <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.install}>安装</Button>
 
+        <Progress percent={this.state.mingwUncompressedSize / this.state.mingwTotalSize * 100} status="active" showInfo={false} />
+        <h4>test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: "iec" })} / {filesize(this.state.mingwTotalSize, { standard: "iec" })} ({formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})</h4>
         <h4>test respack path: {this.state.respackPath}</h4>
         <h4>test remote require: {this.state.remoteGlobal}</h4>
         <h4>test env: {JSON.stringify(this.props.global.environment)}</h4>

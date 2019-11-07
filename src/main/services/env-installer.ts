@@ -2,13 +2,14 @@ import { isMac, isWindows } from '@/utils/platform';
 import { spawn } from '@/utils/child-process';
 import { getEnvironment } from './env-checker';
 import Respack from './respack';
-import { extractAll } from '@/utils/extract';
+import { extractAll, getUncompressedSize } from '@/utils/extract';
 import { app } from 'electron';
 import paths from 'common/configs/paths';
 import * as path from 'path';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
 import { logMain } from 'common/utils/logger';
+import getFolderSize from 'get-folder-size';
 
 const RESPACK_PATH = app.getPath('userData') + paths.respack;
 const RESPACK_TEMP_PATH = app.getPath('userData') + paths.respackTemp;
@@ -27,6 +28,26 @@ export async function installXCodeCLT() {
   }
 }
 
+export async function getMingwTotalSize(): Promise<number> {
+  const res = await Respack.readResFromLocalManifestOrThrow('c++');
+  return getUncompressedSize(path.join(RESPACK_PATH, res.name));
+}
+
+export async function getMingwUncompressedSize(): Promise<number> {
+  const installPath = 'C:\\MinGW64';
+  return new Promise((resolve, reject) => {
+    const __start = Date.now();
+    getFolderSize(installPath, (err, size) => {
+      if (err) {
+        logMain.error(`[getMingwUncompressedSize.error ${Date.now() - __start + 'ms'}]`, err);
+        reject(err);
+        return;
+      }
+      resolve(size);
+    });
+  });
+}
+
 export async function installGccAndGdb(force = false) {
   if (!force && await isEnvInstalled('gcc')) {
     return;
@@ -37,7 +58,7 @@ export async function installGccAndGdb(force = false) {
     const res = await Respack.readResFromLocalManifestOrThrow('c++');
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
-    await extractAll(path.join(RESPACK_PATH, res.name), installPath);
+    await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
     const { stdout, stderr } = await spawn('[installGccAndGdb]', 'reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', 'PATH']);
     const userPath = matchOne(/PATH    REG_EXPAND_SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr)) || '%PATH%';
     logMain.info('[installGccAndGdb] userPath:', userPath);
