@@ -194,3 +194,11 @@ export async function getEnvironment(force = false) {
   environment = environmentResult;
   return environmentResult;
 }
+
+export async function isEnvInstalled(env: Exclude<keyof IEnvironment, 'vsix'>) {
+  return (await getEnvironment())[env].installed;
+}
+
+export async function isVsixInstalled(vsixId: SupportedVSIXId) {
+  return (await getEnvironment()).vsix[vsixId].installed;
+}

@@ -1,6 +1,6 @@
 import { isMac, isWindows } from '@/utils/platform';
-import { spawn } from '@/utils/child-process';
-import { getEnvironment } from './env-checker';
+import { spawn, execFile } from '@/utils/child-process';
+import { getEnvironment, isEnvInstalled, isVsixInstalled } from './env-checker';
 import Respack from './respack';
 import { extractAll, getUncompressedSize } from '@/utils/extract';
 import { app } from 'electron';
@@ -13,14 +13,6 @@ import getFolderSize from 'get-folder-size';
 
 const RESPACK_PATH = app.getPath('userData') + paths.respack;
 const RESPACK_TEMP_PATH = app.getPath('userData') + paths.respackTemp;
-
-async function isEnvInstalled(env: Exclude<keyof IEnvironment, 'vsix'>) {
-  return (await getEnvironment())[env].installed;
-}
-
-async function isVsixInstalled(vsixId: SupportedVSIXId) {
-  return (await getEnvironment()).vsix[vsixId].installed;
-}
 
 export async function installXCodeCLT() {
   if (isMac) {
@@ -59,10 +51,13 @@ export async function installGccAndGdb(force = false) {
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
     await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
-    const { stdout, stderr } = await spawn('[installGccAndGdb]', 'reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', 'PATH']);
-    const userPath = matchOne(/PATH    REG_EXPAND_SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr)) || '%PATH%';
+    let userPath = '';
+    try {
+      const { stdout, stderr } = await spawn('[installGccAndGdb]', 'reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', 'PATH']);
+      userPath = matchOne(/PATH    REG_\S*SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr)) || '';
+    } catch (e) { }
     logMain.info('[installGccAndGdb] userPath:', userPath);
-    await spawn('[installGccAndGdb]', 'setx', ['PATH', `"${userPath}${userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
+    await spawn('[installGccAndGdb]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
   }
 }
 
@@ -71,7 +66,8 @@ export async function installPython(force = false) {
     return;
   }
   if (isWindows) {
-
+    const res = await Respack.readResFromLocalManifestOrThrow('python');
+    await execFile('[installPython]', path.join(RESPACK_PATH, res.name));
   }
 }
 
@@ -104,7 +100,8 @@ export async function installVSCode(force = false) {
     // 解压 zip
     // 复制 app 到 /Applications
   } else if (isWindows) {
-
+    const res = await Respack.readResFromLocalManifestOrThrow('vscode');
+    await execFile('[installVSCode]', path.join(RESPACK_PATH, res.name));
   }
 }
 

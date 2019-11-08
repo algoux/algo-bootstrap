@@ -133,7 +133,7 @@ class Index extends React.Component<Props, State> {
     }, 1000);
   }
 
-  install = async () => {
+  installGcc = async () => {
     try {
       if (sm.platform.isWindows) {
         await this.getMingwTotalSize();
@@ -148,6 +148,24 @@ class Index extends React.Component<Props, State> {
     }
   }
 
+  installPython = async () => {
+    try {
+      await sm.envInstaller.installPython();
+    } catch (e) {
+      logRenderer.error(`[install] install failed:`, e);
+      msg.error('安装环境时发生错误');
+    }
+  }
+
+  installVSCode = async () => {
+    try {
+      await sm.envInstaller.installVSCode();
+    } catch (e) {
+      logRenderer.error(`[install] install failed:`, e);
+      msg.error('安装环境时发生错误');
+    }
+  }
+
   render() {
     return (
       <div style={{ textAlign: 'center' }}>
@@ -156,7 +174,10 @@ class Index extends React.Component<Props, State> {
         <Button style={{ marginTop: '20px' }} onClick={this.getEnvironment}>开始</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
-        <Button style={{ marginTop: '20px' }} onClick={this.install}>安装</Button>
+        <br />
+        <Button style={{ marginTop: '20px' }} onClick={this.installGcc}>安装 GCC</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.installPython}>安装 Python</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.installVSCode}>安装 VS Code</Button>
 
         <Progress percent={this.state.mingwUncompressedSize / this.state.mingwTotalSize * 100} status="active" showInfo={false} />
         <h4>test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: "iec" })} / {filesize(this.state.mingwTotalSize, { standard: "iec" })} ({formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})</h4>

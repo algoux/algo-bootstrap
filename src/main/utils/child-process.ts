@@ -22,7 +22,7 @@ export type SpawnOutput = Output;
 export type ExecFileOutput = Output;
 export type ChildProcessOutput = string | Buffer | null | undefined;
 
-export function spawn(type: string, cmd: string, args: string[], extraOptions: SpawnOptions = {}) {
+export function spawn(type: string, cmd: string, args: string[] = [], extraOptions: SpawnOptions = {}) {
   logProcess.info(type, '[spawn.start]', cmd, args.join(' '));
   const __start = Date.now();
   return _spawn(cmd, args, {
@@ -48,7 +48,7 @@ export function spawn(type: string, cmd: string, args: string[], extraOptions: S
   });
 }
 
-export function execFile(type: string, file: string, args: string[], extraOptions: ExecFileOptions = {}) {
+export function execFile(type: string, file: string, args: string[] = [], extraOptions: ExecFileOptions = {}) {
   logProcess.info(type, '[execFile.start]', file, args.join(' '));
   const __start = Date.now();
   return _execFile(file, args, {
