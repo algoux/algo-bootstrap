@@ -6,7 +6,7 @@ import ipcKeys from 'common/configs/ipc';
 import x from '@/test';
 import req from '@/utils/request';
 import _modules from '@/modules';
-import { getEnvironment } from '@/services/env-checker';
+import { getEnvironments } from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
 import { isMac } from './utils/platform';
 
@@ -118,6 +118,6 @@ ipcMain.answerRenderer(ipcKeys.getResPack, async (param) => {
   // console.log('modules', global.modules);
   // logMain.info('app.getLocale()', app.getLocale());
   return {
-    checkEnvironment: await getEnvironment(true),
+    checkEnvironment: await getEnvironments(true),
   };
 });

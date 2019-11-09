@@ -7,27 +7,27 @@ type CurrentState = IGlobalState;
 function genInitialState(): CurrentState {
   return {
     name: 'Dva state',
-    environment: purifyObject(sm.envChecker.genEmptyEnvironment()),
+    environments: purifyObject(sm.envChecker.genEmptyEnvironments()),
   };
 }
 
 export default {
   state: genInitialState(),
   reducers: {
-    setEnvironment(state: CurrentState, { payload: { environment } }: DvaAction<Pick<CurrentState, 'environment'>>) {
-      state.environment = purifyObject(environment);
+    setEnvironments(state: CurrentState, { payload: { environments } }: DvaAction<Pick<CurrentState, 'environments'>>) {
+      state.environments = purifyObject(environments);
     },
   },
   effects: {
-    * getEnvironment({ payload: { force = false } }: DvaAction<{ force?: boolean }>, { call, put }: DvaSagaEffect) {
-      const environment: IEnvironment = yield call(sm.envChecker.getEnvironment, force);
+    * getEnvironments({ payload: { force = false } }: DvaAction<{ force?: boolean }>, { call, put }: DvaSagaEffect) {
+      const environments: IEnvironment = yield call(sm.envChecker.getEnvironments, force);
       yield put({
-        type: 'setEnvironment',
+        type: 'setEnvironments',
         payload: {
-          environment,
+          environments,
         },
       });
-      return environment;
+      return environments;
     },
   },
 };

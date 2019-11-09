@@ -63,14 +63,14 @@ class Index extends React.Component<Props, State> {
     this.setState({ ipc: JSON.stringify(ret) });
   }
 
-  getEnvironment = async () => {
+  getEnvironments = async () => {
     const env = await this.props.dispatch!({
-      type: 'global/getEnvironment',
+      type: 'global/getEnvironments',
       payload: {
         force: true,
       },
     });
-    logRenderer.info('getEnvironment:', env);
+    logRenderer.info('getEnvironments:', env);
   }
 
   testRemoteGlobal = async () => {
@@ -157,9 +157,27 @@ class Index extends React.Component<Props, State> {
     }
   }
 
+  installCpplint = async () => {
+    try {
+      await sm.envInstaller.installCpplint();
+    } catch (e) {
+      logRenderer.error(`[install] install failed:`, e);
+      msg.error('安装环境时发生错误');
+    }
+  }
+
   installVSCode = async () => {
     try {
-      await sm.envInstaller.installVSCode();
+      await sm.envInstaller.installVSCode(true);
+    } catch (e) {
+      logRenderer.error(`[install] install failed:`, e);
+      msg.error('安装环境时发生错误');
+    }
+  }
+
+  installVsix = async (vsixId: SupportedVSIXId) => {
+    try {
+      await sm.envInstaller.installVsix(vsixId, true);
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
@@ -171,19 +189,24 @@ class Index extends React.Component<Props, State> {
       <div style={{ textAlign: 'center' }}>
         <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
         <p>接下来，向导将指引你完成安装和配置。</p>
-        <Button style={{ marginTop: '20px' }} onClick={this.getEnvironment}>开始</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>开始</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
         <br />
         <Button style={{ marginTop: '20px' }} onClick={this.installGcc}>安装 GCC</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.installPython}>安装 Python</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.installCpplint}>安装 cpplint</Button>
         <Button style={{ marginTop: '20px' }} onClick={this.installVSCode}>安装 VS Code</Button>
+        <br />
+        {sm.envChecker.VSIXIds.map(vsixId => {
+          return <Button key={vsixId} style={{ marginTop: '20px' }} onClick={() => this.installVsix(vsixId)}>{vsixId}</Button>;
+        })}
 
         <Progress percent={this.state.mingwUncompressedSize / this.state.mingwTotalSize * 100} status="active" showInfo={false} />
         <h4>test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: "iec" })} / {filesize(this.state.mingwTotalSize, { standard: "iec" })} ({formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})</h4>
         <h4>test respack path: {this.state.respackPath}</h4>
         <h4>test remote require: {this.state.remoteGlobal}</h4>
-        <h4>test env: {JSON.stringify(this.props.global.environment)}</h4>
+        <h4>test env: {JSON.stringify(this.props.global.environments)}</h4>
         <h4>test ipc: {this.state.ipc}</h4>
         <h4>test @: {config.outputPath}</h4>
         <h4>test common: {ipcKeys.getResPack}</h4>

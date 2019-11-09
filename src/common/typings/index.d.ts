@@ -20,7 +20,7 @@ interface ICheckEnvironmentResultNotInstalled {
 
 interface ICheckEnvironmentResultInstalled {
   installed: true;
-  version: string | null;
+  version: string;
   path: string | null;
 }
 

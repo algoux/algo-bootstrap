@@ -15,9 +15,9 @@ export type SupportedVSIXId = keyof typeof VSIXId;
 
 export const VSIXIds = Object.keys(VSIXId) as SupportedVSIXId[];
 
-const emptyEnvironment = genEmptyEnvironment();
+const emptyEnvironments = genEmptyEnvironments();
 
-let environment = emptyEnvironment;
+let environments = emptyEnvironments;
 
 function genNotInstalled(): ICheckEnvironmentResultNotInstalled {
   return { installed: false };
@@ -42,7 +42,7 @@ export function genEmptyVSIXMap() {
   return map as Record<SupportedVSIXId, ICheckEnvironmentResult>;
 }
 
-export function genEmptyEnvironment(): IEnvironment {
+export function genEmptyEnvironments(): IEnvironment {
   return {
     gcc: genNotInstalled(),
     gdb: genNotInstalled(),
@@ -171,9 +171,9 @@ export async function checkVsix(codePath: string): Promise<Record<SupportedVSIXI
   return genEmptyVSIXMap();
 }
 
-export async function getEnvironment(force = false) {
-  if (!force && environment !== emptyEnvironment) {
-    return environment;
+export async function getEnvironments(force = false) {
+  if (!force && environments !== emptyEnvironments) {
+    return environments;
   }
   const [gcc, gdb, python, cpplint, code] = await Promise.all([
     isMac ? (await checkXCodeCLT() ? checkGcc() : genNotInstalled()) : checkGcc(),
@@ -190,15 +190,39 @@ export async function getEnvironment(force = false) {
     code,
     vsix: code.installed && code.path ? await checkVsix(code.path) : genEmptyVSIXMap(),
   };
-  logMain.info('[getEnvironment]', environmentResult);
-  environment = environmentResult;
+  logMain.info('[getEnvironments]', environmentResult);
+  environments = environmentResult;
   return environmentResult;
 }
 
+export async function getEnvironment(env: Exclude<keyof IEnvironment, 'vsix'>) {
+  return (await getEnvironments())[env];
+}
+
+export async function getVsix(vsixId: SupportedVSIXId) {
+  return (await getEnvironments()).vsix[vsixId];
+}
+
 export async function isEnvInstalled(env: Exclude<keyof IEnvironment, 'vsix'>) {
-  return (await getEnvironment())[env].installed;
+  return (await getEnvironment(env)).installed;
 }
 
 export async function isVsixInstalled(vsixId: SupportedVSIXId) {
-  return (await getEnvironment()).vsix[vsixId].installed;
+  return (await getVsix(vsixId)).installed;
+}
+
+export async function getWindowsSystemPath() {
+  try {
+    const { stdout, stderr } = await spawn('[getWindowsSystemPath]', 'reg', ['query', `"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"`, '/v', 'PATH']);
+    return matchOne(/PATH    REG_\S*SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr));
+  } catch (e) { }
+  return null;
+}
+
+export async function getWindowsUserPath() {
+  try {
+    const { stdout, stderr } = await spawn('[getWindowsUserPath]', 'reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', 'PATH']);
+    return matchOne(/PATH    REG_\S*SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr));
+  } catch (e) { }
+  return null;
 }

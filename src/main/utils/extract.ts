@@ -46,8 +46,9 @@ export function extractAll(filePath: string, targetDir: string, clearTargetDir =
       // logMain.info('[extractAll.done]', filePath, targetDir);
       // resolve();
       clearTargetDir && await fs.emptyDir(targetDir);
-      fs.createReadStream(filePath)
-        .pipe(unzipper.Extract({ path: targetDir }))
+      const rs = fs.createReadStream(filePath);
+      rs.on('error', e => reject(e));
+      rs.pipe(unzipper.Extract({ path: targetDir }))
         .promise()
         .then(r => {
           logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`, filePath, targetDir);
