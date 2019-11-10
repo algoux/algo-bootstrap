@@ -3,3 +3,5 @@ declare module NodeJS {
     modules: _GlobalSharedModules;
   }
 }
+
+declare const __static: string;

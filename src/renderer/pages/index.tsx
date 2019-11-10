@@ -29,6 +29,7 @@ interface State {
   respackPath: string;
   mingwTotalSize: number;
   mingwUncompressedSize: number;
+  projectPath: string;
 }
 
 type Props = IIndexProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
@@ -44,6 +45,7 @@ class Index extends React.Component<Props, State> {
       respackPath: '',
       mingwTotalSize: 0,
       mingwUncompressedSize: 0,
+      projectPath: '',
     };
   }
 
@@ -184,13 +186,50 @@ class Index extends React.Component<Props, State> {
     }
   }
 
+  initializeProject = async () => {
+    const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      properties: ['openDirectory'],
+    });
+    const projectPath = res.filePaths ? res.filePaths[0] : '';
+    if (projectPath) {
+      this.setState({
+        projectPath,
+      });
+      try {
+        let init = false;
+        if (await sm.vsc.isDirEmpty(projectPath)) {
+          init = true;
+        } else if (await msg.confirm('选定目录中已存在文件，仍要初始化？')) {
+          init = true;
+        }
+        if (init) {
+          logRenderer.info('[initializeProject]', projectPath);
+          await sm.vsc.genProjectFiles(projectPath);
+        }
+      } catch (e) {
+        logRenderer.error('[initializeProject]', e);
+        msg.error('初始化项目时发生错误');
+      }
+    }
+  }
+
+  openProject = async (projectPath: string) => {
+    try {
+      logRenderer.info('[openProject]', projectPath);
+      projectPath && await sm.vsc.openProject(projectPath);
+    } catch (e) {
+      logRenderer.info('[openProject]', e);
+      msg.error('初始化项目时发生错误');
+    }
+  }
+
   render() {
     return (
       <div style={{ textAlign: 'center' }}>
         <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
         <p>接下来，向导将指引你完成安装和配置。</p>
-        <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>开始</Button>
-        <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button>
+        <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>检查环境</Button>
+        {/* <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button> */}
         <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
         <br />
         <Button style={{ marginTop: '20px' }} onClick={this.installGcc}>安装 GCC</Button>
@@ -199,8 +238,12 @@ class Index extends React.Component<Props, State> {
         <Button style={{ marginTop: '20px' }} onClick={this.installVSCode}>安装 VS Code</Button>
         <br />
         {sm.envChecker.VSIXIds.map(vsixId => {
-          return <Button key={vsixId} style={{ marginTop: '20px' }} onClick={() => this.installVsix(vsixId)}>{vsixId}</Button>;
+          return <Button key={vsixId} style={{ marginTop: '20px' }} onClick={() => this.installVsix(vsixId)}>{vsixId.split('.')[1]}</Button>;
         })}
+
+        <br />
+        <Button style={{ marginTop: '20px' }} onClick={this.initializeProject}>初始化 VSC 项目</Button>
+        <Button style={{ marginTop: '20px' }} onClick={() => this.openProject(this.state.projectPath)}>打开项目</Button>
 
         <Progress percent={this.state.mingwUncompressedSize / this.state.mingwTotalSize * 100} status="active" showInfo={false} />
         <h4>test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: "iec" })} / {filesize(this.state.mingwTotalSize, { standard: "iec" })} ({formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})</h4>

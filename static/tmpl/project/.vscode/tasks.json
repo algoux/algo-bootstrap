@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "Build (g++)",
+      "command": "g++",
+      "args": [
+        "-g",
+        "${file}",
+        "-std=c++11",
+        "-o",
+        "${workspaceFolder}/.exe"
+      ]
+    },
+    {
+      "label": "Build (clang++)",
+      "type": "shell",
+      "command": "clang++",
+      "args": [
+        "-std=c++11",
+        "-stdlib=libc++",
+        "${file}",
+        "-o",
+        "${workspaceFolder}/.exe",
+        "--debug"
+      ]
+    }
+  ]
+}

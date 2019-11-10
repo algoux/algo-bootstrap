@@ -26,7 +26,7 @@ interface ICheckEnvironmentResultInstalled {
 
 type ICheckEnvironmentResult = ICheckEnvironmentResultNotInstalled | ICheckEnvironmentResultInstalled;
 
-interface IEnvironment {
+interface IEnvironments {
   gcc: ICheckEnvironmentResult;
   gdb: ICheckEnvironmentResult;
   python: ICheckEnvironmentResult;

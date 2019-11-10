@@ -4,5 +4,5 @@ interface IState {
 
 interface IGlobalState {
   name: string;
-  environments: IEnvironment;
+  environments: IEnvironments;
 }

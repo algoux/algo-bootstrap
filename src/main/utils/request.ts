@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import constants from 'common/configs/constants';
 import api from 'common/configs/apis';
 import moment from 'moment';
+import { logMain } from 'common/utils/logger';
 
 let requestTaskId = 1;
 
@@ -30,6 +31,7 @@ function checkStatus(reqId: number, mau: string, duration: number, response: Axi
     headers: response.headers,
     data: response.data,
   }, null, '  '));
+  // TODO 添加 resp 和 error 的生产环境 log
   if (response.status >= 200 && response.status < 300) {
     return response;
   }
@@ -53,6 +55,7 @@ async function baseRequest<O = any, PO = O>(url: string, options: AxiosRequestCo
   const reqId = requestTaskId++;
   const mau = `${options.method || 'GET'} ${url}`;
   console.log(`[${now()}  req #${reqId}] ${mau}` + (options.data ? '\n' + JSON.stringify(options.data, null, '  ') : ''));
+  logMain.info('[req]', mau);
   const st = Date.now();
   const response = await axiosInstance({
     url,

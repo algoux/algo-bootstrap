@@ -42,7 +42,7 @@ export function genEmptyVSIXMap() {
   return map as Record<SupportedVSIXId, ICheckEnvironmentResult>;
 }
 
-export function genEmptyEnvironments(): IEnvironment {
+export function genEmptyEnvironments(): IEnvironments {
   return {
     gcc: genNotInstalled(),
     gdb: genNotInstalled(),
@@ -182,7 +182,7 @@ export async function getEnvironments(force = false) {
     checkCpplint(),
     checkVSCode(),
   ]);
-  const environmentResult: IEnvironment = {
+  const environmentResult: IEnvironments = {
     gcc,
     gdb,
     python,
@@ -195,7 +195,7 @@ export async function getEnvironments(force = false) {
   return environmentResult;
 }
 
-export async function getEnvironment(env: Exclude<keyof IEnvironment, 'vsix'>) {
+export async function getEnvironment(env: Exclude<keyof IEnvironments, 'vsix'>) {
   return (await getEnvironments())[env];
 }
 
@@ -203,7 +203,7 @@ export async function getVsix(vsixId: SupportedVSIXId) {
   return (await getEnvironments()).vsix[vsixId];
 }
 
-export async function isEnvInstalled(env: Exclude<keyof IEnvironment, 'vsix'>) {
+export async function isEnvInstalled(env: Exclude<keyof IEnvironments, 'vsix'>) {
   return (await getEnvironment(env)).installed;
 }
 

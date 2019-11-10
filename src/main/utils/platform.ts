@@ -11,3 +11,5 @@ export enum Platform {
 }
 
 export type SupportedPlatform = keyof typeof Platform;
+
+export const currentPlatform = _platform as SupportedPlatform;

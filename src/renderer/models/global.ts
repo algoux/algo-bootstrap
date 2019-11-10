@@ -20,7 +20,7 @@ export default {
   },
   effects: {
     * getEnvironments({ payload: { force = false } }: DvaAction<{ force?: boolean }>, { call, put }: DvaSagaEffect) {
-      const environments: IEnvironment = yield call(sm.envChecker.getEnvironments, force);
+      const environments: IEnvironments = yield call(sm.envChecker.getEnvironments, force);
       yield put({
         type: 'setEnvironments',
         payload: {
