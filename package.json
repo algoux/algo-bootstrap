@@ -53,7 +53,6 @@
     "algoux"
   ],
   "dependencies": {
-    "adm-zip": "^0.4.13",
     "axios": "^0.19.0",
     "ejs": "^2.7.1",
     "electron-better-ipc": "^0.6.0",
@@ -72,7 +71,6 @@
     "url-assembler": "^2.1.0"
   },
   "devDependencies": {
-    "@types/adm-zip": "^0.4.32",
     "@types/ejs": "^2.6.3",
     "@types/fs-extra": "^8.0.1",
     "@types/get-folder-size": "^2.0.0",

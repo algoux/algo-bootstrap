@@ -105,13 +105,19 @@ class Index extends React.Component<Props, State> {
     });
     logRenderer.info('open res', res);
     if (respackPath) {
+      const respack = new Respack(respackPath);
       try {
-        const respack = new Respack(respackPath);
+        await respack.loadManifest();
         await respack.validate();
+      } catch (e) {
+        logRenderer.error(`[openRespack] open failed:`, e);
+        msg.error('验证资源包失败');
+      }
+      try {
         await respack.extract();
       } catch (e) {
         logRenderer.error(`[openRespack] open failed:`, e);
-        msg.error('验证或应用资源包失败');
+        msg.error('应用资源包失败');
       }
     }
   }

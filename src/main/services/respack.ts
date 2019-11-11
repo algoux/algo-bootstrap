@@ -1,14 +1,11 @@
-import AdmZip from 'adm-zip';
-import { SupportedPlatform } from '@/utils/platform';
 import { logMain } from 'common/utils/logger';
-import Codes from 'common/configs/codes';
-import generalError from 'common/utils/general-error';
 import req from '@/utils/request';
 import api from 'common/configs/apis';
 import * as sha from 'sha';
 import { app } from 'electron';
 import paths from 'common/configs/paths';
 import fs from 'fs-extra';
+import { loadOne, extractAll } from '@/utils/extract';
 
 interface IRespackCheckResult {
   _id: string;
@@ -49,14 +46,16 @@ export default class Respack {
 
 
   private readonly filePath: string;
-  private readonly zipInstance: AdmZip;
-  private readonly manifest: IRespackManifest;
+  private manifest: IRespackManifest | null;
 
   constructor(filePath: string) {
     this.filePath = filePath;
-    this.zipInstance = new AdmZip(filePath);
-    this.manifest = JSON.parse(this.zipInstance.getEntry('manifest.json').getData().toString());
-    logMain.info('[respack] manifest:', this.manifest);
+    this.manifest = null;
+  }
+
+  public async loadManifest() {
+    this.manifest = (await loadOne(this.filePath, 'manifest.json', 'json')) as IRespackManifest;
+    logMain.info('[Respack] [loadManifest]', this.manifest);
   }
 
   public getManifest() {
@@ -65,31 +64,32 @@ export default class Respack {
 
   public async validate() {
     const manifest = this.manifest;
+    if (!manifest) {
+      throw Error('No manifest');
+    }
     if (manifest.platform !== process.platform) {
-      throw generalError(Codes.respackIncompatible, Error(`Respack platform "${manifest.platform}" is incompatible with "${process.platform}"`));
+      throw Error(`Respack platform "${manifest.platform}" is incompatible with "${process.platform}"`);
     }
     let sha1 = '';
     try {
       const fileId = getFileId(manifest.id, manifest.platform, manifest.version);
       const checkInfo = await req.get<IRespackCheckResult>(`${api.respack.info}/${fileId}.json`);
-      logMain.info('[respack] respack checkInfo:', checkInfo);
+      logMain.info('[Respack] [validate] respack checkInfo:', checkInfo);
       sha1 = checkInfo.sha1;
     } catch (e) {
-      throw generalError(Codes.respackInfoFetchFailed, e);
+      throw e;
     }
     try {
       sha.checkSync(this.filePath, sha1);
     } catch (e) {
-      throw generalError(Codes.respackChecksumError, e);
+      throw e;
     }
     return true;
   }
 
   public async extract() {
     const target = app.getPath('userData') + paths.respack;
-    logMain.info('[respack] extract to:', target);
-    await fs.remove(target);
-    this.zipInstance.extractAllTo(target, true);
-    logMain.info('[respack] extract completed');
+    logMain.info('[Respack] [extract]', target);
+    await extractAll(this.filePath, target, true);
   }
 }
