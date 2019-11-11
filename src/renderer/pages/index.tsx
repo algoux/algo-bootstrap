@@ -135,6 +135,7 @@ class Index extends React.Component<Props, State> {
       this.setState({
         mingwUncompressedSize: size,
       });
+      remote.getCurrentWindow().setProgressBar(size / this.state.mingwTotalSize);
     } catch (e) { }
     this._pollMingwSizeTimer = setTimeout(() => {
       this.pollMingwUncompressedSize();
@@ -145,7 +146,7 @@ class Index extends React.Component<Props, State> {
     try {
       if (sm.platform.isWindows) {
         await this.getMingwTotalSize();
-        this.pollMingwUncompressedSize();
+        await this.pollMingwUncompressedSize();
       }
       await sm.envInstaller.installGccAndGdb();
     } catch (e) {
@@ -153,6 +154,9 @@ class Index extends React.Component<Props, State> {
       msg.error('安装环境时发生错误');
     } finally {
       clearTimeout(this._pollMingwSizeTimer!);
+      if (sm.platform.isWindows) {
+        remote.getCurrentWindow().setProgressBar(-1);
+      }
     }
   }
 
@@ -233,6 +237,7 @@ class Index extends React.Component<Props, State> {
     return (
       <div style={{ textAlign: 'center' }}>
         <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
+        {/* TODO 允许自定义向导名称，影响 renderer 和 sudo prompt */}
         <p>接下来，向导将指引你完成安装和配置。</p>
         <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>检查环境</Button>
         {/* <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button> */}
@@ -246,7 +251,6 @@ class Index extends React.Component<Props, State> {
         {sm.envChecker.VSIXIds.map(vsixId => {
           return <Button key={vsixId} style={{ marginTop: '20px' }} onClick={() => this.installVsix(vsixId)}>{vsixId.split('.')[1]}</Button>;
         })}
-
         <br />
         <Button style={{ marginTop: '20px' }} onClick={this.initializeProject}>初始化 VSC 项目</Button>
         <Button style={{ marginTop: '20px' }} onClick={() => this.openProject(this.state.projectPath)}>打开项目</Button>

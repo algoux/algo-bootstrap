@@ -6,6 +6,7 @@ import { app } from 'electron';
 import paths from 'common/configs/paths';
 import fs from 'fs-extra';
 import { loadOne, extractAll } from '@/utils/extract';
+import * as path from 'path';
 
 interface IRespackCheckResult {
   _id: string;
@@ -18,11 +19,17 @@ function getFileId(id: string, platform: string, version: string) {
 }
 
 export default class Respack {
-  public static defaultResPath = app.getPath('userData') + paths.respack;
+  public static defaultResPath = path.join(app.getPath('userData'), paths.respack);
 
   public static async readLocalManifest(filePath: string = '') {
-    const usedPath = filePath || this.defaultResPath + '/manifest.json';
+    const usedPath = filePath || path.join(this.defaultResPath, 'manifest.json');
     return await fs.readJSON(usedPath) as IRespackManifest;
+  }
+
+  public static async hasLocalRespack(respackDirPath: string = '') {
+    const dirPath = respackDirPath || path.join(this.defaultResPath);
+    const manifestPath = path.join(dirPath, 'manifest.json');
+    return (await fs.pathExists(manifestPath)) && (await this.readLocalManifest(manifestPath));
   }
 
   public static async readResFromLocalManifest(id: string, prefix: string = '', filePath: string = '') {
@@ -88,7 +95,7 @@ export default class Respack {
   }
 
   public async extract() {
-    const target = app.getPath('userData') + paths.respack;
+    const target = path.join(app.getPath('userData'), paths.respack);
     logMain.info('[Respack] [extract]', target);
     await extractAll(this.filePath, target, true);
   }
