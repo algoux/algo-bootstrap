@@ -80,6 +80,9 @@ export async function checkGcc(): Promise<ICheckEnvironmentResult> {
   const GCC_REG = /^gcc version (.*)$/m;
   const APPLE_CLANG_REG = /^Apple clang version (.*)$/m;
   try {
+    if (isMac && !await checkXCodeCLT()) {
+      return genNotInstalled();
+    }
     const { stdout, stderr } = await spawn('[checkGcc]', 'gcc', ['-v']);
     let ver: string | null = null;
     if (isMac) {
@@ -176,7 +179,7 @@ export async function getEnvironments(force = false) {
     return environments;
   }
   const [gcc, gdb, python, cpplint, code] = await Promise.all([
-    isMac ? (await checkXCodeCLT() ? checkGcc() : genNotInstalled()) : checkGcc(),
+    checkGcc(),
     isMac ? genNotInstalled() : checkGdb(),
     checkPython(),
     checkCpplint(),
@@ -210,6 +213,17 @@ export async function isEnvInstalled(env: Exclude<keyof IEnvironments, 'vsix'>) 
 export async function isVsixInstalled(vsixId: SupportedVSIXId) {
   return (await getVsix(vsixId)).installed;
 }
+
+// export async function isAllVsixInstalled() {
+//   let installed = true;
+//   for (const vsixId of VSIXIds) {
+//     if (!await isVsixInstalled(vsixId)) {
+//       installed = false;
+//       break;
+//     }
+//   }
+//   return installed;
+// }
 
 export async function getWindowsSystemPath() {
   try {

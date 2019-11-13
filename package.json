@@ -40,7 +40,7 @@
     "build:renderer-analyze": "cross-env ANALYZE=1 APP_ROOT=src/renderer umi build",
     "build:main-dev": "NODE_ENV=development webpack --config ./build/webpack.main.config.js",
     "build:main-prod": "NODE_ENV=production webpack --config ./build/webpack.main.prod.config.js",
-    "build": "npm run build:renderer && npm run build:main-prod",
+    "build": "npm run build:renderer && npm run build:main",
     "pack:dir": "electron-builder --dir",
     "pack:mac": "electron-builder --mac",
     "pack:win": "electron-builder --win",

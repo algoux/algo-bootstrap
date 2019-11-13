@@ -5,6 +5,7 @@ type _GlobalSharedModules = typeof import('common/../main/modules').default;
 // type _GlobalEnvironment = PromiseResolveType<ReturnType<typeof import('common/../main/services/env-checker').default>>;
 
 type SupportedPlatform = import('common/../main/utils/platform').SupportedPlatform;
+type SupportedEnvId = Exclude<keyof IEnvironments, 'vsix'>
 type SupportedVSIXId = import('common/../main/services/env-checker').SupportedVSIXId;
 
 interface IApiResp<T = undefined> {

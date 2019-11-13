@@ -9,6 +9,7 @@ import _modules from '@/modules';
 import { getEnvironments } from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
 import { isMac } from './utils/platform';
+import constants from 'common/configs/constants';
 
 // if (module.hot) {
 //   module.hot.accept();
@@ -44,7 +45,7 @@ function createWindow() {
       nodeIntegration: true,
       // preload: path.join(__dirname, './ preload.js'),
     },
-    title: 'Algo Bootstrap' + ipcKeys.getResPack + x.a,
+    title: `${constants.appName} v${app.getVersion()}`,
   });
 
   if (process.platform === 'darwin') {

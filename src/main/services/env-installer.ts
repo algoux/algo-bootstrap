@@ -29,7 +29,6 @@ export async function refreshWindowsPath() {
   const newPath = [...systemPath.split(';').filter(p => !!p), ...userPath.split(';').filter(p => !!p)].join(';');
   logMain.info('[refreshWindowsPath]', newPath);
   process.env.PATH = newPath;
-  getEnvironments(true);
 }
 
 export async function installXCodeCLT() {
@@ -58,21 +57,23 @@ export async function getMingwUncompressedSize(): Promise<number> {
   });
 }
 
-export async function installGccAndGdb(force = false) {
+export async function installGcc(force = false) {
   if (!force && await isEnvInstalled('gcc')) {
     return;
   }
   if (isMac) {
     await installXCodeCLT();
+    await getEnvironments(true);
   } else if (isWindows) {
     const res = await Respack.readResFromLocalManifestOrThrow('c++');
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
     await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
     const userPath = await getWindowsUserPath() || '';
-    logMain.info('[installGccAndGdb] userPath:', userPath);
-    await spawn('[installGccAndGdb]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
+    logMain.info('[installGcc] userPath:', userPath);
+    await spawn('[installGcc]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
     await refreshWindowsPath();
+    await getEnvironments(true);
   }
 }
 
@@ -84,6 +85,7 @@ export async function installPython(force = false) {
     const res = await Respack.readResFromLocalManifestOrThrow('python');
     await execFile('[installPython]', path.join(RESPACK_PATH, res.name));
     await refreshWindowsPath();
+    await getEnvironments(true);
   }
 }
 
@@ -115,6 +117,7 @@ export async function installCpplint(force = false) {
     default:
       throw Error('Incompatible format');
   }
+  await getEnvironments(true);
 }
 
 export async function installVSCode(force = false) {
@@ -136,9 +139,11 @@ export async function installVSCode(force = false) {
       default:
         throw Error('Incompatible format');
     }
+    await getEnvironments(true);
   } else if (isWindows) {
     await execFile('[installVSCode]', path.join(RESPACK_PATH, res.name));
     await refreshWindowsPath();
+    await getEnvironments(true);
   }
 }
 
@@ -153,4 +158,5 @@ export async function installVsix(vsixId: SupportedVSIXId, force = false) {
   const res = await Respack.readResFromLocalManifestOrThrow(`vsix/${vsixId}`);
   const filePath = path.join(RESPACK_PATH, res.name);
   await spawn('[installVsix]', `"${code.path || 'code'}"`, ['--install-extension', `"${filePath}"`]);
+  await getEnvironments(true);
 }

@@ -12,8 +12,8 @@ if (process.env.NODE_ENV === 'development') {
 export const dva = {
   config: {
     onError(e: ErrorEvent) {
-      e.preventDefault();
-      logRenderer.error('[app.onError]', e);
+      // e.preventDefault();
+      // logRenderer.error('[app.onError]', e);
     },
     ...extraConfig,
   },

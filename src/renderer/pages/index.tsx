@@ -67,7 +67,7 @@ class Index extends React.Component<Props, State> {
 
   getEnvironments = async () => {
     const env = await this.props.dispatch!({
-      type: 'global/getEnvironments',
+      type: 'env/getEnvironments',
       payload: {
         force: true,
       },
@@ -148,7 +148,10 @@ class Index extends React.Component<Props, State> {
         await this.getMingwTotalSize();
         await this.pollMingwUncompressedSize();
       }
-      await sm.envInstaller.installGccAndGdb();
+      await this.props.dispatch!({
+        type: 'env/installGcc',
+        payload: {},
+      });
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
@@ -162,7 +165,10 @@ class Index extends React.Component<Props, State> {
 
   installPython = async () => {
     try {
-      await sm.envInstaller.installPython();
+      await this.props.dispatch!({
+        type: 'env/installPython',
+        payload: {},
+      });
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
@@ -171,7 +177,10 @@ class Index extends React.Component<Props, State> {
 
   installCpplint = async () => {
     try {
-      await sm.envInstaller.installCpplint();
+      await this.props.dispatch!({
+        type: 'env/installCpplint',
+        payload: {},
+      });
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
@@ -180,7 +189,10 @@ class Index extends React.Component<Props, State> {
 
   installVSCode = async () => {
     try {
-      await sm.envInstaller.installVSCode(true);
+      await this.props.dispatch!({
+        type: 'env/installVSCode',
+        payload: {},
+      });
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
@@ -189,7 +201,12 @@ class Index extends React.Component<Props, State> {
 
   installVsix = async (vsixId: SupportedVSIXId) => {
     try {
-      await sm.envInstaller.installVsix(vsixId, true);
+      await this.props.dispatch!({
+        type: 'env/installVsix',
+        payload: {
+          vsixId,
+        },
+      });
     } catch (e) {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
@@ -259,11 +276,11 @@ class Index extends React.Component<Props, State> {
         <h4>test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: "iec" })} / {filesize(this.state.mingwTotalSize, { standard: "iec" })} ({formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})</h4>
         <h4>test respack path: {this.state.respackPath}</h4>
         <h4>test remote require: {this.state.remoteGlobal}</h4>
-        <h4>test env: {JSON.stringify(this.props.global.environments)}</h4>
+        <h4>test env: {JSON.stringify(this.props.env.environments)}</h4>
         <h4>test ipc: {this.state.ipc}</h4>
         <h4>test @: {config.outputPath}</h4>
         <h4>test common: {ipcKeys.getResPack}</h4>
-        <h4>test dva: {this.props.global.name}</h4>
+        <h4>test dva: {this.props.env.name}</h4>
         <h4>test image: <img src={yay} style={{ width: '25px', height: '25px' }} /></h4>
 
         <Test
@@ -279,7 +296,10 @@ class Index extends React.Component<Props, State> {
 
 function mapStateToProps(state: IState) {
   console.log('mapState', state);
-  return state;
+  return {
+    env: state.env,
+  };
+  // return state;
 }
 
 export default connect(mapStateToProps)(Index);

@@ -14,8 +14,8 @@ interface State {
 function mapStateToProps(state: IState) {
   console.log('mapState', state);
   return {
-    global: {
-      name: state.global.name,
+    env: {
+      name: state.env.name,
     },
   };
 }
@@ -40,7 +40,7 @@ class Test extends Component<Props, State> {
       <div>
         <p>props.count: {this.props.count}</p>
         <p>props.size: {this.props.size}</p>
-        <p>state.global.name: {this.props.global.name}</p>
+        <p>state.env.name: {this.props.env.name}</p>
       </div>
     );
   }
