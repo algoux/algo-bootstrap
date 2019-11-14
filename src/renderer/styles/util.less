@@ -198,3 +198,100 @@
 .--no-wrap {
   white-space: nowrap;
 }
+
+// anim
+
+@default-anim-duration: .5s;
+@default-anim-cubic-bezier: cubic-bezier(0.215, 0.610, 0.355, 1);
+
+.--fade-in {
+  animation: fade-in @default-anim-duration @default-anim-cubic-bezier;
+}
+
+.--fade-out {
+  animation: fade-out @default-anim-duration @default-anim-cubic-bezier;
+}
+
+.--slide-left {
+  animation: slide-left @default-anim-duration @default-anim-cubic-bezier;
+}
+
+.--slide-right {
+  animation: slide-right @default-anim-duration @default-anim-cubic-bezier;
+}
+
+.--slide-up {
+  animation: slide-up @default-anim-duration @default-anim-cubic-bezier;
+}
+
+.--slide-down {
+  animation: slide-down @default-anim-duration @default-anim-cubic-bezier;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

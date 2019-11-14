@@ -46,6 +46,7 @@ function createWindow() {
       // preload: path.join(__dirname, './ preload.js'),
     },
     title: `${constants.appName} v${app.getVersion()}`,
+    // show: false,
   });
 
   if (process.platform === 'darwin') {
@@ -71,6 +72,10 @@ function createWindow() {
     //   mode: 'detach',
     // });
   }
+
+  // mainWindow.once('ready-to-show', () => {
+  //   mainWindow?.show();
+  // });
 
   mainWindow.on('closed', () => {
     mainWindow = null;

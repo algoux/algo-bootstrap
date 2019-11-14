@@ -75,7 +75,7 @@ class RootLayout extends React.Component<Props, State> {
     return <Layout>
       <Layout.Sider
         theme="light"
-        className="sidebar"
+        className="sidebar --slide-right"
         style={{
           overflow: 'auto', height: '100vh', position: 'fixed', left: 0,
         }}
@@ -128,7 +128,7 @@ class RootLayout extends React.Component<Props, State> {
         </Menu>
       </Layout.Sider>
       <Layout style={{ marginLeft: 200 }}>
-        <Layout.Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
+        <Layout.Content className="--slide-left" style={{ margin: '24px 16px 0', overflow: 'initial' }}>
           {props.children}
         </Layout.Content>
       </Layout>

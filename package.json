@@ -103,7 +103,7 @@
     "slash": "^3.0.0",
     "ts-loader": "^6.1.2",
     "tslint": "^5.20.0",
-    "typescript": "^3.6.3",
+    "typescript": "3.7.2",
     "uglifyjs-webpack-plugin": "^2.1.2",
     "umi": "^2.9.0",
     "umi-plugin-react": "^1.8.0",
