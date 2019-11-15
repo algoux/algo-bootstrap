@@ -41,7 +41,7 @@ export default {
   // ],
   alias: {
     // '@': require('path').resolve(__dirname, 'src'),
-    common: require('path').resolve(__dirname, '../../common'),
+    common: require('path').resolve(__dirname, '../common'),
   },
   externals(_context: any, request: any, callback: (error: any, result: any) => void) {
     const isDev = process.env.NODE_ENV === 'development';
@@ -57,9 +57,9 @@ export default {
     if (load.includes(request)) {
       isExternal = `require("${request}")`;
     }
-    const appDeps = Object.keys(require('../../../package').dependencies);
+    const appDeps = Object.keys(require('../../package').dependencies);
     if (appDeps.includes(request)) {
-      const orininalPath = slash(path.join(__dirname, '../../../node_modules', request));
+      const orininalPath = slash(path.join(__dirname, '../../node_modules', request));
       const requireAbsolute = `require('${orininalPath}')`;
       isExternal = isDev ? requireAbsolute : `require('${request}')`;
     }
