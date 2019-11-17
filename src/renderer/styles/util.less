@@ -228,6 +228,10 @@
   animation: slide-down @default-anim-duration @default-anim-cubic-bezier;
 }
 
+.--p-slide-up {
+  animation: p-slide-up @default-anim-duration @default-anim-cubic-bezier;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -293,5 +297,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes p-slide-up {
+  from {
+    opacity: 0;
+    bottom: -15px;
+  }
+
+  to {
+    opacity: 1;
+    bottom: 0;
   }
 }

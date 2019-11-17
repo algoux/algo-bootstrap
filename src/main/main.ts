@@ -3,8 +3,6 @@ import * as path from 'path';
 import * as url from 'url';
 import { ipcMain } from 'electron-better-ipc';
 import ipcKeys from 'common/configs/ipc';
-import x from '@/test';
-import req from '@/utils/request';
 import _modules from '@/modules';
 import { getEnvironments } from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
@@ -33,9 +31,8 @@ global.modules = _modules;
 
 let mainWindow: Electron.BrowserWindow | null;
 
-console.log(path.join(__dirname, './preload.js'));
-console.log('ipc', ipcKeys);
-console.log('x', x);
+// console.log(path.join(__dirname, './preload.js'));
+// console.log('ipc', ipcKeys);
 
 function createWindow() {
   mainWindow = new BrowserWindow({

@@ -3,6 +3,8 @@ import { Layout, Menu, Icon } from 'antd';
 import { DispatchProp } from 'react-redux';
 import { connect } from '@/utils/dva';
 import sm from '@/utils/modules';
+import { RouteProps } from '@/typings/props';
+import pages from '@/configs/pages';
 
 interface IRootLayoutProps {
 }
@@ -10,7 +12,7 @@ interface IRootLayoutProps {
 interface State {
 }
 
-type Props = IRootLayoutProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
+type Props = IRootLayoutProps & ReturnType<typeof mapStateToProps> & DispatchProp<any> & RouteProps;
 
 class RootLayout extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -71,6 +73,9 @@ class RootLayout extends React.Component<Props, State> {
 
   render() {
     const props = this.props;
+    const bgStyle = { backgroundColor: sm.platform.isMac ? 'transparent' : '#e5e5e5' };
+    const { location } = props;
+    const activeLinkKey = location.pathname;
 
     return <Layout>
       <Layout.Sider
@@ -78,6 +83,7 @@ class RootLayout extends React.Component<Props, State> {
         className="sidebar --slide-right"
         style={{
           overflow: 'auto', height: '100vh', position: 'fixed', left: 0,
+          ...bgStyle,
         }}
       >
         <div
@@ -91,44 +97,44 @@ class RootLayout extends React.Component<Props, State> {
         >Algo<br />Bootstrap</div>
         <Menu
           mode="inline"
-          defaultSelectedKeys={['1']}
+          selectedKeys={[`${activeLinkKey}`]}
           style={{ backgroundColor: 'transparent' }}
         >
           <Menu.ItemGroup key="group-0" title="准备">
-            <Menu.Item key="check-environments">
+            <Menu.Item key={pages.preparation.respack}>
               <span className="menu-sub-item-title">环境和资源包</span>
               {this.renderEnvRespackStatusIcon()}
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.ItemGroup key="group-1" title="安装开发环境">
-            <Menu.Item key="gcc">
+            <Menu.Item key={pages.installer.gcc}>
               <span className="menu-sub-item-title">C/C++</span>
               {this.renderEnvStatusIcon('gcc')}
             </Menu.Item>
-            <Menu.Item key="python">
+            <Menu.Item key={pages.installer.python}>
               <span className="menu-sub-item-title">Python 支持</span>
               {this.renderEnvStatusIcon('python')}
             </Menu.Item>
-            <Menu.Item key="cpplint">
+            <Menu.Item key={pages.installer.cpplint}>
               <span className="menu-sub-item-title">代码风格检查器</span>
               {this.renderEnvStatusIcon('cpplint')}
             </Menu.Item>
-            <Menu.Item key="code">
+            <Menu.Item key={pages.installer.code}>
               <span className="menu-sub-item-title">VS Code</span>
               {this.renderEnvStatusIcon('code')}
             </Menu.Item>
-            <Menu.Item key="vsix">
+            <Menu.Item key={pages.installer.vsix}>
               <span className="menu-sub-item-title">VS Code 扩展</span>
               {this.renderVsixStatusIcon()}
             </Menu.Item>
           </Menu.ItemGroup>
-          <Menu.Item key="start">
+          <Menu.Item key={pages.projects}>
             <span>开始使用</span>
           </Menu.Item>
         </Menu>
       </Layout.Sider>
       <Layout style={{ marginLeft: 200 }}>
-        <Layout.Content className="--slide-left" style={{ margin: '24px 16px 0', overflow: 'initial' }}>
+        <Layout.Content>
           {props.children}
         </Layout.Content>
       </Layout>
@@ -137,17 +143,6 @@ class RootLayout extends React.Component<Props, State> {
 }
 
 function mapStateToProps(state: IState) {
-  console.warn('layout state', {
-    environments: state.env.environments,
-    loadings: {
-      getEnvironments: !!state.loading.effects['env/getEnvironments'],
-      gcc: !!state.loading.effects['env/installGcc'],
-      python: !!state.loading.effects['env/installGcc'],
-      cpplint: !!state.loading.effects['env/installGcc'],
-      code: !!state.loading.effects['env/installGcc'],
-      vsix: !!state.loading.effects['env/installVsix'],
-    },
-  })
   return {
     environments: state.env.environments,
     loadings: {

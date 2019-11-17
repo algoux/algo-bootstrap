@@ -5,11 +5,20 @@ body,
 #root {
   height: 100%;
   background: transparent !important;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
   margin: 0;
 }
+
+p:last-of-type {
+  margin-bottom: 0;
+}
+
+@sidebar-width: 200px;
+@divider-border: 1px solid #ddd;
 
 .ant-layout.ant-layout-has-sider {
   // -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -19,7 +28,7 @@ body {
   background-color: transparent !important;
 
   .sidebar.ant-layout-sider {
-    background-color: transparent !important;
+    // background-color: transparent !important;
     user-select: none;
 
     .ant-layout-sider-children {
@@ -53,4 +62,63 @@ body {
   display: inline-block;
   width: calc(100% - 32px);
   margin-left: 12px;
+}
+
+.ant-spin {
+  color: inherit;
+}
+
+.ant-layout-content {
+  // flex: none;
+  // width: 100%;
+  // height: 100%;
+  // flex: 1 0 auto; /* 2 */
+  // width: 100%;
+}
+
+.full-center {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
+
+
+.container {
+  margin: 32px 16px 16px;
+  padding-bottom: @action-bar-height;
+}
+
+.center-view {
+  position: absolute;
+  top: 45%;
+  left: calc(50% + 100px);
+  transform: translate(-50%, -50%);
+
+  @media only screen and (max-width: 767px) {
+    top: 47.5%;
+  }
+}
+
+@action-bar-height: 75px;
+
+.action-bar {
+  width: 100%;
+  height: @action-bar-height;
+  position: fixed;
+  bottom: 0px;
+  border-top: @divider-border;
+  background: rgba(255, 255, 255, .85);
+  backdrop-filter: blur(20px);
+  display: flex;
+
+  .info {
+    margin: auto 30px auto 30px;
+  }
+
+  .actions {
+    margin: auto (@sidebar-width + 30px) auto auto;
+  }
 }
