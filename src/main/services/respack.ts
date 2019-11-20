@@ -23,13 +23,22 @@ export default class Respack {
 
   public static async readLocalManifest(filePath: string = '') {
     const usedPath = filePath || path.join(this.defaultResPath, 'manifest.json');
-    return await fs.readJSON(usedPath) as IRespackManifest;
+    return await fs.readJson(usedPath) as IRespackManifest;
   }
 
   public static async hasLocalRespack(respackDirPath: string = '') {
     const dirPath = respackDirPath || path.join(this.defaultResPath);
     const manifestPath = path.join(dirPath, 'manifest.json');
-    return (await fs.pathExists(manifestPath)) && (await this.readLocalManifest(manifestPath));
+    let has = true;
+    try {
+      const manifest = await this.readLocalManifest(manifestPath);
+      for (const file of manifest.files) {
+        has = has && await fs.pathExists(path.join(dirPath, file.name));
+      }
+    } catch (e) {
+      has = false;
+    }
+    return has;
   }
 
   public static async readResFromLocalManifest(id: string, prefix: string = '', filePath: string = '') {

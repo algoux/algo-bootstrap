@@ -31,12 +31,14 @@ class RootLayout extends React.Component<Props, State> {
 
   renderEnvRespackStatusIcon = () => {
     const props = this.props;
-    const environments = props.environments;
-    if (props.loadings.getEnvironments) {
+    const hasRespack = props.hasRespack;
+    if (props.loadings.getEnvironments || props.loadings.getHasRespack) {
       return this.renderStatusIcon('loading');
     }
-    return this.renderStatusIcon('done');
-    // return null;
+    if (hasRespack) {
+      return this.renderStatusIcon('done');
+    }
+    return null;
   }
 
   renderEnvStatusIcon = (envId: Exclude<SupportedEnvId, 'gdb'>) => {
@@ -73,7 +75,7 @@ class RootLayout extends React.Component<Props, State> {
 
   render() {
     const props = this.props;
-    const bgStyle = { backgroundColor: sm.platform.isMac ? 'transparent' : '#e5e5e5' };
+    const bgStyle = { backgroundColor: sm.platform.isMac ? 'transparent' : 'rgb(227, 229, 231)' };
     const { location } = props;
     const activeLinkKey = location.pathname;
 
@@ -145,6 +147,7 @@ class RootLayout extends React.Component<Props, State> {
 function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
+    hasRespack: state.respack.hasRespack,
     loadings: {
       getEnvironments: !!state.loading.effects['env/getEnvironments'],
       gcc: !!state.loading.effects['env/installGcc'],
@@ -152,6 +155,7 @@ function mapStateToProps(state: IState) {
       cpplint: !!state.loading.effects['env/installCpplint'],
       code: !!state.loading.effects['env/installVSCode'],
       vsix: !!state.loading.effects['env/installVsix'],
+      getHasRespack: !!state.loading.effects['respack/getHasRespack'],
     },
   };
 }

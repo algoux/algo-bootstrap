@@ -11,6 +11,7 @@ interface IDvaBaseState {
 
 interface IDvaModelState {
   env: IEnvState;
+  respack: IRespackState;
 }
 
 type IState = IDvaBaseState & IDvaModelState;
@@ -24,8 +25,12 @@ interface ILocation {
 }
 
 interface IEnvState {
-  name: string;
   environments: IEnvironments;
+}
+
+interface IRespackState {
+  hasRespack: boolean;
+  manifest: IRespackManifest | null;
 }
 
 type EffectKeys =
@@ -35,3 +40,6 @@ type EffectKeys =
   | 'env/installCpplint'
   | 'env/installVSCode'
   | 'env/installVsix'
+  | 'respack/getHasRespack'
+  | 'respack/getManifest'
+  | 'respack/importRespack'

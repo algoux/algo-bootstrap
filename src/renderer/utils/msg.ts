@@ -3,6 +3,15 @@ import sm from './modules';
 
 const Platform = sm.platform.Platform;
 
+function success(message: string, detail?: string) {
+  remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+    buttons: [],
+    type: 'info',
+    message,
+    detail,
+  });
+}
+
 function error(message: string, detail?: string) {
   remote.dialog.showMessageBox(remote.getCurrentWindow(), {
     buttons: [],
@@ -29,6 +38,7 @@ function confirm(message: string, detail?: string) {
 }
 
 const msg = {
+  success,
   error,
   confirm,
 };

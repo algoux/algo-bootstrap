@@ -71,6 +71,7 @@
     "url-assembler": "^2.1.0"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.9",
     "@types/ejs": "^2.6.3",
     "@types/fs-extra": "^8.0.1",
     "@types/get-folder-size": "^2.0.0",

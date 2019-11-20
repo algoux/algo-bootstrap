@@ -232,6 +232,40 @@
   animation: p-slide-up @default-anim-duration @default-anim-cubic-bezier;
 }
 
+.--p-slide-up-delay-300 {
+  animation: hidden .3s, p-slide-up @default-anim-duration @default-anim-cubic-bezier .32s;
+}
+
+.--p-slide-up-delay-500 {
+  animation: hidden .5s, p-slide-up @default-anim-duration @default-anim-cubic-bezier .5s;
+}
+
+.--p-slide-up-delay-700 {
+  animation: hidden .7s, p-slide-up @default-anim-duration @default-anim-cubic-bezier .7s;
+}
+
+.--p-slide-up-delay-1000 {
+  animation: hidden 1s, p-slide-up @default-anim-duration @default-anim-cubic-bezier 1s;
+}
+
+.--p-slide-up-delay-1500 {
+  animation: hidden 1.5s, p-slide-up @default-anim-duration @default-anim-cubic-bezier 1.5s;
+}
+
+.--p-slide-up-delay-2000 {
+  animation: hidden 2s, p-slide-up @default-anim-duration @default-anim-cubic-bezier 2s;
+}
+
+@keyframes hidden {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

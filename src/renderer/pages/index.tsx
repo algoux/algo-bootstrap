@@ -24,6 +24,14 @@ class Index extends React.Component<Props, State> {
       type: 'env/getEnvironments',
       payload: {},
     });
+    const hasRespack = await this.props.dispatch!({
+      type: 'respack/getHasRespack',
+      payload: {},
+    });
+    hasRespack && await this.props.dispatch!({
+      type: 'respack/getManifest',
+      payload: {},
+    });
     router.push(pages.preparation.index);
   }
 
@@ -39,7 +47,9 @@ class Index extends React.Component<Props, State> {
 function mapStateToProps(state: IState) {
   return {
     env: state.env,
-    loading: state.loading.effects['env/getEnvironments'],
+    loading: !!state.loading.effects['env/getEnvironments'] ||
+      !!state.loading.effects['respack/getHasRespack'] ||
+      !!state.loading.effects['respack/getManifest'],
   };
 }
 

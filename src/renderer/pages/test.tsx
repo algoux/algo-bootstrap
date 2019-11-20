@@ -279,7 +279,6 @@ class Test extends React.Component<Props, State> {
           <h4>test env: {JSON.stringify(this.props.env.environments)}</h4>
           <h4>test ipc: {this.state.ipc}</h4>
           <h4>test common: {ipcKeys.getResPack}</h4>
-          <h4>test dva: {this.props.env.name}</h4>
           <h4>test image: <img src={yay} style={{ width: '25px', height: '25px' }} /></h4>
         </div>
       </PageAnimation>

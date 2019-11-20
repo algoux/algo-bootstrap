@@ -6,7 +6,6 @@ type CurrentState = IEnvState;
 
 function genInitialState(): CurrentState {
   return {
-    name: 'Dva state',
     environments: purifyObject(sm.envChecker.genEmptyEnvironments()),
   };
 }

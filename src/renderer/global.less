@@ -19,6 +19,11 @@ p:last-of-type {
 
 @sidebar-width: 200px;
 @divider-border: 1px solid #ddd;
+@action-bar-height: 75px;
+
+@color-secondary: #999;
+@color-green: #4fb24f;
+@color-red: #e23a36;
 
 .ant-layout.ant-layout-has-sider {
   // -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -29,7 +34,7 @@ p:last-of-type {
 
   .sidebar.ant-layout-sider {
     // background-color: transparent !important;
-    user-select: none;
+    // user-select: none;
 
     .ant-layout-sider-children {
       overflow-x: hidden;
@@ -39,6 +44,7 @@ p:last-of-type {
 
 .ant-layout {
   background-color: #fff;
+  user-select: none;
 }
 
 .ant-menu-inline,
@@ -87,7 +93,7 @@ p:last-of-type {
 
 
 .container {
-  margin: 32px 16px 16px;
+  margin: 32px 42px 16px;
   padding-bottom: @action-bar-height;
 }
 
@@ -102,8 +108,6 @@ p:last-of-type {
   }
 }
 
-@action-bar-height: 75px;
-
 .action-bar {
   width: 100%;
   height: @action-bar-height;
@@ -116,9 +120,60 @@ p:last-of-type {
 
   .info {
     margin: auto 30px auto 30px;
+
+    p {
+      font-size: 15px;
+    }
   }
 
   .actions {
     margin: auto (@sidebar-width + 30px) auto auto;
+
+    button {
+      margin-left: 8px;
+    }
   }
+}
+
+.top-title {
+  margin-top: 25px;
+  margin-bottom: 12px;
+}
+
+.color-green {
+  color: @color-green !important;
+}
+
+.color-red {
+  color: @color-red !important;
+}
+
+.env-card {
+  .ant-card-body {
+    display: flex;
+    padding: 16px;
+  }
+
+  .icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .info {
+    padding-left: 12px;
+    overflow: hidden;
+
+    .name {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 20px;
+      margin-bottom: 3px;
+    }
+
+    .desc {
+      color: @color-secondary;
+      font-size: 12px;
+    }
+  }
+
 }
