@@ -1,10 +1,11 @@
 import React from 'react';
 import { Layout, Menu, Icon } from 'antd';
-import { DispatchProp } from 'react-redux';
 import { connect } from '@/utils/dva';
 import sm from '@/utils/modules';
-import { RouteProps } from '@/typings/props';
+import { RouteProps, DispatchProps } from '@/typings/props';
 import pages from '@/configs/pages';
+import { Link } from 'react-router-dom';
+import { formatMessage } from 'umi-plugin-locale';
 
 interface IRootLayoutProps {
 }
@@ -12,7 +13,7 @@ interface IRootLayoutProps {
 interface State {
 }
 
-type Props = IRootLayoutProps & ReturnType<typeof mapStateToProps> & DispatchProp<any> & RouteProps;
+type Props = IRootLayoutProps & ReturnType<typeof mapStateToProps> & DispatchProps & RouteProps;
 
 class RootLayout extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -22,7 +23,7 @@ class RootLayout extends React.Component<Props, State> {
   renderStatusIcon = (status: 'pending' | 'loading' | 'done', title = '') => {
     switch (status) {
       case 'loading':
-        return <Icon type="loading-3-quarters" spin className="--mr-none" />;
+        return <Icon type="loading" className="--mr-none" />;
       case 'done':
         return <Icon type="check" className="--mr-none" title={title} />;
     }
@@ -104,34 +105,48 @@ class RootLayout extends React.Component<Props, State> {
         >
           <Menu.ItemGroup key="group-0" title="准备">
             <Menu.Item key={pages.preparation.respack}>
-              <span className="menu-sub-item-title">环境和资源包</span>
-              {this.renderEnvRespackStatusIcon()}
+              <Link to={pages.preparation.respack}>
+                <span className="menu-sub-item-title">环境和资源包</span>
+                {this.renderEnvRespackStatusIcon()}
+              </Link>
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.ItemGroup key="group-1" title="安装开发环境">
             <Menu.Item key={pages.installer.gcc}>
-              <span className="menu-sub-item-title">C/C++</span>
-              {this.renderEnvStatusIcon('gcc')}
+              <Link to={pages.installer.gcc}>
+                <span className="menu-sub-item-title">{formatMessage({ id: 'env.gcc' })}</span>
+                {this.renderEnvStatusIcon('gcc')}
+              </Link>
             </Menu.Item>
             <Menu.Item key={pages.installer.python}>
-              <span className="menu-sub-item-title">Python 支持</span>
-              {this.renderEnvStatusIcon('python')}
+              <Link to={pages.installer.python}>
+                <span className="menu-sub-item-title">{formatMessage({ id: 'env.python' })}</span>
+                {this.renderEnvStatusIcon('python')}
+              </Link>
             </Menu.Item>
             <Menu.Item key={pages.installer.cpplint}>
-              <span className="menu-sub-item-title">代码风格检查器</span>
-              {this.renderEnvStatusIcon('cpplint')}
+              <Link to={pages.installer.cpplint}>
+                <span className="menu-sub-item-title">{formatMessage({ id: 'env.cpplint' })}</span>
+                {this.renderEnvStatusIcon('cpplint')}
+              </Link>
             </Menu.Item>
             <Menu.Item key={pages.installer.code}>
-              <span className="menu-sub-item-title">VS Code</span>
-              {this.renderEnvStatusIcon('code')}
+              <Link to={pages.installer.code}>
+                <span className="menu-sub-item-title">{formatMessage({ id: 'env.code' })}</span>
+                {this.renderEnvStatusIcon('code')}
+              </Link>
             </Menu.Item>
             <Menu.Item key={pages.installer.vsix}>
-              <span className="menu-sub-item-title">VS Code 扩展</span>
-              {this.renderVsixStatusIcon()}
+              <Link to={pages.installer.vsix}>
+                <span className="menu-sub-item-title">{formatMessage({ id: 'env.vsix' })}</span>
+                {this.renderVsixStatusIcon()}
+              </Link>
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.Item key={pages.projects}>
-            <span>开始使用</span>
+            <Link to={pages.projects}>
+              <span>开始使用</span>
+            </Link>
           </Menu.Item>
         </Menu>
       </Layout.Sider>

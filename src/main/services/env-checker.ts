@@ -4,6 +4,8 @@ import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
 
+export const EnvIds = ['gcc', 'gdb', 'python', 'cpplint', 'code'] as SupportedEnvId[];
+
 export enum VSIXId {
   'ms-vscode.cpptools' = 'ms-vscode.cpptools',
   'formulahendry.code-runner' = 'formulahendry.code-runner',
@@ -178,13 +180,18 @@ export async function getEnvironments(force = false) {
   if (!force && environments !== emptyEnvironments) {
     return environments;
   }
-  const [gcc, gdb, python, cpplint, code] = await Promise.all([
-    checkGcc(),
-    isMac ? genNotInstalled() : checkGdb(),
-    checkPython(),
-    checkCpplint(),
-    checkVSCode(),
-  ]);
+  // const [gcc, gdb, python, cpplint, code] = await Promise.all([
+  //   checkGcc(),
+  //   isMac ? genNotInstalled() : checkGdb(),
+  //   checkPython(),
+  //   checkCpplint(),
+  //   checkVSCode(),
+  // ]);
+  const gcc = await checkGcc();
+  const gdb = isMac ? genNotInstalled() : await checkGdb();
+  const python = await checkPython();
+  const cpplint = await checkCpplint();
+  const code = await checkVSCode();
   const environmentResult: IEnvironments = {
     gcc,
     gdb,

@@ -3,6 +3,8 @@ import { spawn as _spawn, execFile as _execFile, PromisifySpawnOptions, Output }
 import { logProcess } from 'common/utils/logger';
 import constants from 'common/configs/constants';
 import sudo from 'sudo-prompt';
+import * as path from 'path';
+import { isMac } from './platform';
 
 const SHELL_TIMEOUT = 20 * 1000;
 
@@ -93,6 +95,7 @@ export async function sudoExec(type: string, cmd: string): Promise<SudoExecResul
       cmd,
       {
         name: constants.appName,
+        icns: isMac ? path.join(__static, 'icon.icns') : undefined,
         ...commonSpawnOptions,
       },
       function (e: Error, stdout: string, stderr: string) {

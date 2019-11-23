@@ -8,3 +8,7 @@ export interface RouteLocation extends H.Location {
 export interface RouteProps extends RouteComponentProps<any> {
   location: RouteLocation;
 }
+
+export interface DispatchProps {
+  dispatch: <A = any, S = any>(action: DvaAction<A>) => S
+}

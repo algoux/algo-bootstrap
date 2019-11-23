@@ -1,4 +1,4 @@
-import { DvaAction, DvaSagaEffect } from '@/utils/dva';
+import { DvaSagaEffect } from '@/utils/dva';
 import sm from '@/utils/modules';
 import { purifyObject } from '@/../common/utils/format';
 
@@ -15,10 +15,10 @@ export default {
   state: genInitialState(),
   reducers: {
     setHasRespack(state: CurrentState, { payload: { hasRespack } }: DvaAction<Pick<CurrentState, 'hasRespack'>>) {
-      state.hasRespack = purifyObject(hasRespack);
+      state.hasRespack = hasRespack;
     },
     setManifest(state: CurrentState, { payload: { manifest } }: DvaAction<Pick<CurrentState, 'manifest'>>) {
-      state.manifest = purifyObject(manifest);
+      state.manifest = manifest;
     },
   },
   effects: {
@@ -35,7 +35,7 @@ export default {
     * getManifest({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
       let manifest: IRespackManifest | null = null;
       try {
-        manifest = yield call(sm.Respack.readLocalManifest);
+        manifest = purifyObject(yield call(sm.Respack.readLocalManifest));
       } catch (e) { }
       yield put({
         type: 'setManifest',

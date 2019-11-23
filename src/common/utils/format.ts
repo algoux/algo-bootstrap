@@ -2,6 +2,8 @@ import UrlAssembler from 'url-assembler';
 import { floor } from 'math-precision';
 import { cloneDeep } from 'lodash';
 import { ChildProcessOutput } from '@/utils/child-process';
+// @ts-ignore
+import filesize from 'filesize';
 
 export interface IUrlFArg {
   param?: object;
@@ -56,6 +58,14 @@ export function formatPercentage(a: number, b: number, precision: number = 2): s
     return Math.pow(10, -prec) + '%';
   }
   return parseFloat(ratio).toFixed(prec) + '%';
+}
+
+/**
+ * Format standard file size
+ * @param size file size in byte
+ */
+export function formatFileSize(size: number) {
+  return filesize(size, { standard: "iec" });
 }
 
 /**

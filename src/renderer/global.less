@@ -95,6 +95,10 @@ p:last-of-type {
 .container {
   margin: 32px 42px 16px;
   padding-bottom: @action-bar-height;
+
+  img {
+    max-width: 100%;
+  }
 }
 
 .center-view {
@@ -140,12 +144,27 @@ p:last-of-type {
   margin-bottom: 12px;
 }
 
+.article {
+  border-top: @divider-border;
+  margin-top: 15px;
+  padding-top: 15px;
+
+  .section-header:not(:first-of-type) {
+    margin-top: 1.5em;
+    // margin-bottom: 1em;
+  }
+}
+
 .color-green {
   color: @color-green !important;
 }
 
 .color-red {
   color: @color-red !important;
+}
+
+.color-secondary {
+  color: @color-secondary !important;
 }
 
 .env-card {

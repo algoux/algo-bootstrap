@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from '@/utils/dva';
 import { DispatchProp } from 'react-redux';
 import router from 'umi/router';
-import pages from '@/configs/pages';
 import { Row, Col } from 'antd';
 import ActionBar from '@/components/ActionBar';
 import ExternalLink from '@/components/ExternalLink';
@@ -13,11 +12,12 @@ import cpplintIcon from '@/assets/icons/lint.svg';
 import vscodeIcon from '@/assets/icons/vscode.svg';
 import vscodeExtensionIcon from '@/assets/icons/vscode-extension.svg';
 import EnvCard from '@/components/EnvCard';
-import { isVsixAllInstalled } from '@/utils/env';
+import { isVsixAllInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { remote } from 'electron';
 import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
 import constants from 'common/configs/constants';
+import { formatMessage } from 'umi-plugin-locale';
 
 export interface IEnvAndRespackProps {
 }
@@ -55,8 +55,12 @@ class EnvAndRespack extends React.Component<Props, State> {
         msg.error(e.msg);
         return;
       }
-      msg.success('资源包导入完成', '点击「开始安装」完成后续步骤。');
+      msg.success('资源包导入完成', '点击「开始安装」完成后续步骤');
     }
+  }
+
+  startInstall = () => {
+    router.push(getNextInstallerItemPage(this.props.environments));
   }
 
   render() {
@@ -73,7 +77,7 @@ class EnvAndRespack extends React.Component<Props, State> {
           <Row gutter={8}>
             <Col {...colProps}>
               <EnvCard
-                name="C/C++"
+                name={formatMessage({ id: 'env.gcc' })}
                 icon={ccppIcon}
                 installed={environments.gcc.installed}
                 version={(environments.gcc as ICheckEnvironmentResultInstalled).version}
@@ -81,7 +85,7 @@ class EnvAndRespack extends React.Component<Props, State> {
             </Col>
             <Col {...colProps}>
               <EnvCard
-                name="Python 支持"
+                name={formatMessage({ id: 'env.python' })}
                 icon={pythonIcon}
                 installed={environments.python.installed}
                 version={(environments.python as ICheckEnvironmentResultInstalled).version}
@@ -89,7 +93,7 @@ class EnvAndRespack extends React.Component<Props, State> {
             </Col>
             <Col {...colProps}>
               <EnvCard
-                name="代码风格检查器"
+                name={formatMessage({ id: 'env.cpplint' })}
                 icon={cpplintIcon}
                 installed={environments.cpplint.installed}
                 version={'cpplint ' + (environments.cpplint as ICheckEnvironmentResultInstalled).version}
@@ -97,7 +101,7 @@ class EnvAndRespack extends React.Component<Props, State> {
             </Col>
             <Col {...colProps}>
               <EnvCard
-                name="VS Code"
+                name={formatMessage({ id: 'env.code' })}
                 icon={vscodeIcon}
                 installed={environments.code.installed}
                 version={(environments.code as ICheckEnvironmentResultInstalled).version}
@@ -105,7 +109,7 @@ class EnvAndRespack extends React.Component<Props, State> {
             </Col>
             <Col {...colProps}>
               <EnvCard
-                name="VS Code 扩展"
+                name={formatMessage({ id: 'env.vsix' })}
                 icon={vscodeExtensionIcon}
                 installed={isVsixAllInstalled(environments)}
               />
@@ -123,7 +127,7 @@ class EnvAndRespack extends React.Component<Props, State> {
             </> :
             <>
               <p>如果要重新下载最新的资源包，请前往 <ExternalLink href="https://acm.sdut.edu.cn">下载资源包</ExternalLink>。</p>
-              <p>现在，向导准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
+              <p>现在，向导已准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
             </>}
 
         </div>
@@ -153,6 +157,7 @@ class EnvAndRespack extends React.Component<Props, State> {
               type: 'primary',
               text: '开始安装',
               disabled: loading,
+              onClick: this.startInstall,
             },
           ]
         }

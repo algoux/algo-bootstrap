@@ -1,3 +1,8 @@
+interface DvaAction<P = any> {
+  type: string;
+  payload: P;
+}
+
 interface IDvaBaseState {
   routing: {
     location: ILocation;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from '@/utils/dva';
-import { DispatchProp } from 'react-redux';
 import Loading from '@/components/Loading';
 import router from 'umi/router';
 import pages from '@/configs/pages';
 import PageAnimation from '@/components/PageAnimation';
+import { DispatchProps } from '@/typings/props';
 
 export interface IIndexProps {
 }
@@ -12,7 +12,7 @@ export interface IIndexProps {
 interface State {
 }
 
-type Props = IIndexProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
+type Props = IIndexProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 class Index extends React.Component<Props, State> {
   constructor(props: Props) {
