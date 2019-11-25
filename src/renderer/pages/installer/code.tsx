@@ -131,7 +131,7 @@ class CodeInstaller extends React.Component<Props, State> {
     if (sm.platform.isWindows) {
       return this.renderWindows();
     } else if (sm.platform.isMac) {
-      return this.renderWindows();
+      return this.renderMac();
     }
     return null;
   }

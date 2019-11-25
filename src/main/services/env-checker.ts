@@ -148,8 +148,8 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   } catch (e) {
     if (isMac) {
       try {
-        const binPath = '/Applications/Visual\\ Studio\\ Code.app/Contents/Resources/app/bin/code';
-        const { stdout, stderr } = await spawn('[checkVSCode]', binPath, ['-v']);
+        const binPath = '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code';
+        const { stdout, stderr } = await spawn('[checkVSCode]', `"${binPath}"`, ['-v']);
         const ver = matchOne(CODE_REG, parseStringFromProcessOutput(stderr || stdout));
         if (ver) {
           return genInstalled(ver, binPath);
