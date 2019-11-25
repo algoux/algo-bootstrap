@@ -32,7 +32,8 @@ class Board extends React.Component<Props, State> {
 
   initializeProject = async () => {
     const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-      properties: ['openDirectory'],
+      properties: ['openDirectory', 'createDirectory'],
+      message: '选择一个文件夹作为项目目录，或者你也可以新建一个空文件夹',
     });
     const projectPath = res.filePaths ? res.filePaths[0] : '';
     if (projectPath) {

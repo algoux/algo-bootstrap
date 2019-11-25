@@ -13,7 +13,7 @@ import { extractAll, getUncompressedSize } from '@/utils/extract';
 import { app } from 'electron';
 import paths from 'common/configs/paths';
 import * as path from 'path';
-import { matchOne } from 'common/utils/regexp';
+import { matchOne, escapeRegExp } from 'common/utils/regexp';
 import { logMain } from 'common/utils/logger';
 import getFolderSize from 'get-folder-size';
 
@@ -27,8 +27,13 @@ export async function refreshWindowsPath() {
   const systemPath = await getWindowsSystemPath() || '';
   const userPath = await getWindowsUserPath() || '';
   const newPath = [...systemPath.split(';').filter(p => !!p), ...userPath.split(';').filter(p => !!p)].join(';');
-  logMain.info('[refreshWindowsPath]', newPath);
-  process.env.PATH = newPath;
+  // 将 PATH 中的变量替换为实际值
+  let parsedPath = newPath.replace(/%(\S)+%/g, match => match.toUpperCase());
+  for (const key of Object.keys(process.env)) {
+    parsedPath = parsedPath.replace(new RegExp(`%${escapeRegExp(key.toUpperCase())}%`, 'g'), process.env[key]!);
+  }
+  logMain.info('[refreshWindowsPath]', parsedPath);
+  process.env.PATH = parsedPath;
 }
 
 export async function installXCodeCLT() {
@@ -69,7 +74,7 @@ export async function installGcc(force = false) {
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
     await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
-    const userPath = await getWindowsUserPath() || '';
+    const userPath = (await getWindowsUserPath()) ?? '%PATH%';
     logMain.info('[installGcc] userPath:', userPath);
     await spawn('[installGcc]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
     await refreshWindowsPath();
@@ -105,8 +110,8 @@ export async function installCpplint(force = false) {
       const installPath = path.join(RESPACK_TEMP_PATH, 'cpplint');
       await extractAll(filePath, installPath);
       // 安装 cpplint
-      // 是 Mac 且是 py2 时，使用 sudo 安装
-      if (isMac && matchOne(/^(\d+)/, py.version) === '2') {
+      // 是 Mac 且是 py2，或是 Windows 时，使用 sudo 安装
+      if ((isMac && matchOne(/^(\d+)/, py.version) === '2') || isWindows) {
         await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`);
       } else {
         await spawn('[installCpplint]', 'python', ['setup.py', 'install'], {

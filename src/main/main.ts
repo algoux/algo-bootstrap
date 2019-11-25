@@ -23,7 +23,7 @@ if (isMac && PATH.search('/usr/local/bin') === -1) {
   process.env.PATH = PATH + ':/usr/local/bin';
 }
 
-logMain.info('[PATH]', process.env.PATH);
+logMain.info('[env]', process.env);
 
 // 将需要共享到渲染进程的模块暴露到 global
 global.modules = _modules;
@@ -104,7 +104,17 @@ type MenuItem = Electron.MenuItemConstructorOptions | Electron.MenuItem;
 
 const menuTemplate: MenuItem[] = [
   {
+    label: '文件',
+    role: 'fileMenu',
+    submenu: [{
+      label: '关闭窗口',
+      accelerator: 'CmdOrCtrl+W',
+      role: 'close',
+    }],
+  },
+  {
     label: '编辑', // Edit
+    role: 'editMenu',
     submenu: [{
       label: '撤销', // Undo
       accelerator: 'CmdOrCtrl+Z',
@@ -248,7 +258,7 @@ if (process.platform === 'darwin') {
 
   // Window menu.
   // @ts-ignore
-  menuTemplate[3].submenu.push({
+  menuTemplate[4].submenu.push({
     type: 'separator',
   }, {
     label: '前置全部窗口', // Bring All to Front

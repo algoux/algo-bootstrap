@@ -5,3 +5,8 @@ export function matchOne(reg: RegExp, str: string) {
   }
   return null;
 }
+
+export function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // $&表示整个被匹配的字符串
+}

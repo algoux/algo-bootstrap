@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -13,6 +13,9 @@
     "productName": "Algo Bootstrap",
     "mac": {
       "category": "public.app-category.developer-tools"
+    },
+    "dmg": {
+      "icon": "build/dmg.icns"
     },
     "win": {
       "target": [
