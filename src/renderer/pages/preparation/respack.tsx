@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from '@/utils/dva';
-import { DispatchProp } from 'react-redux';
 import router from 'umi/router';
 import { Row, Col } from 'antd';
 import ActionBar from '@/components/ActionBar';
@@ -18,6 +17,7 @@ import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
 import constants from 'common/configs/constants';
 import { formatMessage } from 'umi-plugin-locale';
+import { DispatchProps } from '@/typings/props';
 
 export interface IEnvAndRespackProps {
 }
@@ -25,7 +25,7 @@ export interface IEnvAndRespackProps {
 interface State {
 }
 
-type Props = IEnvAndRespackProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
+type Props = IEnvAndRespackProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 class EnvAndRespack extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -44,7 +44,7 @@ class EnvAndRespack extends React.Component<Props, State> {
       logRenderer.info(`[openRespack]`, respackPath);
       const respack = new sm.Respack(respackPath);
       try {
-        await this.props.dispatch!({
+        await this.props.dispatch({
           type: 'respack/importRespack',
           payload: {
             respackPath,
@@ -123,10 +123,10 @@ class EnvAndRespack extends React.Component<Props, State> {
           {!hasRespack ?
             <>
               <p>安装缺失的环境前，你必须导入一个资源包，这样向导才能智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
-              <p>如果没有已存在的资源包，请前往 <ExternalLink href="https://acm.sdut.edu.cn">下载资源包</ExternalLink>。</p>
+              <p>如果没有已存在的资源包，请前往 <ExternalLink href="https://algoux.org/downloads/respack">下载资源包</ExternalLink>。</p>
             </> :
             <>
-              <p>如果要重新下载最新的资源包，请前往 <ExternalLink href="https://acm.sdut.edu.cn">下载资源包</ExternalLink>。</p>
+              <p>如果要重新下载最新的资源包，请前往 <ExternalLink href="https://algoux.org/downloads/respack">下载资源包</ExternalLink>。</p>
               <p>现在，向导已准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
             </>}
 

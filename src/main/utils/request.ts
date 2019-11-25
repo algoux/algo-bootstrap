@@ -70,12 +70,6 @@ async function baseRequest<O = any, PO = O>(url: string, options: AxiosRequestCo
   return data;
 }
 
-function sleep(time: number) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve(), time || 0);
-  });
-}
-
 function get<O = undefined>(url: string) {
   return baseRequest<O>(url);
 }

@@ -17,7 +17,7 @@ function error(message: string, detail?: string) {
     buttons: [],
     type: 'error',
     message,
-    detail: detail === undefined ? '在「菜单 > 调试 > 控制台」中可以获取详细信息' : detail,
+    detail: detail === undefined ? '在「菜单 > 调试 > 打开日志目录」可以查看或发送日志' : detail,
   });
 }
 

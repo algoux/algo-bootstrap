@@ -80,7 +80,7 @@ export async function checkXCodeCLT(): Promise<boolean> {
 
 export async function checkGcc(): Promise<ICheckEnvironmentResult> {
   const GCC_REG = /^gcc version (.*)$/m;
-  const APPLE_CLANG_REG = /^Apple clang version (.*)$/m;
+  const APPLE_CLANG_REG = /version (.*)$/m;
   try {
     if (isMac && !await checkXCodeCLT()) {
       return genNotInstalled();

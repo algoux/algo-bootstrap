@@ -74,6 +74,17 @@ class RootLayout extends React.Component<Props, State> {
     return null;
   }
 
+  renderNavItem = (link: string, text: string, icon: React.ReactNode) => {
+    const inner = <>
+      <span className="menu-sub-item-title">{text}</span>
+      {icon}
+    </>;
+    if (process.env.NODE_ENV === 'development') {
+      return <Link to={link}>{inner}</Link>;
+    }
+    return inner;
+  }
+
   render() {
     const props = this.props;
     const bgStyle = { backgroundColor: sm.platform.isMac ? 'transparent' : 'rgb(227, 229, 231)' };
@@ -105,46 +116,28 @@ class RootLayout extends React.Component<Props, State> {
         >
           <Menu.ItemGroup key="group-0" title="准备">
             <Menu.Item key={pages.preparation.respack}>
-              <Link to={pages.preparation.respack}>
-                <span className="menu-sub-item-title">环境和资源包</span>
-                {this.renderEnvRespackStatusIcon()}
-              </Link>
+              {this.renderNavItem(pages.preparation.respack, '环境和资源包', this.renderEnvRespackStatusIcon())}
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.ItemGroup key="group-1" title="安装开发环境">
             <Menu.Item key={pages.installer.gcc}>
-              <Link to={pages.installer.gcc}>
-                <span className="menu-sub-item-title">{formatMessage({ id: 'env.gcc' })}</span>
-                {this.renderEnvStatusIcon('gcc')}
-              </Link>
+              {this.renderNavItem(pages.installer.gcc, formatMessage({ id: 'env.gcc' }), this.renderEnvStatusIcon('gcc'))}
             </Menu.Item>
             <Menu.Item key={pages.installer.python}>
-              <Link to={pages.installer.python}>
-                <span className="menu-sub-item-title">{formatMessage({ id: 'env.python' })}</span>
-                {this.renderEnvStatusIcon('python')}
-              </Link>
+              {this.renderNavItem(pages.installer.python, formatMessage({ id: 'env.python' }), this.renderEnvStatusIcon('python'))}
             </Menu.Item>
             <Menu.Item key={pages.installer.cpplint}>
-              <Link to={pages.installer.cpplint}>
-                <span className="menu-sub-item-title">{formatMessage({ id: 'env.cpplint' })}</span>
-                {this.renderEnvStatusIcon('cpplint')}
-              </Link>
+              {this.renderNavItem(pages.installer.cpplint, formatMessage({ id: 'env.cpplint' }), this.renderEnvStatusIcon('cpplint'))}
             </Menu.Item>
             <Menu.Item key={pages.installer.code}>
-              <Link to={pages.installer.code}>
-                <span className="menu-sub-item-title">{formatMessage({ id: 'env.code' })}</span>
-                {this.renderEnvStatusIcon('code')}
-              </Link>
+              {this.renderNavItem(pages.installer.code, formatMessage({ id: 'env.code' }), this.renderEnvStatusIcon('code'))}
             </Menu.Item>
             <Menu.Item key={pages.installer.vsix}>
-              <Link to={pages.installer.vsix}>
-                <span className="menu-sub-item-title">{formatMessage({ id: 'env.vsix' })}</span>
-                {this.renderVsixStatusIcon()}
-              </Link>
+              {this.renderNavItem(pages.installer.vsix, formatMessage({ id: 'env.vsix' }), this.renderVsixStatusIcon())}
             </Menu.Item>
           </Menu.ItemGroup>
-          <Menu.Item key={pages.projects}>
-            <Link to={pages.projects}>
+          <Menu.Item key={pages.board}>
+            <Link to={pages.board}>
               <span>开始使用</span>
             </Link>
           </Menu.Item>

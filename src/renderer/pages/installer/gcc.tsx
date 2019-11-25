@@ -113,7 +113,7 @@ class GccInstaller extends React.Component<Props, State> {
 
   installGccMac = async () => {
     try {
-      await this.props.dispatch!({
+      await this.props.dispatch({
         type: 'env/installGcc',
         payload: {},
       });

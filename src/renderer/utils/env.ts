@@ -46,5 +46,5 @@ export function getNextInstallerItemPage(environments: IEnvironments) {
   if (next) {
     return pages.installer[next];
   }
-  return pages.projects;
+  return pages.board;
 }

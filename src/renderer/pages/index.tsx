@@ -5,6 +5,7 @@ import router from 'umi/router';
 import pages from '@/configs/pages';
 import PageAnimation from '@/components/PageAnimation';
 import { DispatchProps } from '@/typings/props';
+import { isAllInstalled } from '@/utils/env';
 
 export interface IIndexProps {
 }
@@ -20,15 +21,19 @@ class Index extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    await this.props.dispatch!({
+    const environments = await this.props.dispatch({
       type: 'env/getEnvironments',
       payload: {},
     });
-    const hasRespack = await this.props.dispatch!({
+    if (isAllInstalled(environments)) {
+      router.push(pages.board);
+      return;
+    }
+    const hasRespack = await this.props.dispatch({
       type: 'respack/getHasRespack',
       payload: {},
     });
-    hasRespack && await this.props.dispatch!({
+    hasRespack && await this.props.dispatch({
       type: 'respack/getManifest',
       payload: {},
     });

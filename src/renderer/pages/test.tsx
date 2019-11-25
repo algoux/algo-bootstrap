@@ -3,7 +3,6 @@ import { connect } from '@/utils/dva';
 
 import { formatMessage } from 'umi-plugin-locale';
 import { Button, Progress } from 'antd';
-import yay from '@/assets/yay.jpg';
 
 import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
@@ -11,11 +10,11 @@ import { remote } from 'electron';
 import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
-import { DispatchProp } from 'react-redux';
 // @ts-ignore
 import filesize from 'filesize';
 import { formatPercentage } from 'common/utils/format';
 import PageAnimation from '@/components/PageAnimation';
+import { DispatchProps } from '@/typings/props';
 
 const { req, Respack } = sm;
 
@@ -31,7 +30,7 @@ interface State {
   projectPath: string;
 }
 
-type Props = ITestProps & ReturnType<typeof mapStateToProps> & DispatchProp<any>;
+type Props = ITestProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 class Test extends React.Component<Props, State> {
   _pollMingwSizeTimer?: NodeJS.Timeout;
@@ -65,7 +64,7 @@ class Test extends React.Component<Props, State> {
   }
 
   getEnvironments = async () => {
-    const env = await this.props.dispatch!({
+    const env = await this.props.dispatch({
       type: 'env/getEnvironments',
       payload: {
         force: true,
@@ -147,7 +146,7 @@ class Test extends React.Component<Props, State> {
         await this.getMingwTotalSize();
         await this.pollMingwUncompressedSize();
       }
-      await this.props.dispatch!({
+      await this.props.dispatch({
         type: 'env/installGcc',
         payload: {},
       });
@@ -164,7 +163,7 @@ class Test extends React.Component<Props, State> {
 
   installPython = async () => {
     try {
-      await this.props.dispatch!({
+      await this.props.dispatch({
         type: 'env/installPython',
         payload: {},
       });
@@ -176,7 +175,7 @@ class Test extends React.Component<Props, State> {
 
   installCpplint = async () => {
     try {
-      await this.props.dispatch!({
+      await this.props.dispatch({
         type: 'env/installCpplint',
         payload: {},
       });
@@ -188,7 +187,7 @@ class Test extends React.Component<Props, State> {
 
   installVSCode = async () => {
     try {
-      await this.props.dispatch!({
+      await this.props.dispatch({
         type: 'env/installVSCode',
         payload: {},
       });
@@ -200,7 +199,7 @@ class Test extends React.Component<Props, State> {
 
   installVsix = async (vsixId: SupportedVSIXId) => {
     try {
-      await this.props.dispatch!({
+      await this.props.dispatch({
         type: 'env/installVsix',
         payload: {
           vsixId,
@@ -279,7 +278,7 @@ class Test extends React.Component<Props, State> {
           <h4>test env: {JSON.stringify(this.props.env.environments)}</h4>
           <h4>test ipc: {this.state.ipc}</h4>
           <h4>test common: {ipcKeys.getResPack}</h4>
-          <h4>test image: <img src={yay} style={{ width: '25px', height: '25px' }} /></h4>
+          {/* <h4>test image: <img src={yay} style={{ width: '25px', height: '25px' }} /></h4> */}
         </div>
       </PageAnimation>
     );

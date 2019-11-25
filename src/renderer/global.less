@@ -144,6 +144,11 @@ p:last-of-type {
   margin-bottom: 12px;
 }
 
+.secondary-title {
+  margin-top: 18px;
+  margin-bottom: 4px;
+}
+
 .article {
   border-top: @divider-border;
   margin-top: 15px;
@@ -195,4 +200,14 @@ p:last-of-type {
     }
   }
 
+}
+
+.list-hover-action {
+  .ant-list-item-action {
+    visibility: hidden;
+  }
+
+  &:hover .ant-list-item-action {
+    visibility: visible;
+  }
 }

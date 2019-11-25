@@ -17,6 +17,7 @@ interface IDvaBaseState {
 interface IDvaModelState {
   env: IEnvState;
   respack: IRespackState;
+  projects: IProjectsState;
 }
 
 type IState = IDvaBaseState & IDvaModelState;
@@ -38,6 +39,16 @@ interface IRespackState {
   manifest: IRespackManifest | null;
 }
 
+interface IProject {
+  id: string;
+  path: string;
+  createdAt: number;
+}
+
+interface IProjectsState {
+  list: IProject[];
+}
+
 type EffectKeys =
   | 'env/getEnvironments'
   | 'env/installGcc'
@@ -48,3 +59,5 @@ type EffectKeys =
   | 'respack/getHasRespack'
   | 'respack/getManifest'
   | 'respack/importRespack'
+  | 'projects/addProject'
+  | 'projects/deleteProject'

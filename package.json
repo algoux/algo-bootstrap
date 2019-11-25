@@ -1,10 +1,12 @@
 {
   "name": "algo-bootstrap",
+  "productName": "Algo Bootstrap",
   "version": "0.1.0",
-  "description": "Bootstrap for algorithm beginners",
+  "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
-    "name": "bLue"
+    "name": "bLue",
+    "url": "https://github.com/dreamerblue"
   },
   "private": true,
   "build": {
@@ -19,14 +21,13 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": true,
       "allowToChangeInstallationDirectory": true
     },
     "directories": {
       "output": "release"
     },
     "appId": "org.algoux.algo-bootstrap",
-    "asar": false
+    "asar": true
   },
   "scripts": {
     "start": "npm run build:main-dev && electron ./dist/main/main.js",
@@ -45,7 +46,8 @@
     "pack:mac": "electron-builder --mac",
     "pack:win": "electron-builder --win",
     "dist": "electron-builder",
-    "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\""
+    "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\"",
+    "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'"
   },
   "keywords": [
     "algorithm",
@@ -54,6 +56,7 @@
   ],
   "dependencies": {
     "axios": "^0.19.0",
+    "compare-versions": "^3.5.1",
     "ejs": "^2.7.1",
     "electron-better-ipc": "^0.6.0",
     "electron-log": "^3.0.8",

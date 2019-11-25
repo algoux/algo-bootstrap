@@ -12,7 +12,7 @@ const pages = {
     code: '/installer/code',
     vsix: '/installer/vsix',
   },
-  projects: '/projects',
+  board: '/board',
   settings: '/settings',
 };
 
