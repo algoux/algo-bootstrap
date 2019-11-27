@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -72,7 +72,7 @@
     "promisify-child-process": "^3.1.1",
     "sha": "^3.0.0",
     "source-map-support": "^0.5.16",
-    "sudo-prompt": "^9.0.0",
+    "sudo-prompt": "^9.1.1",
     "unzipper": "^0.10.5",
     "url-assembler": "^2.1.0"
   },

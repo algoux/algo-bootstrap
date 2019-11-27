@@ -11,11 +11,12 @@ export enum VSIXId {
   'formulahendry.code-runner' = 'formulahendry.code-runner',
   'streetsidesoftware.code-spell-checker' = 'streetsidesoftware.code-spell-checker',
   'mine.cpplint' = 'mine.cpplint',
+  'vadimcn.vscode-lldb' = 'vadimcn.vscode-lldb',
 }
 
 export type SupportedVSIXId = keyof typeof VSIXId;
 
-export const VSIXIds = Object.keys(VSIXId) as SupportedVSIXId[];
+export const VSIXIds = (isMac ? Object.keys(VSIXId) : Object.keys(VSIXId).filter(id => id !== 'vadimcn.vscode-lldb')) as SupportedVSIXId[];
 
 const emptyEnvironments = genEmptyEnvironments();
 
@@ -38,7 +39,7 @@ function genInstalled(
 
 export function genEmptyVSIXMap() {
   const map = {};
-  Object.keys(VSIXId).map(id => {
+  VSIXIds.map(id => {
     map[id] = genNotInstalled();
   });
   return map as Record<SupportedVSIXId, ICheckEnvironmentResult>;
