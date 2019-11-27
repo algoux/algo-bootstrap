@@ -22,13 +22,7 @@
                 "preLaunchTask": "Build (g++)"
             },
             "osx": {
-                "MIMode": "lldb",
-                "externalConsole": true,
-                "logging": {
-                    "trace": true,
-                    "traceResponse": true,
-                    "engineLogging": true
-                },
+                "type": "lldb",
                 "preLaunchTask": "Build (clang++)"
             },
             "linux": {

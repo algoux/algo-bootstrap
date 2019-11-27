@@ -120,7 +120,8 @@ export async function installCpplint(force = false) {
       // 安装 cpplint
       // 是 Mac 且是 py2，或是 Windows 时，使用 sudo 安装
       if ((isMac && matchOne(/^(\d+)/, py.version) === '2') || isWindows) {
-        await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`);
+        // https://github.com/jorangreef/sudo-prompt/issues/116
+        await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`, { env: { PATH: process.env.PATH } });
       } else {
         await spawn('[installCpplint]', 'python', ['setup.py', 'install'], {
           cwd: installPath,

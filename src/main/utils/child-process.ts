@@ -20,9 +20,9 @@ const commonExecFileOptions = {
   windowsHide: true,
 };
 
-const commonSudoExecFileOptions = {
-  encoding: 'utf8',
-  windowsHide: true,
+const commonSudoExecOptions: SudoExecOptions = {
+  name: constants.appName,
+  icns: isMac ? path.join(__static, 'icon.icns') : undefined,
 };
 
 export type SpawnOptions = PromisifySpawnOptions;
@@ -30,6 +30,13 @@ export type ExecFileOptions = _ExecFileOptions;
 export type SpawnOutput = Output;
 export type ExecFileOutput = Output;
 export type ChildProcessOutput = string | Buffer | null | undefined;
+
+export interface SudoExecOptions {
+  name?: string;
+  icns?: string;
+  env?: NodeJS.ProcessEnv;
+}
+
 export interface SudoExecResult {
   stdout: string;
   stderr: string;
@@ -87,18 +94,17 @@ export function execFile(type: string, file: string, args: string[] = [], extraO
   });
 }
 
-export async function sudoExec(type: string, cmd: string): Promise<SudoExecResult> {
+export async function sudoExec(type: string, cmd: string, extraOptions: SudoExecOptions = {}): Promise<SudoExecResult> {
   logProcess.info(type, '[sudoExec.start]', cmd);
   const __start = Date.now();
   return new Promise((resolve, reject) => {
     sudo.exec(
       cmd,
       {
-        name: constants.appName,
-        icns: isMac ? path.join(__static, 'icon.icns') : undefined,
-        ...commonSpawnOptions,
+        ...commonSudoExecOptions,
+        ...extraOptions,
       },
-      function (e: Error, stdout: string, stderr: string) {
+      function (e: string, stdout: string, stderr: string) {
         if (e) {
           logProcess.error(
             type, `[sudoExec.error ${Date.now() - __start + 'ms'}]`, cmd,
