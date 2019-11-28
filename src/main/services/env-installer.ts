@@ -84,6 +84,7 @@ export async function installGcc(force = false) {
     await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
     const userPath = (await getWindowsUserPath()) ?? '%PATH%';
     logMain.info('[installGcc] userPath:', userPath);
+    // TODO 防止重复添加 path
     await spawn('[installGcc]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
     await refreshWindowsPath();
     await getEnvironments(true);
@@ -119,9 +120,11 @@ export async function installCpplint(force = false) {
       await extractAll(filePath, installPath);
       // 安装 cpplint
       // 是 Mac 且是 py2，或是 Windows 时，使用 sudo 安装
-      if ((isMac && matchOne(/^(\d+)/, py.version) === '2') || isWindows) {
+      if (isMac && matchOne(/^(\d+)/, py.version) === '2') {
+        await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`);
+      } else if (isWindows) {
         // https://github.com/jorangreef/sudo-prompt/issues/116
-        await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`, { env: { PATH: process.env.PATH } });
+        await sudoExec('[installCpplint]', `cd /d "${installPath}" && python setup.py install`, { env: { PATH: process.env.PATH } });
       } else {
         await spawn('[installCpplint]', 'python', ['setup.py', 'install'], {
           cwd: installPath,

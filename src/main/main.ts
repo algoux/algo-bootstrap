@@ -6,12 +6,13 @@ import ipcKeys from 'common/configs/ipc';
 import _modules from '@/modules';
 import { getEnvironments } from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
-import { isMac } from './utils/platform';
+import { isMac } from '@/utils/platform';
 import constants from 'common/configs/constants';
-import req from './utils/request';
+import req from '@/utils/request';
 import api from 'common/configs/apis';
 import compareVersions from 'compare-versions';
 import log from 'electron-log';
+import { currentPlatform } from '@/utils/platform';
 
 logMain.info('[app.start]');
 // if (module.hot) {
@@ -273,13 +274,28 @@ if (process.platform === 'win32') {
   addUpdateMenuItems(helpMenu, 0);
 }
 
-app.on('ready', () => {
-  // @ts-ignore
-  const menu = Menu.buildFromTemplate(menuTemplate);
-  Menu.setApplicationMenu(menu);
-  createWindow();
-  checkUpdate(true);
-});
+// app start
+
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, _commandLine, _workingDirectory) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    }
+  });
+
+  app.on('ready', () => {
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
+    createWindow();
+    checkUpdate(true);
+  });
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -315,14 +331,15 @@ ipcMain.answerRenderer(ipcKeys.getResPack, async (param) => {
 
 async function checkUpdate(auto = false) {
   try {
-    const res: { version: string, url: string } = await req.get(api.version);
+    const res: ICheckAppVersion = await req.get(api.version);
     logMain.info('[checkUpdate]', res);
-    if (compareVersions.compare(app.getVersion(), res.version, '<')) {
+    const versionInfo: ICheckVersionInfo = res[currentPlatform];
+    if (compareVersions.compare(app.getVersion(), versionInfo.version, '<')) {
       const okText = isMac ? '好' : '确定';
       let clicked: Electron.MessageBoxReturnValue;
       const options = {
         type: 'info',
-        message: `检查到新版本：${res.version}`,
+        message: `检查到新版本：${versionInfo.version}`,
         detail: `点击「${okText}」前往下载`,
         buttons: [okText, '取消'],
         defaultId: 0,
@@ -334,7 +351,7 @@ async function checkUpdate(auto = false) {
         clicked = await dialog.showMessageBox(options);
       }
       if (clicked?.response === 0) {
-        shell.openExternal(res.url);
+        shell.openExternal(versionInfo.url);
       }
     } else if (!auto) {
       const options = {

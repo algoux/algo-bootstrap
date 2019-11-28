@@ -50,3 +50,13 @@ interface IRespackManifest {
   platform: SupportedPlatform;
   files: IRespackManifestFile[];
 }
+
+interface ICheckVersionInfo {
+  version: string;
+  url: string;
+}
+
+interface ICheckAppVersion {
+  win32: ICheckVersionInfo;
+  darwin: ICheckVersionInfo;
+}

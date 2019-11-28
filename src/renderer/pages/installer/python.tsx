@@ -11,6 +11,7 @@ import windowsStep_2 from '@/assets/guides/python/python-win32-light-step-2.png'
 import windowsStep_3 from '@/assets/guides/python/python-win32-light-step-3.png';
 import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
+import { windowProgress } from '@/utils/native';
 
 export interface IPythonInstallerProps {
 }
@@ -47,14 +48,17 @@ class PythonInstaller extends React.Component<Props, State> {
       return;
     }
     try {
+      windowProgress.start();
       const environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installPython',
         payload: {},
       });
+      windowProgress.end();
       if (isEnvInstalled(environments, 'python')) {
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
+      windowProgress.end();
       logRenderer.error(`[installPython]`, e);
       msg.error('安装环境失败');
     }

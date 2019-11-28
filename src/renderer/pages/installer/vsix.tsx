@@ -8,6 +8,7 @@ import { formatMessage } from 'umi-plugin-locale';
 import { getNextInstallerItemPage, isVsixAllInstalled } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import sm from '@/utils/modules';
+import { windowProgress } from '@/utils/native';
 
 export interface IVsixInstallerProps {
 }
@@ -62,6 +63,7 @@ class VsixInstaller extends React.Component<Props, State> {
     }
     let environments: IEnvironments | undefined;
     try {
+      windowProgress.start();
       for (let i = 0; i < sm.envChecker.VSIXIds.length; ++i) {
         const vsixId = sm.envChecker.VSIXIds[i];
         this.setState({
@@ -70,10 +72,12 @@ class VsixInstaller extends React.Component<Props, State> {
         });
         environments = await this.installVsix(vsixId);
       }
+      windowProgress.end();
       if (environments && isVsixAllInstalled(environments)) {
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
+      windowProgress.end();
       logRenderer.error(`[installAllVsix]`, e);
       msg.error('安装环境失败');
     }

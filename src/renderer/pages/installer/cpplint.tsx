@@ -7,6 +7,7 @@ import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
+import { windowProgress } from '@/utils/native';
 
 export interface ICpplintInstallerProps {
 }
@@ -44,14 +45,17 @@ class CpplintInstaller extends React.Component<Props, State> {
       return;
     }
     try {
+      windowProgress.start();
       const environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installCpplint',
         payload: {},
       });
+      windowProgress.end();
       if (isEnvInstalled(environments, 'cpplint')) {
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
+      windowProgress.end();
       logRenderer.error(`[installCpplint]`, e);
       msg.error('安装环境失败');
     }
