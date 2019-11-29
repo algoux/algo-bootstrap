@@ -15,6 +15,7 @@ import log from 'electron-log';
 import { currentPlatform } from '@/utils/platform';
 
 logMain.info('[app.start]');
+logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
 // if (module.hot) {
 //   module.hot.accept();
 // }

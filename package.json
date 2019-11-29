@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -48,6 +48,7 @@
     "pack:dir": "electron-builder --dir",
     "pack:mac": "electron-builder --mac",
     "pack:win": "electron-builder --win",
+    "pack": "electron-builder -mw",
     "dist": "electron-builder",
     "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\"",
     "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'"

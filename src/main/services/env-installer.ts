@@ -20,6 +20,14 @@ import getFolderSize from 'get-folder-size';
 const RESPACK_PATH = path.join(app.getPath('userData'), paths.respack);
 const RESPACK_TEMP_PATH = path.join(app.getPath('userData'), paths.respackTemp);
 
+export async function appendToWindowsUserPath(PATH: string) {
+  logMain.info('[appendToWindowsUserPath] PATH to append:', PATH);
+  const userPath = (await getWindowsUserPath()) ?? '%PATH%';
+  // TODO 防止重复添加 path。已添加则返回 false
+  await spawn('[appendToWindowsUserPath]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${PATH}"`]);
+  return true;
+}
+
 export async function refreshWindowsPath() {
   if (!isWindows) {
     return;
@@ -27,10 +35,11 @@ export async function refreshWindowsPath() {
   const systemPath = await getWindowsSystemPath();
   const userPath = await getWindowsUserPath();
   if (systemPath === null || userPath === null) {
-    // 目前仅在 gcc、python、vscode 安装完毕后用到刷新 PATH
+    // 目前仅在 gcc、python、cpplint、vscode 安装完毕后用到刷新 PATH
     // 而环境一旦安装成功，user PATH 一定不为空，且 system PATH 始终不为空
     // 因此若有 system/user PATH 获取失败，要么是 reg 命令挂掉，要么是确实没有 PATH 这个环境变量。后者已经在上文分析，可排除
     // 这种情况可认为是意外导致 reg 挂掉，为防止刷新环境错误，这里抛错且不更新 PATH
+    // TODO 考虑部分环境用户已配置在系统变量的情况
     logMain.error('[refreshWindowsPath] system or user path is null');
     throw Error('system or user path is null');
   }
@@ -82,11 +91,7 @@ export async function installGcc(force = false) {
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
     await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
-    const userPath = (await getWindowsUserPath()) ?? '%PATH%';
-    logMain.info('[installGcc] userPath:', userPath);
-    // TODO 防止重复添加 path
-    await spawn('[installGcc]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${installPath}\\bin"`]);
-    await refreshWindowsPath();
+    await appendToWindowsUserPath(`${installPath}\\bin`) && await refreshWindowsPath();
     await getEnvironments(true);
   }
 }
@@ -124,7 +129,13 @@ export async function installCpplint(force = false) {
         await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`);
       } else if (isWindows) {
         // https://github.com/jorangreef/sudo-prompt/issues/116
-        await sudoExec('[installCpplint]', `cd /d "${installPath}" && python setup.py install`, { env: { PATH: process.env.PATH } });
+        const { stdout, stderr } = await sudoExec('[installCpplint]', `cd /d "${installPath}" && python setup.py install`, {
+          env: { PATH: process.env.PATH },
+        });
+        const pythonScriptPath = matchOne(/^Installing cpplint.exe script to (.*)/m, stdout || stderr);
+        if (pythonScriptPath) {
+          await appendToWindowsUserPath(pythonScriptPath) && await refreshWindowsPath();
+        }
       } else {
         await spawn('[installCpplint]', 'python', ['setup.py', 'install'], {
           cwd: installPath,
