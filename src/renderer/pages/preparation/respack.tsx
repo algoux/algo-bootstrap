@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from '@/utils/dva';
 import router from 'umi/router';
-import { Row, Col } from 'antd';
+import { Row, Col, Progress } from 'antd';
 import ActionBar from '@/components/ActionBar';
 import ExternalLink from '@/components/ExternalLink';
 import sm from '@/utils/modules';
@@ -18,11 +18,23 @@ import msg from '@/utils/msg';
 import constants from 'common/configs/constants';
 import { formatMessage } from 'umi-plugin-locale';
 import { DispatchProps } from '@/typings/props';
+import { ipcRenderer as ipc } from 'electron-better-ipc';
+import ipcKeys from 'common/configs/ipc';
+import paths from 'common/configs/paths';
+import * as path from 'path';
+import { formatFileSize, formatPercentage } from 'common/utils/format';
+
+const RESPACK_DOWNLOAD_PATH = path.join(remote.app.getPath('userData'), paths.respackDownload);
 
 export interface IEnvAndRespackProps {
 }
 
 interface State {
+  downloadTaskId: number;
+  downloading: boolean;
+  receivedSize: number;
+  totalSize: number;
+  speed: number;
 }
 
 type Props = IEnvAndRespackProps & ReturnType<typeof mapStateToProps> & DispatchProps;
@@ -30,6 +42,71 @@ type Props = IEnvAndRespackProps & ReturnType<typeof mapStateToProps> & Dispatch
 class EnvAndRespack extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      downloadTaskId: 0,
+      downloading: false,
+      receivedSize: 0,
+      totalSize: 0,
+      speed: 0,
+    };
+  }
+
+  componentDidMount() {
+    ipc.answerMain(ipcKeys.downloadProgress, async (res) => {
+      if (res.downloadTaskId === this.state.downloadTaskId) {
+        this.setState({
+          receivedSize: res.received,
+          totalSize: res.total,
+          speed: res.speed,
+        });
+      }
+    });
+    ipc.answerMain(ipcKeys.downloadDone, async (res) => {
+      if (res.downloadTaskId === this.state.downloadTaskId) {
+        this.setState({
+          downloading: false,
+        });
+        const respackPath = path.join(RESPACK_DOWNLOAD_PATH, res.filename);
+        console.log('filepath', respackPath);
+        this.importRespack(respackPath);
+      }
+    });
+    ipc.answerMain(ipcKeys.downloadError, async (res) => {
+      if (res.downloadTaskId === this.state.downloadTaskId) {
+        this.setState({
+          downloading: false,
+        });
+      }
+    });
+  }
+
+  downloadRespack = async () => {
+    let downloadUrl = '';
+    try {
+      const versionInfo = await this.props.dispatch<{}, ICheckVersionInfo>({
+        type: 'respack/getOnlineRespackVersion',
+        payload: {},
+      });
+      logRenderer.info('[downloadRespack] version:', versionInfo);
+      downloadUrl = versionInfo.url;
+    } catch (e) {
+      logRenderer.error('[downloadRespack] error:', e);
+      msg.error('查询资源包版本失败');
+    }
+    if (downloadUrl) {
+      const downloadTaskId = await ipc.callMain(ipcKeys.download, {
+        url: downloadUrl,
+        directory: RESPACK_DOWNLOAD_PATH,
+        clearDir: true,
+        errorTitle: '下载失败',
+        errorMessage: '无法完成下载，因为网络错误',
+        showBadge: false,
+      });
+      this.setState({
+        downloadTaskId,
+        downloading: true,
+      });
+    }
   }
 
   openRespack = async () => {
@@ -40,31 +117,46 @@ class EnvAndRespack extends React.Component<Props, State> {
       ],
     });
     const respackPath = res.filePaths ? res.filePaths[0] : '';
-    if (respackPath) {
-      logRenderer.info(`[openRespack]`, respackPath);
-      const respack = new sm.Respack(respackPath);
-      try {
-        await this.props.dispatch({
-          type: 'respack/importRespack',
-          payload: {
-            respackPath,
-          },
-        });
-      } catch (e) {
-        logRenderer.error(`[openRespack] load and validate failed:`, e);
-        msg.error(e.msg);
-        return;
-      }
-      msg.success('资源包导入完成', '点击「开始安装」完成后续步骤');
+    this.importRespack(respackPath);
+  }
+
+  importRespack = async (respackPath: string) => {
+    if (!respackPath) {
+      return;
     }
+    logRenderer.info(`[openRespack]`, respackPath);
+    try {
+      await this.props.dispatch({
+        type: 'respack/importRespack',
+        payload: {
+          respackPath,
+        },
+      });
+    } catch (e) {
+      logRenderer.error(`[openRespack] load and validate failed:`, e);
+      msg.error(e.msg);
+      return;
+    }
+    msg.success('资源包导入完成', '点击「开始安装」完成后续步骤');
   }
 
   startInstall = () => {
     router.push(getNextInstallerItemPage(this.props.environments));
   }
 
+  renderDownloadInfo = () => {
+    const state = this.state;
+    const received = formatFileSize(state.receivedSize);
+    const total = formatFileSize(state.totalSize);
+    const percent = formatPercentage(state.receivedSize, state.totalSize);
+    const speed = formatFileSize(state.speed);
+    return `${received} / ${total} (${percent})，当前速度：${speed}/s`;
+  }
+
   render() {
-    const { environments, hasRespack, manifest, loading } = this.props;
+    const { environments, hasRespack, manifest, importLoading: importing, getOnlineVersionloading } = this.props;
+    const { receivedSize, totalSize } = this.state;
+    const downloading = getOnlineVersionloading || this.state.downloading;
     const colProps = {
       className: '--mt-sm --mb-sm',
       md: 12,
@@ -119,44 +211,65 @@ class EnvAndRespack extends React.Component<Props, State> {
 
         <div className="content-block">
           <h1 className="top-title">资源包</h1>
-          <p>资源包囊括了所有必要的安装文件。</p>
-          {!hasRespack ?
+          {downloading ? <>
+            <Progress percent={receivedSize / totalSize * 100} status="active" showInfo={false} />
+            <p>正在下载资源包：{this.renderDownloadInfo()}</p>
+          </> : (!hasRespack ?
             <>
+              <p>资源包囊括了所有必要的安装文件。</p>
               <p>安装缺失的环境前，你必须导入一个资源包，这样向导才能智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
-              <p>如果没有已存在的资源包，请前往 <ExternalLink href="https://algoux.org/downloads/respack">下载资源包</ExternalLink>。</p>
+              <p>如果没有已存在的资源包，请点击「下载资源包」或 <ExternalLink href="https://algoux.org/downloads/respack">手动下载</ExternalLink> 并导入。</p>
             </> :
             <>
-              <p>如果要重新下载最新的资源包，请前往 <ExternalLink href="https://algoux.org/downloads/respack">下载资源包</ExternalLink>。</p>
+              <p>资源包已就绪。如要重新下载最新的资源包，请点击「下载资源包」或 <ExternalLink href="https://algoux.org/downloads/respack">手动下载</ExternalLink> 并导入。</p>
               <p>现在，向导已准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
-            </>}
+            </>)}
 
         </div>
       </div>
       <ActionBar
-        info={hasRespack && manifest ? <p>已导入资源包：版本 {manifest.version}</p> : null}
+        info={hasRespack && manifest ? <p>已导入资源包：v{manifest.version}</p> : null}
         actions={!hasRespack ?
           [
             {
               key: 'chooseRespack',
-              type: 'primary',
+              type: 'ghost',
               text: '导入资源包',
-              loading,
+              loading: importing,
+              disabled: downloading,
               onClick: this.openRespack,
+            },
+            {
+              key: 'downloadRespack',
+              type: 'primary',
+              text: '下载资源包',
+              loading: downloading,
+              disabled: importing,
+              onClick: this.downloadRespack,
             },
           ] :
           [
             {
               key: 'reChooseRespack',
               type: 'ghost',
-              text: '重新导入资源包',
-              loading,
+              text: '导入资源包',
+              loading: importing,
+              disabled: downloading,
               onClick: this.openRespack,
+            },
+            {
+              key: 'reDownloadRespack',
+              type: 'ghost',
+              text: '下载资源包',
+              loading: downloading,
+              disabled: importing,
+              onClick: this.downloadRespack,
             },
             {
               key: 'startInstall',
               type: 'primary',
               text: '开始安装',
-              disabled: loading,
+              disabled: downloading || importing,
               onClick: this.startInstall,
             },
           ]
@@ -172,7 +285,8 @@ function mapStateToProps(state: IState) {
     environments: state.env.environments,
     hasRespack: state.respack.hasRespack,
     manifest: state.respack.manifest,
-    loading: !!state.loading.effects['respack/importRespack'],
+    importLoading: !!state.loading.effects['respack/importRespack'],
+    getOnlineVersionloading: !!state.loading.effects['respack/getOnlineRespackVersion'],
   };
 }
 

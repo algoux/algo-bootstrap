@@ -7,6 +7,7 @@ import paths from 'common/configs/paths';
 import fs from 'fs-extra';
 import { loadOne, extractAll } from '@/utils/extract';
 import * as path from 'path';
+import { currentPlatform } from '@/utils/platform';
 
 interface IRespackCheckResult {
   _id: string;
@@ -58,6 +59,12 @@ export default class Respack {
       return res;
     }
     throw new Error(`Resource {prefix: "${prefix}", id: "${id}"} not found in manifest`);
+  }
+
+  public static async getOnlineVersion(): Promise<ICheckVersionInfo> {
+    const versionInfo = await req.get<ICheckRespackVersion>(api.respack.version);
+    logMain.info('[Respack] [getOnlineVersion]', versionInfo);
+    return versionInfo[currentPlatform];
   }
 
 

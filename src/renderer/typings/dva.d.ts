@@ -59,5 +59,6 @@ type EffectKeys =
   | 'respack/getHasRespack'
   | 'respack/getManifest'
   | 'respack/importRespack'
+  | 'respack/getOnlineRespackVersion'
   | 'projects/addProject'
   | 'projects/deleteProject'

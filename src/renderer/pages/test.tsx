@@ -28,6 +28,7 @@ interface State {
   mingwTotalSize: number;
   mingwUncompressedSize: number;
   projectPath: string;
+  downloadTaskId: number;
 }
 
 type Props = ITestProps & ReturnType<typeof mapStateToProps> & DispatchProps;
@@ -44,6 +45,7 @@ class Test extends React.Component<Props, State> {
       mingwTotalSize: 0,
       mingwUncompressedSize: 0,
       projectPath: '',
+      downloadTaskId: 0,
     };
   }
 
@@ -55,10 +57,26 @@ class Test extends React.Component<Props, State> {
     // ipc.send('get-emoji', 'unicorn');
     // this.testIpc();
     // this.testRemoteGlobal();
+    ipc.answerMain(ipcKeys.downloadProgress, async (res) => {
+      console.log('on progress', this.state.downloadTaskId, res.downloadTaskId);
+      if (res.downloadTaskId === this.state.downloadTaskId) {
+        console.log('download progress:', res);
+      }
+    });
+    ipc.answerMain(ipcKeys.downloadDone, async (res) => {
+      if (res.downloadTaskId === this.state.downloadTaskId) {
+        console.log('下载完成', res);
+      }
+    });
+    ipc.answerMain(ipcKeys.downloadError, async (res) => {
+      if (res.downloadTaskId === this.state.downloadTaskId) {
+        console.log('下载失败', res);
+      }
+    });
   }
 
   testIpc = async () => {
-    const ret = await ipc.callMain<string>(ipcKeys.getResPack, 'wa') as string;
+    const ret = await ipc.callMain(ipcKeys.getResPack, 'wa');
     console.log('ipc ret:', ret);
     this.setState({ ipc: JSON.stringify(ret) });
   }
@@ -248,6 +266,20 @@ class Test extends React.Component<Props, State> {
     }
   }
 
+  testDownload = async () => {
+    const downloadTaskId = await ipc.callMain(ipcKeys.download, {
+      url: 'https://algoux.org/downloads/respack/ab-fullpack-darwin-1911270.respack',
+      // url: 'http://localhost:9009/algo-bootstrap-static/respack/ab-fullpack-darwin-1911270.respack',
+      errorTitle: '下载失败',
+      errorMessage: '无法完成下载，因为网络错误',
+      showBadge: false,
+    });
+    console.log('!!downloadTaskId:', downloadTaskId);
+    this.setState({
+      downloadTaskId,
+    });
+  }
+
   render() {
     return (
       <PageAnimation>
@@ -255,6 +287,8 @@ class Test extends React.Component<Props, State> {
           <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
           {/* TODO 允许自定义向导名称，影响 renderer 和 sudo prompt */}
           <p>接下来，向导将指引你完成安装和配置。</p>
+          <Button style={{ marginTop: '20px' }} onClick={this.testDownload}>下载</Button>
+          <br />
           <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>检查环境</Button>
           {/* <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button> */}
           <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>

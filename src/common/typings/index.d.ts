@@ -60,3 +60,8 @@ interface ICheckAppVersion {
   win32: ICheckVersionInfo;
   darwin: ICheckVersionInfo;
 }
+
+interface ICheckRespackVersion {
+  win32: ICheckVersionInfo;
+  darwin: ICheckVersionInfo;
+}

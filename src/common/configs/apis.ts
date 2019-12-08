@@ -8,6 +8,7 @@ const api = {
   respack: {
     info: BASE_URL + '/respack/checksum',
     download: BASE_URL + '/respack',
+    version: BASE_URL + '/respack/version.json',
   },
 };
 

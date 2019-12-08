@@ -71,5 +71,9 @@ export default {
         payload: {},
       });
     },
+    * getOnlineRespackVersion({ payload: {} }: DvaAction<{}>, { call }: DvaSagaEffect) {
+      const versionInfo = yield call(sm.Respack.getOnlineVersion);
+      return versionInfo;
+    },
   },
 };

@@ -21,6 +21,8 @@ class Index extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
+    // router.push(pages.test);
+    // return;
     const environments = await this.props.dispatch({
       type: 'env/getEnvironments',
       payload: {},

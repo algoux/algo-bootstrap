@@ -1,4 +1,5 @@
 /// <reference path="../../common/typings/index.d.ts" />
+/// <reference path="../../common/typings/ipc.d.ts" />
 
 declare module '*.css';
 declare module '*.less';
