@@ -33,7 +33,7 @@ class Board extends React.Component<Props, State> {
   initializeProject = async () => {
     const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
       properties: ['openDirectory', 'createDirectory'],
-      message: '选择一个文件夹作为项目目录，或者你也可以新建一个空文件夹',
+      message: '选择一个文件夹作为项目目录，你也可以新建一个空文件夹',
     });
     const projectPath = res.filePaths ? res.filePaths[0] : '';
     if (projectPath) {
@@ -47,6 +47,8 @@ class Board extends React.Component<Props, State> {
         if (init) {
           logRenderer.info('[initializeProject]', projectPath);
           await sm.vsc.genProjectFiles(projectPath);
+        } else {
+          return null;
         }
         return projectPath;
       } catch (e) {
@@ -57,7 +59,7 @@ class Board extends React.Component<Props, State> {
     return null;
   }
 
-  openProject = async (projectPath: string) => {
+  openTargetProject = async (projectPath: string) => {
     try {
       logRenderer.info('[openProject]', projectPath);
       projectPath && await sm.vsc.openProject(projectPath);
@@ -78,7 +80,25 @@ class Board extends React.Component<Props, State> {
           createdAt: Date.now(),
         },
       });
-      await this.openProject(projectPath);
+      await this.openTargetProject(projectPath);
+    }
+  }
+
+  openProject = async () => {
+    const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    const projectPath = res.filePaths ? res.filePaths[0] : '';
+    if (projectPath) {
+      this.props.dispatch({
+        type: 'projects/addProject',
+        payload: {
+          id: projectPath,
+          path: projectPath,
+          createdAt: Date.now(),
+        },
+      });
+      await this.openTargetProject(projectPath);
     }
   }
 
@@ -102,11 +122,12 @@ class Board extends React.Component<Props, State> {
     };
 
     return <PageAnimation>
-      <div className="container">
+      <div className="container no-action-bar">
         <div className="content-block">
           <h1 className="top-title">开始使用</h1>
           <h2 className="secondary-title">项目</h2>
-          <a onClick={this.newProject}>新建项目...</a>
+          <p className="--mb-xs"><a onClick={this.newProject}>新建或初始化旧项目...</a></p>
+          <p className="--mb-xs"><a onClick={this.openProject}>打开项目...</a></p>
           <List
             size="small"
             split={false}
@@ -117,12 +138,12 @@ class Board extends React.Component<Props, State> {
               style={{ paddingTop: '2px', paddingBottom: '0' }}
               actions={[<a onClick={() => this.deleteProject(project.id)}><Icon type="delete" /></a>]}
             >
-              <a onClick={() => this.openProject(project.path)}>{path.basename(project.path)}</a>
+              <a onClick={() => this.openTargetProject(project.path)}>{path.basename(project.path)}</a>
               <span className="--ml-md-lg --user-select-text">{project.path}</span>
             </List.Item>}
           />
           <h2 className="secondary-title">帮助</h2>
-          <p className="--mb-xs"><ExternalLink href="https://dreamer.blue/blog">使用 VS Code 调试 C 语言程序（还没写，点了也没用）</ExternalLink></p>
+          <p className="--mb-xs"><ExternalLink href="https://ab.algoux.org/docs/get_started/">VS Code 使用指南</ExternalLink></p>
           <h2 className="secondary-title">探索</h2>
           {/* <Row gutter={8}>
             <Col {...colProps}><ExternalLink href="https://acm.sdut.edu.cn/">SDUT OJ</ExternalLink></Col>

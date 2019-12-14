@@ -74,10 +74,10 @@ class RootLayout extends React.Component<Props, State> {
     return null;
   }
 
-  renderNavItem = (link: string, text: string, icon: React.ReactNode) => {
+  renderNavItem = (link: string, text: string, icon?: React.ReactNode) => {
     const inner = <>
       <span className="menu-sub-item-title">{text}</span>
-      {icon}
+      {icon ? icon : null}
     </>;
     if (process.env.NODE_ENV === 'development') {
       return <Link to={link}>{inner}</Link>;
@@ -137,9 +137,7 @@ class RootLayout extends React.Component<Props, State> {
             </Menu.Item>
           </Menu.ItemGroup>
           <Menu.Item key={pages.board}>
-            <Link to={pages.board}>
-              <span>开始使用</span>
-            </Link>
+            {this.renderNavItem(pages.board, '开始使用')}
           </Menu.Item>
         </Menu>
       </Layout.Sider>

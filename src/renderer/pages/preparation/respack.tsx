@@ -153,6 +153,10 @@ class EnvAndRespack extends React.Component<Props, State> {
     return `${received} / ${total} (${percent})，当前速度：${speed}/s`;
   }
 
+  renderRespackLink = () => {
+    return <ExternalLink href="https://ab.algoux.org/#respack">手动下载</ExternalLink>;
+  }
+
   render() {
     const { environments, hasRespack, manifest, importLoading: importing, getOnlineVersionloading } = this.props;
     const { receivedSize, totalSize } = this.state;
@@ -218,10 +222,10 @@ class EnvAndRespack extends React.Component<Props, State> {
             <>
               <p>资源包囊括了所有必要的安装文件。</p>
               <p>安装缺失的环境前，你必须导入一个资源包，这样向导才能智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
-              <p>如果没有已存在的资源包，请点击「下载资源包」或 <ExternalLink href="https://algoux.org/downloads/respack">手动下载</ExternalLink> 并导入。</p>
+              <p>如果没有已存在的资源包，请点击「下载资源包」或 {this.renderRespackLink()} 并导入。</p>
             </> :
             <>
-              <p>资源包已就绪。如要重新下载最新的资源包，请点击「下载资源包」或 <ExternalLink href="https://algoux.org/downloads/respack">手动下载</ExternalLink> 并导入。</p>
+              <p>资源包已就绪。如要重新下载最新的资源包，请点击「下载资源包」或 {this.renderRespackLink()} 并导入。</p>
               <p>现在，向导已准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
             </>)}
 

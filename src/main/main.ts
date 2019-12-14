@@ -204,12 +204,25 @@ const menuTemplate: MenuItem[] = [
   {
     label: '帮助', // 帮助
     role: 'help',
-    submenu: [{
-      label: 'Algo Bootstrap 帮助',
-      click: () => {
-        shell.openExternal('https://algoux.org');
-      }
-    }]
+    submenu: [
+      {
+        label: 'Algo Bootstrap 官方网站',
+        click: () => {
+          shell.openExternal('https://ab.algoux.org');
+        },
+      },
+      {
+        label: '加入 QQ 群聊',
+        click: (_item, focusedWindow) => {
+          const options = {
+            type: 'info',
+            message: '加入 QQ 群聊',
+            detail: '搜索群号码 445813999 以加入',
+          };
+          dialog.showMessageBox(focusedWindow || null, options);
+        }
+      },
+    ]
   }];
 
 function addUpdateMenuItems(items, position) {

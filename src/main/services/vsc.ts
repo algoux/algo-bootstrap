@@ -6,6 +6,7 @@ import ejs from 'ejs';
 import { getEnvironments, isEnvInstalled, getEnvironment } from './env-checker';
 import { isWindows, isMac, isLinux, Platform } from '@/utils/platform';
 import { spawn } from '@/utils/child-process';
+import { app } from 'electron';
 
 export async function isDirEmpty(dirPath: string) {
   const dirFiles = await fs.readdir(dirPath);
@@ -31,6 +32,7 @@ async function genTmplData() {
     throw Error('cpplint not installed');
   }
   const data = {
+    appVersion: app.getVersion(),
     gccPath: {
       [Platform.win32]: fmt(isWindows ? environments.gcc.path : undefined, 'C:\\MinGW64\\bin\\g++.exe'),
       [Platform.darwin]: fmt(isMac ? environments.gcc.path : undefined, '/usr/bin/gcc'),
