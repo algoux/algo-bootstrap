@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -65,6 +65,7 @@
     "electron-better-ipc": "^0.6.0",
     "electron-dl": "^2.0.0",
     "electron-log": "^3.0.8",
+    "electron-store": "^5.1.0",
     "filesize": "^6.0.0",
     "fs-extra": "^8.1.0",
     "get-folder-size": "^2.0.1",
@@ -75,8 +76,11 @@
     "sha": "^3.0.0",
     "source-map-support": "^0.5.16",
     "sudo-prompt": "^9.1.1",
+    "universal-analytics": "^0.4.20",
     "unzipper": "^0.10.5",
-    "url-assembler": "^2.1.0"
+    "url-assembler": "^2.1.0",
+    "useragent-generator": "^1.1.1-amkt-22079-finish.0",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.9",
@@ -89,8 +93,10 @@
     "@types/react-redux": "^5.0.21",
     "@types/redux-logger": "^3.0.7",
     "@types/sha": "^3.0.0",
+    "@types/universal-analytics": "^0.4.3",
     "@types/unzipper": "^0.10.0",
     "@types/url-assembler": "^1.2.1",
+    "@types/uuid": "^3.4.6",
     "antd": "3.11.6",
     "awesome-typescript-loader": "^5.2.1",
     "classnames": "^2.2.6",

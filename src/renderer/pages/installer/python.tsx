@@ -48,6 +48,7 @@ class PythonInstaller extends React.Component<Props, State> {
       return;
     }
     try {
+      const _startAt = Date.now();
       windowProgress.start();
       const environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installPython',
@@ -55,12 +56,14 @@ class PythonInstaller extends React.Component<Props, State> {
       });
       windowProgress.end();
       if (isEnvInstalled(environments, 'python')) {
+        sm.track.timing('install', 'python', Date.now() - _startAt);
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installPython]`, e);
       msg.error('安装环境失败');
+      sm.track.event('install', 'error', 'python', 1);
     }
   }
 

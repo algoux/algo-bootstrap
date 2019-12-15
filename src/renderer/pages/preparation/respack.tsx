@@ -67,8 +67,8 @@ class EnvAndRespack extends React.Component<Props, State> {
           downloading: false,
         });
         const respackPath = path.join(RESPACK_DOWNLOAD_PATH, res.filename);
-        console.log('filepath', respackPath);
         this.importRespack(respackPath);
+        sm.track.timing('download', 'done', res.time);
       }
     });
     ipc.answerMain(ipcKeys.downloadError, async (res) => {
@@ -76,6 +76,7 @@ class EnvAndRespack extends React.Component<Props, State> {
         this.setState({
           downloading: false,
         });
+        sm.track.event('download', 'error');
       }
     });
   }
@@ -89,6 +90,7 @@ class EnvAndRespack extends React.Component<Props, State> {
       });
       logRenderer.info('[downloadRespack] version:', versionInfo);
       downloadUrl = versionInfo.url;
+      sm.track.event('respack', 'download', versionInfo.version);
     } catch (e) {
       logRenderer.error('[downloadRespack] error:', e);
       msg.error('查询资源包版本失败');
@@ -125,6 +127,7 @@ class EnvAndRespack extends React.Component<Props, State> {
       return;
     }
     logRenderer.info(`[openRespack]`, respackPath);
+    sm.track.event('respack', 'importStart', path.basename(respackPath));
     try {
       await this.props.dispatch({
         type: 'respack/importRespack',
@@ -135,8 +138,10 @@ class EnvAndRespack extends React.Component<Props, State> {
     } catch (e) {
       logRenderer.error(`[openRespack] load and validate failed:`, e);
       msg.error(e.msg);
+      sm.track.event('respack', 'importError', 'error', 1);
       return;
     }
+    sm.track.event('respack', 'importDone', path.basename(respackPath));
     msg.success('资源包导入完成', '点击「开始安装」完成后续步骤');
   }
 

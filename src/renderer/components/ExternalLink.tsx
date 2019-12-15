@@ -1,5 +1,6 @@
 import React from 'react';
 import { shell } from 'electron';
+import sm from '@/utils/modules';
 
 export interface IExternalLinkProps {
   href: string;
@@ -11,7 +12,10 @@ const ExternalLink: React.FC<IExternalLinkProps> = ({ href, className, style, ch
   <a
     className={className}
     style={style}
-    onClick={() => shell.openExternal(href)}
+    onClick={() => {
+      sm.track.event('use', 'extLink', href);
+      shell.openExternal(href);
+    }}
   >{children}</a>
 );
 

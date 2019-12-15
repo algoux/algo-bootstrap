@@ -8,6 +8,7 @@ import { formatMessage } from 'umi-plugin-locale';
 import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
+import sm from '@/utils/modules';
 
 export interface ICpplintInstallerProps {
 }
@@ -45,6 +46,7 @@ class CpplintInstaller extends React.Component<Props, State> {
       return;
     }
     try {
+      const _startAt = Date.now();
       windowProgress.start();
       const environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installCpplint',
@@ -52,12 +54,14 @@ class CpplintInstaller extends React.Component<Props, State> {
       });
       windowProgress.end();
       if (isEnvInstalled(environments, 'cpplint')) {
+        sm.track.timing('install', 'cpplint', Date.now() - _startAt);
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installCpplint]`, e);
       msg.error('安装环境失败');
+      sm.track.event('install', 'error', 'cpplint', 1);
     }
   }
 

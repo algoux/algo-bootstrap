@@ -96,6 +96,12 @@ export async function checkGcc(): Promise<ICheckEnvironmentResult> {
       ver = matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout));
     }
     if (ver) {
+      // if (isWindows) {
+      //   // 非 MinGW-W64 版，VSC 不支持调试
+      //   if (ver.search('MinGW-W64') === -1) {
+      //     return genNotInstalled();
+      //   }
+      // }
       return genInstalled(ver, await findPath('gcc'));
     }
   } catch (e) { }

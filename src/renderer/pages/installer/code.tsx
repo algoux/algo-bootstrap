@@ -51,6 +51,7 @@ class CodeInstaller extends React.Component<Props, State> {
       return;
     }
     try {
+      const _startAt = Date.now();
       windowProgress.start();
       const environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installVSCode',
@@ -58,12 +59,14 @@ class CodeInstaller extends React.Component<Props, State> {
       });
       windowProgress.end();
       if (isEnvInstalled(environments, 'code')) {
+        sm.track.timing('install', 'code', Date.now() - _startAt);
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installVSCode]`, e);
       msg.error('安装环境失败');
+      sm.track.event('install', 'error', 'code', 1);
     }
   }
 

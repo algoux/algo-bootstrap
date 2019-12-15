@@ -40,6 +40,7 @@ let cachedState = genInitialState();
 
 class GccInstaller extends React.Component<Props, State> {
   _pollMingwSizeTimer?: number;
+  _startAt: number = 0;
 
   constructor(props: Props) {
     super(props);
@@ -86,6 +87,7 @@ class GccInstaller extends React.Component<Props, State> {
     }
     let environments: IEnvironments | undefined;
     try {
+      this._startAt = Date.now();
       if (sm.platform.isWindows) {
         await this.getMingwTotalSize();
         await this.pollMingwUncompressedSize();
@@ -94,9 +96,11 @@ class GccInstaller extends React.Component<Props, State> {
         type: 'env/installGcc',
         payload: {},
       });
+      sm.track.timing('install', 'gcc', Date.now() - this._startAt);
     } catch (e) {
       logRenderer.error(`[installGcc]`, e);
       msg.error('安装环境失败');
+      sm.track.event('install', 'error', 'gcc', 1);
     } finally {
       clearTimeout(this._pollMingwSizeTimer!);
       if (sm.platform.isWindows) {
@@ -123,6 +127,7 @@ class GccInstaller extends React.Component<Props, State> {
     this.setState({
       startedInstallation: true,
     });
+    this._startAt = Date.now();
   }
 
   checkComplete = async () => {
@@ -139,6 +144,7 @@ class GccInstaller extends React.Component<Props, State> {
       checkCompleteLoading: false,
     });
     if (isEnvInstalled(environments, 'gcc')) {
+      sm.track.timing('install', 'gcc', Date.now() - this._startAt);
       router.push(getNextInstallerItemPage(environments));
     }
   }

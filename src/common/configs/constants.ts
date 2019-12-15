@@ -1,5 +1,6 @@
 const constants = {
   appName: 'Algo Bootstrap',
+  site: 'https://ab.algoux.org',
   requestTimeout: 60 * 1000,
   msgDuration: {
     success: 3,

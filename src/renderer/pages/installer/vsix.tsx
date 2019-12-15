@@ -63,6 +63,7 @@ class VsixInstaller extends React.Component<Props, State> {
     }
     let environments: IEnvironments | undefined;
     try {
+      const _startAt = Date.now();
       windowProgress.start();
       for (let i = 0; i < sm.envChecker.VSIXIds.length; ++i) {
         const vsixId = sm.envChecker.VSIXIds[i];
@@ -74,12 +75,14 @@ class VsixInstaller extends React.Component<Props, State> {
       }
       windowProgress.end();
       if (environments && isVsixAllInstalled(environments)) {
+        sm.track.timing('install', 'vsix', Date.now() - _startAt);
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installAllVsix]`, e);
       msg.error('安装环境失败');
+      sm.track.event('install', 'error', 'vsix', 1);
     }
   }
 

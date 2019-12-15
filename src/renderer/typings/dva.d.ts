@@ -30,6 +30,11 @@ interface ILocation {
   state: any;
 }
 
+// models
+
+interface IGlobalState {
+}
+
 interface IEnvState {
   environments: IEnvironments;
 }

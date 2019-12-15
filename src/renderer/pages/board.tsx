@@ -37,6 +37,11 @@ class Board extends React.Component<Props, State> {
     });
     const projectPath = res.filePaths ? res.filePaths[0] : '';
     if (projectPath) {
+      if (sm.platform.isWindows &&
+        /\p{Unified_Ideograph}/u.test(projectPath) &&
+        !await msg.confirm('选定路径中含有中文字符，可能无法使用调试功能，是否继续？')) {
+        return null;
+      }
       try {
         let init = false;
         if (await sm.vsc.isDirEmpty(projectPath)) {
@@ -46,6 +51,7 @@ class Board extends React.Component<Props, State> {
         }
         if (init) {
           logRenderer.info('[initializeProject]', projectPath);
+          sm.track.event('use', 'initProject');
           await sm.vsc.genProjectFiles(projectPath);
         } else {
           return null;
@@ -90,6 +96,7 @@ class Board extends React.Component<Props, State> {
     });
     const projectPath = res.filePaths ? res.filePaths[0] : '';
     if (projectPath) {
+      sm.track.event('use', 'openProject');
       this.props.dispatch({
         type: 'projects/addProject',
         payload: {
@@ -104,6 +111,7 @@ class Board extends React.Component<Props, State> {
 
   deleteProject = async (projectId: string) => {
     if (await msg.confirm('删除这个项目？', '这个操作仅将项目从列表中移除，不会删除文件')) {
+      sm.track.event('use', 'deleteProject');
       this.props.dispatch({
         type: 'projects/deleteProject',
         payload: {

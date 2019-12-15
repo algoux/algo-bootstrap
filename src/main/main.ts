@@ -16,6 +16,7 @@ import { currentPlatform } from '@/utils/platform';
 import { download } from 'electron-dl';
 import filesize from 'filesize';
 import fs from 'fs-extra';
+import track from './utils/track';
 
 logMain.info('[app.start]');
 logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
@@ -94,6 +95,7 @@ function updateAppTheme() {
   if (process.platform === 'darwin') {
     const isDarkMode = systemPreferences.isDarkMode();
     const theme = isDarkMode ? 'dark' : 'light';
+    track.event('app', 'setTheme', theme);
     console.log('[updateAppTheme] theme:', theme);
     // systemPreferences.setAppLevelAppearance(theme);
   }
@@ -186,9 +188,8 @@ const menuTemplate: MenuItem[] = [
     submenu: [{
       label: '打开日志目录',
       click: (_item, focusedWindow) => {
-        if (focusedWindow) {
-          openLogDir();
-        }
+        track.event('app', 'openLogDir');
+        openLogDir();
       }
     }],
   },
@@ -208,12 +209,14 @@ const menuTemplate: MenuItem[] = [
       {
         label: 'Algo Bootstrap 官方网站',
         click: () => {
-          shell.openExternal('https://ab.algoux.org');
+          track.event('app', 'openSite');
+          shell.openExternal(constants.site);
         },
       },
       {
         label: '加入 QQ 群聊',
         click: (_item, focusedWindow) => {
+          track.event('app', 'openQQGroup');
           const options = {
             type: 'info',
             message: '加入 QQ 群聊',
@@ -234,6 +237,7 @@ function addUpdateMenuItems(items, position) {
     label: '检查更新',
     key: 'checkForUpdate',
     click: () => {
+      track.event('app', 'checkUpdate');
       checkUpdate();
     }
   }];
@@ -328,8 +332,12 @@ app.on('activate', () => {
 });
 
 app.on('gpu-process-crashed', function () {
-  console.error('GPU进程崩溃，程序退出');
+  track.exception('gpuProcessCrashed', true);
   app.exit(1);
+});
+
+app.on('renderer-process-crashed', function () {
+  track.exception('rendererProcessCrashed', true);
 });
 
 app.on('quit', () => {
@@ -487,3 +495,5 @@ async function openLogDir() {
     logMain.error('[openLog] error:', e);
   }
 }
+
+track.event('app', 'start', app.getVersion(), 1);
