@@ -14,7 +14,7 @@ export default {
   effects: {
   },
   subscriptions: {
-    setup({ _dispatch, history }: { dispatch: Function, history: History }) {
+    setup({ dispatch, history }: { dispatch: Function, history: History }) {
       return history.listen((location) => {
         sm.track.pageview(location.pathname);
       });

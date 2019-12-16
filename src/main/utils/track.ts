@@ -13,7 +13,10 @@ const options = {
     'user-agent': genUA(),
   },
 };
-logMain.info('[track] uid:', uid, 'options:', options);
+logMain.info('[track.init] uid:', uid, 'options:', options);
+if (!process.env.GA_TC) {
+  logMain.error('[track.init] error: No GA Track Code found');
+}
 const usr = ua(process.env.GA_TC || '', uid, options);
 
 const errorCallback = (type: string) => (error: Error | null, count: number) => error && logMain.error(type, error, count);
