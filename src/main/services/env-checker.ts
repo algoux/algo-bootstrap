@@ -172,7 +172,7 @@ export async function checkVsix(codePath: string): Promise<Record<SupportedVSIXI
     const vsixMap = genEmptyVSIXMap();
     const { stdout, stderr } = await spawn('[checkVSIX]', `"${codePath}"`, ['--list-extensions', '--show-versions']);
     VSIXIds.forEach(vsixId => {
-      const reg = new RegExp(`^${vsixId}@([.\\w]+)$`, 'm');
+      const reg = new RegExp(`^${vsixId}@([_.-\\w]+)$`, 'm');
       const ver = matchOne(reg, parseStringFromProcessOutput(stderr || stdout));
       if (ver) {
         vsixMap[vsixId] = genInstalled(ver, null);
