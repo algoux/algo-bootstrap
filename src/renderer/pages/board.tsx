@@ -151,7 +151,7 @@ class Board extends React.Component<Props, State> {
             </List.Item>}
           />
           <h2 className="secondary-title">帮助</h2>
-          <p className="--mb-xs"><ExternalLink href="https://ab.algoux.org/docs/get_started/">VS Code 使用指南</ExternalLink></p>
+          <p className="--mb-xs"><ExternalLink href="https://ab.algoux.org/docs/getting_started/">VS Code 使用指南</ExternalLink></p>
           <h2 className="secondary-title">探索</h2>
           {/* <Row gutter={8}>
             <Col {...colProps}><ExternalLink href="https://acm.sdut.edu.cn/">SDUT OJ</ExternalLink></Col>
