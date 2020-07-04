@@ -74,5 +74,5 @@ export async function openProject(projectPath: string) {
   if (!code.installed) {
     throw Error('VS Code not installed');
   }
-  await spawn('[openProject]', `"${code.path}"`, [projectPath]);
+  await spawn('[openProject]', `"${code.path}"`, [`"${projectPath}"`]);
 }
