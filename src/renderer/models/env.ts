@@ -26,6 +26,7 @@ export default {
       { call, put }: DvaSagaEffect,
     ) {
       const environments: IEnvironments = purifyObject(
+        // @ts-ignore
         yield call(sm.envChecker.getEnvironments, force),
       );
       yield put({
@@ -41,40 +42,40 @@ export default {
       { call, put }: DvaSagaEffect,
     ) {
       yield call(sm.envInstaller.installGcc, force);
-      return yield put({
+      return (yield put({
         type: 'getEnvironments',
         payload: {},
-      });
+      })) as IEnvironments;
     },
     *installPython(
       { payload: { force = false } }: DvaAction<{ force?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
       yield call(sm.envInstaller.installPython, force);
-      return yield put({
+      return (yield put({
         type: 'getEnvironments',
         payload: {},
-      });
+      })) as IEnvironments;
     },
     *installCpplint(
       { payload: { force = false } }: DvaAction<{ force?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
       yield call(sm.envInstaller.installCpplint, force);
-      return yield put({
+      return (yield put({
         type: 'getEnvironments',
         payload: {},
-      });
+      })) as IEnvironments;
     },
     *installVSCode(
       { payload: { force = false } }: DvaAction<{ force?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
       yield call(sm.envInstaller.installVSCode, force);
-      return yield put({
+      return (yield put({
         type: 'getEnvironments',
         payload: {},
-      });
+      })) as IEnvironments;
     },
     *installVsix(
       {
@@ -83,10 +84,10 @@ export default {
       { call, put }: DvaSagaEffect,
     ) {
       yield call(sm.envInstaller.installVsix, vsixId, force);
-      return yield put({
+      return (yield put({
         type: 'getEnvironments',
         payload: {},
-      });
+      })) as IEnvironments;
     },
   },
 };

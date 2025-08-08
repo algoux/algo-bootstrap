@@ -10,8 +10,7 @@ import { dialog, getCurrentWindow } from '@electron/remote';
 import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
-// @ts-ignore
-import filesize from 'filesize';
+import { filesize } from 'filesize';
 import { formatPercentage } from 'common/utils/format';
 import PageAnimation from '@/components/PageAnimation';
 import { DispatchProps } from '@/typings/props';

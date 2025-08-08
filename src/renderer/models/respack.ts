@@ -41,6 +41,7 @@ export default {
     *getManifest({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
       let manifest: IRespackManifest | null = null;
       try {
+        // @ts-ignore
         manifest = purifyObject(yield call(sm.Respack.readLocalManifest));
       } catch (e) {}
       yield put({
@@ -59,14 +60,14 @@ export default {
       try {
         yield call(respack.loadManifest);
         yield call(respack.validate);
-      } catch (e) {
+      } catch (e: any) {
         const err = e;
         err.msg = '验证资源包失败';
         throw err;
       }
       try {
         yield call(respack.extract);
-      } catch (e) {
+      } catch (e: any) {
         const err = e;
         err.msg = '应用资源包失败';
         throw err;
@@ -81,7 +82,7 @@ export default {
       });
     },
     *getOnlineRespackVersion({ payload: {} }: DvaAction<{}>, { call }: DvaSagaEffect) {
-      const versionInfo = yield call(sm.Respack.getOnlineVersion);
+      const versionInfo = (yield call(sm.Respack.getOnlineVersion)) as ICheckVersionInfo;
       return versionInfo;
     },
   },

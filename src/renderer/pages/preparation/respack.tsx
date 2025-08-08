@@ -132,7 +132,7 @@ class EnvAndRespack extends React.Component<Props, State> {
           respackPath,
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       logRenderer.error(`[openRespack] load and validate failed:`, e);
       msg.error(e.msg);
       sm.track.event('respack', 'importError', 'error', 1);
