@@ -1,11 +1,13 @@
-import { remote } from 'electron';
-import { cloneDeep } from 'lodash';
+import { getGlobal } from '@electron/remote';
 import { purifyObject } from '@/../common/utils/format';
 
-const sharedModules: _GlobalSharedModules = remote.getGlobal('modules');
+const sharedModules: _GlobalSharedModules = getGlobal('modules');
 
 // 避免返回的对象含有 electron 的 getter/setter
-const pureHackWrapper = (f: (...args: any[]) => any) => (...args: any[]) => f(...args).then((r: any) => purifyObject(r));
+const pureHackWrapper =
+  (f: (...args: any[]) => any) =>
+  (...args: any[]) =>
+    f(...args).then((r: any) => purifyObject(r));
 
 const sm = {
   ...sharedModules,

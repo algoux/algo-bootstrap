@@ -34,6 +34,7 @@ export function genUA() {
   const arch = os.arch();
   const release = os.release();
   let osVersion = '';
+  // TODO update
   if (isMac) {
     const ver = macKernelMap[release] || '';
     osVersion = `Macintosh; Intel Mac OS X ${ver.replace(/\./g, '_')}`;
@@ -44,8 +45,10 @@ export function genUA() {
       osVersion = `Windows NT ${release}`;
     }
   }
-  return uag.chrome({
-    version: process.versions.chrome,
-    os: osVersion,
-  }) + ` Electron/${process.versions.electron} AlgoBootstrap/${app.getVersion()}`;
+  return (
+    uag.chrome({
+      version: process.versions.chrome,
+      os: osVersion,
+    }) + ` Electron/${process.versions.electron} AlgoBootstrap/${app.getVersion()}`
+  );
 }

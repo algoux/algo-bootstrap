@@ -14,9 +14,13 @@ const EnvCard: React.FC<IEnvCardProps> = ({ name, icon, installed, version }) =>
     <img className="icon" src={icon} />
     <div className="info">
       <p className="name">{name}</p>
-      <p className={classnames('desc --text-ellipsis', {
-        'color-green': installed,
-      })}>{installed ? `已安装${version ? `：${version}` : ''}` : '未安装'}</p>
+      <p
+        className={classnames('desc --text-ellipsis', {
+          'color-green': installed,
+        })}
+      >
+        {installed ? `已安装${version ? `：${version}` : ''}` : '未安装'}
+      </p>
     </div>
   </Card>
 );

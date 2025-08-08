@@ -26,11 +26,18 @@ function initAxios(): AxiosInstance {
 }
 
 function checkStatus(reqId: number, mau: string, duration: number, response: AxiosResponse) {
-  console.log(`[${now()} resp #${reqId}] ${mau} (${duration}ms)\n` + JSON.stringify({
-    status: `${response.status} ${response.statusText}`,
-    headers: response.headers,
-    data: response.data,
-  }, null, '  '));
+  console.log(
+    `[${now()} resp #${reqId}] ${mau} (${duration}ms)\n` +
+      JSON.stringify(
+        {
+          status: `${response.status} ${response.statusText}`,
+          headers: response.headers,
+          data: response.data,
+        },
+        null,
+        '  ',
+      ),
+  );
   // TODO 添加 resp 和 error 的生产环境 log
   if (response.status >= 200 && response.status < 300) {
     return response;
@@ -49,12 +56,23 @@ function checkStatus(reqId: number, mau: string, duration: number, response: Axi
  * @returns {Promise<IApiResp<any>>}
  */
 async function baseRequest<O = any>(url: string, options?: AxiosRequestConfig): Promise<O>;
-async function baseRequest<O = any, PO = O>(url: string, options: AxiosRequestConfig, postprocess: (data: O) => PO): Promise<PO>;
-async function baseRequest<O = any, PO = O>(url: string, options: AxiosRequestConfig = {}, postprocess?: (data: O) => PO) {
+async function baseRequest<O = any, PO = O>(
+  url: string,
+  options: AxiosRequestConfig,
+  postprocess: (data: O) => PO,
+): Promise<PO>;
+async function baseRequest<O = any, PO = O>(
+  url: string,
+  options: AxiosRequestConfig = {},
+  postprocess?: (data: O) => PO,
+) {
   const axiosInstance = initAxios();
   const reqId = requestTaskId++;
   const mau = `${options.method || 'GET'} ${url}`;
-  console.log(`[${now()}  req #${reqId}] ${mau}` + (options.data ? '\n' + JSON.stringify(options.data, null, '  ') : ''));
+  console.log(
+    `[${now()}  req #${reqId}] ${mau}` +
+      (options.data ? '\n' + JSON.stringify(options.data, null, '  ') : ''),
+  );
   logMain.info('[req]', mau);
   const st = Date.now();
   const response = await axiosInstance({
@@ -65,6 +83,7 @@ async function baseRequest<O = any, PO = O>(url: string, options: AxiosRequestCo
   checkStatus(reqId, mau, ed - st, response);
   const data = response.data;
   if (postprocess && typeof postprocess === 'function') {
+    // @ts-ignore
     return postprocess(data);
   }
   return data;
@@ -101,7 +120,6 @@ function del<I = undefined, O = undefined>(url: string, data?: I) {
     data,
   });
 }
-
 
 const req = {
   baseRequest,

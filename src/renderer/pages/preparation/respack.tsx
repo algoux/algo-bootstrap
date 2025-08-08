@@ -12,7 +12,7 @@ import vscodeIcon from '@/assets/icons/vscode.svg';
 import vscodeExtensionIcon from '@/assets/icons/vscode-extension.svg';
 import EnvCard from '@/components/EnvCard';
 import { isVsixAllInstalled, getNextInstallerItemPage } from '@/utils/env';
-import { remote } from 'electron';
+import { dialog, app, getCurrentWindow } from '@electron/remote';
 import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
 import constants from 'common/configs/constants';
@@ -24,10 +24,9 @@ import paths from 'common/configs/paths';
 import * as path from 'path';
 import { formatFileSize, formatPercentage } from 'common/utils/format';
 
-const RESPACK_DOWNLOAD_PATH = path.join(remote.app.getPath('userData'), paths.respackDownload);
+const RESPACK_DOWNLOAD_PATH = path.join(app.getPath('userData'), paths.respackDownload);
 
-export interface IEnvAndRespackProps {
-}
+export interface IEnvAndRespackProps {}
 
 interface State {
   downloadTaskId: number;
@@ -109,18 +108,16 @@ class EnvAndRespack extends React.Component<Props, State> {
         downloading: true,
       });
     }
-  }
+  };
 
   openRespack = async () => {
-    const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+    const res = await dialog.showOpenDialog(getCurrentWindow(), {
       properties: ['openFile'],
-      filters: [
-        { name: `${constants.appName} 资源包`, extensions: ['respack'] },
-      ],
+      filters: [{ name: `${constants.appName} 资源包`, extensions: ['respack'] }],
     });
     const respackPath = res.filePaths ? res.filePaths[0] : '';
     this.importRespack(respackPath);
-  }
+  };
 
   importRespack = async (respackPath: string) => {
     if (!respackPath) {
@@ -143,11 +140,11 @@ class EnvAndRespack extends React.Component<Props, State> {
     }
     sm.track.event('respack', 'importDone', path.basename(respackPath));
     msg.success('资源包导入完成', '点击「开始安装」完成后续步骤');
-  }
+  };
 
   startInstall = () => {
     router.push(getNextInstallerItemPage(this.props.environments));
-  }
+  };
 
   renderDownloadInfo = () => {
     const state = this.state;
@@ -156,14 +153,20 @@ class EnvAndRespack extends React.Component<Props, State> {
     const percent = formatPercentage(state.receivedSize, state.totalSize);
     const speed = formatFileSize(state.speed);
     return `${received} / ${total} (${percent})，当前速度：${speed}/s`;
-  }
+  };
 
   renderRespackLink = () => {
     return <ExternalLink href="https://ab.algoux.org/#respack">手动下载</ExternalLink>;
-  }
+  };
 
   render() {
-    const { environments, hasRespack, manifest, importLoading: importing, getOnlineVersionloading } = this.props;
+    const {
+      environments,
+      hasRespack,
+      manifest,
+      importLoading: importing,
+      getOnlineVersionloading,
+    } = this.props;
     const { receivedSize, totalSize } = this.state;
     const downloading = getOnlineVersionloading || this.state.downloading;
     const colProps = {
@@ -171,121 +174,141 @@ class EnvAndRespack extends React.Component<Props, State> {
       md: 12,
       xl: 6,
     };
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">环境</h1>
-          <Row gutter={8}>
-            <Col {...colProps}>
-              <EnvCard
-                name={formatMessage({ id: 'env.gcc' })}
-                icon={ccppIcon}
-                installed={environments.gcc.installed}
-                version={(environments.gcc as ICheckEnvironmentResultInstalled).version}
-              />
-            </Col>
-            <Col {...colProps}>
-              <EnvCard
-                name={formatMessage({ id: 'env.python' })}
-                icon={pythonIcon}
-                installed={environments.python.installed}
-                version={(environments.python as ICheckEnvironmentResultInstalled).version}
-              />
-            </Col>
-            <Col {...colProps}>
-              <EnvCard
-                name={formatMessage({ id: 'env.cpplint' })}
-                icon={cpplintIcon}
-                installed={environments.cpplint.installed}
-                version={'cpplint ' + (environments.cpplint as ICheckEnvironmentResultInstalled).version}
-              />
-            </Col>
-            <Col {...colProps}>
-              <EnvCard
-                name={formatMessage({ id: 'env.code' })}
-                icon={vscodeIcon}
-                installed={environments.code.installed}
-                version={(environments.code as ICheckEnvironmentResultInstalled).version}
-              />
-            </Col>
-            <Col {...colProps}>
-              <EnvCard
-                name={formatMessage({ id: 'env.vsix' })}
-                icon={vscodeExtensionIcon}
-                installed={isVsixAllInstalled(environments)}
-              />
-            </Col>
-          </Row>
-        </div>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">环境</h1>
+            <Row gutter={8}>
+              <Col {...colProps}>
+                <EnvCard
+                  name={formatMessage({ id: 'env.gcc' })}
+                  icon={ccppIcon}
+                  installed={environments.gcc.installed}
+                  version={(environments.gcc as ICheckEnvironmentResultInstalled).version}
+                />
+              </Col>
+              <Col {...colProps}>
+                <EnvCard
+                  name={formatMessage({ id: 'env.python' })}
+                  icon={pythonIcon}
+                  installed={environments.python.installed}
+                  version={(environments.python as ICheckEnvironmentResultInstalled).version}
+                />
+              </Col>
+              <Col {...colProps}>
+                <EnvCard
+                  name={formatMessage({ id: 'env.cpplint' })}
+                  icon={cpplintIcon}
+                  installed={environments.cpplint.installed}
+                  version={
+                    'cpplint ' + (environments.cpplint as ICheckEnvironmentResultInstalled).version
+                  }
+                />
+              </Col>
+              <Col {...colProps}>
+                <EnvCard
+                  name={formatMessage({ id: 'env.code' })}
+                  icon={vscodeIcon}
+                  installed={environments.code.installed}
+                  version={(environments.code as ICheckEnvironmentResultInstalled).version}
+                />
+              </Col>
+              <Col {...colProps}>
+                <EnvCard
+                  name={formatMessage({ id: 'env.vsix' })}
+                  icon={vscodeExtensionIcon}
+                  installed={isVsixAllInstalled(environments)}
+                />
+              </Col>
+            </Row>
+          </div>
 
-        <div className="content-block">
-          <h1 className="top-title">资源包</h1>
-          {downloading ? <>
-            <Progress percent={receivedSize / totalSize * 100} status="active" showInfo={false} />
-            <p>正在下载资源包：{this.renderDownloadInfo()}</p>
-          </> : (!hasRespack ?
-            <>
-              <p>资源包囊括了所有必要的安装文件。</p>
-              <p>安装缺失的环境前，你必须导入一个资源包，这样向导才能智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
-              <p>如果没有已存在的资源包，请点击「下载资源包」或 {this.renderRespackLink()} 并导入。</p>
-            </> :
-            <>
-              <p>资源包已就绪。如要重新下载最新的资源包，请点击「下载资源包」或 {this.renderRespackLink()} 并导入。</p>
-              <p>现在，向导已准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
-            </>)}
-
+          <div className="content-block">
+            <h1 className="top-title">资源包</h1>
+            {downloading ? (
+              <>
+                <Progress
+                  percent={(receivedSize / totalSize) * 100}
+                  status="active"
+                  showInfo={false}
+                />
+                <p>正在下载资源包：{this.renderDownloadInfo()}</p>
+              </>
+            ) : !hasRespack ? (
+              <>
+                <p>资源包囊括了所有必要的安装文件。</p>
+                <p>
+                  安装缺失的环境前，你必须导入一个资源包，这样向导才能智慧配置你的{' '}
+                  {sm.platform.isMac ? 'Mac' : 'PC'}。
+                </p>
+                <p>
+                  如果没有已存在的资源包，请点击「下载资源包」或 {this.renderRespackLink()} 并导入。
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  资源包已就绪。如要重新下载最新的资源包，请点击「下载资源包」或{' '}
+                  {this.renderRespackLink()} 并导入。
+                </p>
+                <p>现在，向导已准备好智慧配置你的 {sm.platform.isMac ? 'Mac' : 'PC'}。</p>
+              </>
+            )}
+          </div>
         </div>
+        <ActionBar
+          info={hasRespack && manifest ? <p>已导入资源包：v{manifest.version}</p> : null}
+          actions={
+            !hasRespack
+              ? [
+                  {
+                    key: 'chooseRespack',
+                    type: 'ghost',
+                    text: '导入资源包',
+                    loading: importing,
+                    disabled: downloading,
+                    onClick: this.openRespack,
+                  },
+                  {
+                    key: 'downloadRespack',
+                    type: 'primary',
+                    text: '下载资源包',
+                    loading: downloading,
+                    disabled: importing,
+                    onClick: this.downloadRespack,
+                  },
+                ]
+              : [
+                  {
+                    key: 'reChooseRespack',
+                    type: 'ghost',
+                    text: '导入资源包',
+                    loading: importing,
+                    disabled: downloading,
+                    onClick: this.openRespack,
+                  },
+                  {
+                    key: 'reDownloadRespack',
+                    type: 'ghost',
+                    text: '下载资源包',
+                    loading: downloading,
+                    disabled: importing,
+                    onClick: this.downloadRespack,
+                  },
+                  {
+                    key: 'startInstall',
+                    type: 'primary',
+                    text: '开始安装',
+                    disabled: downloading || importing,
+                    onClick: this.startInstall,
+                  },
+                ]
+          }
+          delay={1000}
+        />
       </div>
-      <ActionBar
-        info={hasRespack && manifest ? <p>已导入资源包：v{manifest.version}</p> : null}
-        actions={!hasRespack ?
-          [
-            {
-              key: 'chooseRespack',
-              type: 'ghost',
-              text: '导入资源包',
-              loading: importing,
-              disabled: downloading,
-              onClick: this.openRespack,
-            },
-            {
-              key: 'downloadRespack',
-              type: 'primary',
-              text: '下载资源包',
-              loading: downloading,
-              disabled: importing,
-              onClick: this.downloadRespack,
-            },
-          ] :
-          [
-            {
-              key: 'reChooseRespack',
-              type: 'ghost',
-              text: '导入资源包',
-              loading: importing,
-              disabled: downloading,
-              onClick: this.openRespack,
-            },
-            {
-              key: 'reDownloadRespack',
-              type: 'ghost',
-              text: '下载资源包',
-              loading: downloading,
-              disabled: importing,
-              onClick: this.downloadRespack,
-            },
-            {
-              key: 'startInstall',
-              type: 'primary',
-              text: '开始安装',
-              disabled: downloading || importing,
-              onClick: this.startInstall,
-            },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
+    );
   }
 }
 

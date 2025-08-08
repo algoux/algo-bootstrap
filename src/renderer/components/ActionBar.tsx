@@ -19,26 +19,32 @@ export interface IActionBarProps {
 }
 
 const ActionBar: React.FC<IActionBarProps> = (props) => {
-  return <div className={classnames('action-bar', {
-    '--p-slide-up': !props.delay,
-    [`--p-slide-up-delay-${props.delay}`]: props.delay,
-  })}>
-    <div className="info">
-      {props.info}
+  return (
+    <div
+      className={classnames('action-bar', {
+        '--p-slide-up': !props.delay,
+        [`--p-slide-up-delay-${props.delay}`]: props.delay,
+      })}
+    >
+      <div className="info">{props.info}</div>
+      <div className="actions">
+        {props.actions.map((action) => (
+          <Button
+            size="large"
+            key={action.key}
+            type={action.type}
+            disabled={!!action.disabled}
+            loading={!!action.loading}
+            className={action.className}
+            style={action.style}
+            onClick={action.onClick}
+          >
+            {action.loading ? action.loadingText || action.text : action.text}
+          </Button>
+        ))}
+      </div>
     </div>
-    <div className="actions">
-      {props.actions.map(action => <Button
-        size="large"
-        key={action.key}
-        type={action.type}
-        disabled={!!action.disabled}
-        loading={!!action.loading}
-        className={action.className}
-        style={action.style}
-        onClick={action.onClick}
-      >{action.loading ? (action.loadingText || action.text) : action.text}</Button>)}
-    </div>
-  </div>;
+  );
 };
 
 export default ActionBar;

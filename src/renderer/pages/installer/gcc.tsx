@@ -11,12 +11,11 @@ import macStep_2 from '@/assets/guides/gcc/gcc-darwin-light-step-2.png';
 import macStep_3 from '@/assets/guides/gcc/gcc-darwin-light-step-3.png';
 import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
-import { remote } from 'electron';
+import { getCurrentWindow } from '@electron/remote';
 import { formatPercentage, formatFileSize } from 'common/utils/format';
 import { Progress } from 'antd';
 
-export interface IGccInstallerProps {
-}
+export interface IGccInstallerProps {}
 
 interface State {
   mingwTotalSize: number;
@@ -58,7 +57,7 @@ class GccInstaller extends React.Component<Props, State> {
       mingwUncompressedSize: 0,
       checkCompleteLoading: false,
     };
-    remote.getCurrentWindow().setProgressBar(-1);
+    getCurrentWindow().setProgressBar(-1);
   }
 
   getMingwTotalSize = async () => {
@@ -66,7 +65,7 @@ class GccInstaller extends React.Component<Props, State> {
     this.setState({
       mingwTotalSize: size,
     });
-  }
+  };
 
   pollMingwUncompressedSize = async () => {
     try {
@@ -74,12 +73,12 @@ class GccInstaller extends React.Component<Props, State> {
       this.setState({
         mingwUncompressedSize: size,
       });
-      remote.getCurrentWindow().setProgressBar(size / this.state.mingwTotalSize);
-    } catch (e) { }
+      getCurrentWindow().setProgressBar(size / this.state.mingwTotalSize);
+    } catch (e) {}
     this._pollMingwSizeTimer = window.setTimeout(() => {
       this.pollMingwUncompressedSize();
     }, 1000);
-  }
+  };
 
   installGccWindows = async () => {
     if (!sm.platform.isWindows || this.props.loading) {
@@ -104,7 +103,7 @@ class GccInstaller extends React.Component<Props, State> {
     } finally {
       clearTimeout(this._pollMingwSizeTimer!);
       if (sm.platform.isWindows) {
-        remote.getCurrentWindow().setProgressBar(-1);
+        getCurrentWindow().setProgressBar(-1);
         this.setState({
           mingwUncompressedSize: this.state.mingwTotalSize,
         });
@@ -113,7 +112,7 @@ class GccInstaller extends React.Component<Props, State> {
         router.push(getNextInstallerItemPage(environments));
       }
     }
-  }
+  };
 
   installGccMac = async () => {
     try {
@@ -128,7 +127,7 @@ class GccInstaller extends React.Component<Props, State> {
       startedInstallation: true,
     });
     this._startAt = Date.now();
-  }
+  };
 
   checkComplete = async () => {
     this.setState({
@@ -147,7 +146,7 @@ class GccInstaller extends React.Component<Props, State> {
       sm.track.timing('install', 'gcc', Date.now() - this._startAt);
       router.push(getNextInstallerItemPage(environments));
     }
-  }
+  };
 
   renderMingwSize = () => {
     const state = this.state;
@@ -155,24 +154,28 @@ class GccInstaller extends React.Component<Props, State> {
     const total = formatFileSize(state.mingwTotalSize);
     const percent = formatPercentage(state.mingwUncompressedSize, state.mingwTotalSize);
     return `${uncompressed} / ${total} (${percent})`;
-  }
+  };
 
   renderWindows = () => {
     const props = this.props;
     const state = this.state;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
-          <p>正在应用和配置 {formatMessage({ id: 'env.gcc' })}，这可能需要花费一些时间。</p>
-          <p className="color-secondary">* 这个过程将不会消耗你的数据流量。</p>
-          <Progress percent={state.mingwUncompressedSize / state.mingwTotalSize * 100} status="active" showInfo={false} />
-          <p>已应用：{this.renderMingwSize()}</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
+            <p>正在应用和配置 {formatMessage({ id: 'env.gcc' })}，这可能需要花费一些时间。</p>
+            <p className="color-secondary">* 这个过程将不会消耗你的数据流量。</p>
+            <Progress
+              percent={(state.mingwUncompressedSize / state.mingwTotalSize) * 100}
+              status="active"
+              showInfo={false}
+            />
+            <p>已应用：{this.renderMingwSize()}</p>
+          </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installGcc',
               type: 'primary',
@@ -180,61 +183,64 @@ class GccInstaller extends React.Component<Props, State> {
               loading: props.loading,
               onClick: this.installGccWindows,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
-  }
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
+  };
 
   renderMac = () => {
     const state = this.state;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
-          <p>{formatMessage({ id: 'env.installer.desc' })}</p>
-          <div className="article">
-            <h3 className="section-header">1. 安装命令行开发者工具</h3>
-            <img src={macStep_1} />
-            <h3 className="section-header">2. 同意许可协议</h3>
-            <img src={macStep_2} />
-            <h3 className="section-header">3. 等待安装完成</h3>
-            <img src={macStep_3} />
-            <p>安装完成后，请点击「完成安装」。</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
+            <p>{formatMessage({ id: 'env.installer.desc' })}</p>
+            <div className="article">
+              <h3 className="section-header">1. 安装命令行开发者工具</h3>
+              <img src={macStep_1} />
+              <h3 className="section-header">2. 同意许可协议</h3>
+              <img src={macStep_2} />
+              <h3 className="section-header">3. 等待安装完成</h3>
+              <img src={macStep_3} />
+              <p>安装完成后，请点击「完成安装」。</p>
+            </div>
           </div>
         </div>
+        <ActionBar
+          actions={
+            !state.startedInstallation
+              ? [
+                  {
+                    key: 'installGcc',
+                    type: 'primary',
+                    text: '开始安装',
+                    onClick: this.installGccMac,
+                  },
+                ]
+              : [
+                  {
+                    key: 'reinstallGcc',
+                    type: 'default',
+                    text: '重试',
+                    onClick: this.installGccMac,
+                  },
+                  {
+                    key: 'installGcc',
+                    type: 'primary',
+                    text: '完成安装',
+                    loading: state.checkCompleteLoading,
+                    onClick: this.checkComplete,
+                  },
+                ]
+          }
+          delay={1000}
+        />
       </div>
-      <ActionBar
-        actions={!state.startedInstallation ?
-          [
-            {
-              key: 'installGcc',
-              type: 'primary',
-              text: '开始安装',
-              onClick: this.installGccMac,
-            },
-          ] :
-          [
-            {
-              key: 'reinstallGcc',
-              type: 'default',
-              text: '重试',
-              onClick: this.installGccMac,
-            },
-            {
-              key: 'installGcc',
-              type: 'primary',
-              text: '完成安装',
-              loading: state.checkCompleteLoading,
-              onClick: this.checkComplete,
-            },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
-  }
+    );
+  };
 
   render() {
     if (sm.platform.isWindows) {

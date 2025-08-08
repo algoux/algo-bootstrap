@@ -10,17 +10,14 @@ import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
 import sm from '@/utils/modules';
 
-export interface ICpplintInstallerProps {
-}
+export interface ICpplintInstallerProps {}
 
-interface State {
-}
+interface State {}
 
 type Props = ICpplintInstallerProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 function genInitialState(): State {
-  return {
-  };
+  return {};
 }
 
 let cachedState = genInitialState();
@@ -63,21 +60,21 @@ class CpplintInstaller extends React.Component<Props, State> {
       msg.error('安装环境失败');
       sm.track.event('install', 'error', 'cpplint', 1);
     }
-  }
+  };
 
   render() {
     const props = this.props;
     const state = this.state;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.cpplint' })}</h1>
-          <p>正在安装，这只需要花费一点时间。</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.cpplint' })}</h1>
+            <p>正在安装，这只需要花费一点时间。</p>
+          </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installCpplint',
               type: 'primary',
@@ -85,11 +82,11 @@ class CpplintInstaller extends React.Component<Props, State> {
               loading: props.loading,
               onClick: this.installCpplint,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
   }
 }
 

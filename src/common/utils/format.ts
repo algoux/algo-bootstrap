@@ -2,8 +2,7 @@ import UrlAssembler from 'url-assembler';
 import { floor } from 'math-precision';
 import { cloneDeep } from 'lodash';
 import { ChildProcessOutput } from '@/utils/child-process';
-// @ts-ignore
-import filesize from 'filesize';
+import { filesize } from 'filesize';
 
 export interface IUrlFArg {
   param?: object;
@@ -53,7 +52,7 @@ export function formatPercentage(a: number, b: number, precision: number = 2): s
   } else if (Math.min(a, b) === b) {
     return '100%';
   }
-  const ratio = floor(100 * Math.min(a, b) / b, prec);
+  const ratio = floor((100 * Math.min(a, b)) / b, prec);
   if (ratio < Math.pow(10, -prec)) {
     return Math.pow(10, -prec) + '%';
   }
@@ -65,7 +64,7 @@ export function formatPercentage(a: number, b: number, precision: number = 2): s
  * @param size file size in byte
  */
 export function formatFileSize(size: number) {
-  return filesize(size, { standard: "iec" });
+  return filesize(size, { standard: 'iec' });
 }
 
 /**
@@ -118,7 +117,7 @@ export function numberToAlphabet(number: number | string): string {
   }
   let res: string[] = [];
   for (; cnt > 0; cnt--) {
-    res.push(String.fromCharCode(n % radix + 65));
+    res.push(String.fromCharCode((n % radix) + 65));
     n = Math.trunc(n / radix);
   }
   return res.reverse().join('');
@@ -142,7 +141,7 @@ export function alphabetToNumber(alphabet: string): number {
   const radix = 26;
   let p = 1;
   let res = -1;
-  chars.forEach(ch => {
+  chars.forEach((ch) => {
     res += (ch.charCodeAt(0) - 65) * p + p;
     p *= radix;
   });
@@ -159,7 +158,7 @@ export function purifyObject<T = object>(o: T): T {
     if (prototype === '[object Object]' || prototype === '[object Array]') {
       return cloneDeep(o);
     }
-  } catch (e) { }
+  } catch (e) {}
   return o;
 }
 

@@ -16,7 +16,9 @@ const ExternalLink: React.FC<IExternalLinkProps> = ({ href, className, style, ch
       sm.track.event('use', 'extLink', href);
       shell.openExternal(href);
     }}
-  >{children}</a>
+  >
+    {children}
+  </a>
 );
 
 export default ExternalLink;

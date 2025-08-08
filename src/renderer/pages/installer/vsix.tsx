@@ -10,8 +10,7 @@ import { DispatchProps } from '@/typings/props';
 import sm from '@/utils/modules';
 import { windowProgress } from '@/utils/native';
 
-export interface IVsixInstallerProps {
-}
+export interface IVsixInstallerProps {}
 
 interface State {
   installingVsixIndex: number;
@@ -55,7 +54,7 @@ class VsixInstaller extends React.Component<Props, State> {
       },
     });
     return environments;
-  }
+  };
 
   installAllVsix = async () => {
     if (this.props.loading) {
@@ -84,21 +83,24 @@ class VsixInstaller extends React.Component<Props, State> {
       msg.error('安装环境失败');
       sm.track.event('install', 'error', 'vsix', 1);
     }
-  }
+  };
 
   render() {
     const props = this.props;
     const state = this.state;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.vsix' })}</h1>
-          <p>正在安装（{state.installingVsixIndex + 1}/{sm.envChecker.VSIXIds.length}）：{state.installingVsixId}</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.vsix' })}</h1>
+            <p>
+              正在安装（{state.installingVsixIndex + 1}/{sm.envChecker.VSIXIds.length}）：
+              {state.installingVsixId}
+            </p>
+          </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installVsix',
               type: 'primary',
@@ -106,11 +108,11 @@ class VsixInstaller extends React.Component<Props, State> {
               loading: props.loading,
               onClick: this.installAllVsix,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
   }
 }
 

@@ -14,15 +14,21 @@ function genInitialState(): CurrentState {
 export default {
   state: genInitialState(),
   reducers: {
-    setHasRespack(state: CurrentState, { payload: { hasRespack } }: DvaAction<Pick<CurrentState, 'hasRespack'>>) {
+    setHasRespack(
+      state: CurrentState,
+      { payload: { hasRespack } }: DvaAction<Pick<CurrentState, 'hasRespack'>>,
+    ) {
       state.hasRespack = hasRespack;
     },
-    setManifest(state: CurrentState, { payload: { manifest } }: DvaAction<Pick<CurrentState, 'manifest'>>) {
+    setManifest(
+      state: CurrentState,
+      { payload: { manifest } }: DvaAction<Pick<CurrentState, 'manifest'>>,
+    ) {
       state.manifest = manifest;
     },
   },
   effects: {
-    * getHasRespack({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
+    *getHasRespack({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
       const hasRespack: boolean = yield call(sm.Respack.hasLocalRespack);
       yield put({
         type: 'setHasRespack',
@@ -32,11 +38,11 @@ export default {
       });
       return hasRespack;
     },
-    * getManifest({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
+    *getManifest({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
       let manifest: IRespackManifest | null = null;
       try {
         manifest = purifyObject(yield call(sm.Respack.readLocalManifest));
-      } catch (e) { }
+      } catch (e) {}
       yield put({
         type: 'setManifest',
         payload: {
@@ -45,7 +51,10 @@ export default {
       });
       return manifest;
     },
-    * importRespack({ payload: { respackPath } }: DvaAction<{ respackPath: string }>, { call, put }: DvaSagaEffect) {
+    *importRespack(
+      { payload: { respackPath } }: DvaAction<{ respackPath: string }>,
+      { call, put }: DvaSagaEffect,
+    ) {
       const respack = new sm.Respack(respackPath);
       try {
         yield call(respack.loadManifest);
@@ -71,7 +80,7 @@ export default {
         payload: {},
       });
     },
-    * getOnlineRespackVersion({ payload: {} }: DvaAction<{}>, { call }: DvaSagaEffect) {
+    *getOnlineRespackVersion({ payload: {} }: DvaAction<{}>, { call }: DvaSagaEffect) {
       const versionInfo = yield call(sm.Respack.getOnlineVersion);
       return versionInfo;
     },

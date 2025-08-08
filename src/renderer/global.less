@@ -26,15 +26,14 @@ p:last-of-type {
 @color-red: #e23a36;
 
 .ant-layout.ant-layout-has-sider {
-  // -webkit-backdrop-filter: saturate(180%) blur(20px);
-  // backdrop-filter: saturate(180%) blur(20px);
-  // background-color: rgba(255, 255, 255, 0.3);
   height: 100%;
   background-color: transparent !important;
 
   .sidebar.ant-layout-sider {
-    // background-color: transparent !important;
-    // user-select: none;
+    background-color: transparent !important;
+    user-select: none;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
 
     .ant-layout-sider-children {
       overflow-x: hidden;

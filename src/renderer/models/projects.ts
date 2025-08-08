@@ -20,7 +20,7 @@ export default {
     },
   },
   effects: {
-    * getProjects({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
+    *getProjects({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
       const list = localStorage.get<IProject[]>(LsKeys.projects) || [];
       yield put({
         type: 'setProjects',
@@ -30,9 +30,9 @@ export default {
       });
       return list;
     },
-    * addProject({ payload: project }: DvaAction<IProject>, { put, select }: DvaSagaEffect) {
-      const list: IProject[] = yield select(state => state.projects.list);
-      if (list.find(p => p.id === project.id)) {
+    *addProject({ payload: project }: DvaAction<IProject>, { put, select }: DvaSagaEffect) {
+      const list: IProject[] = yield select((state) => state.projects.list);
+      if (list.find((p) => p.id === project.id)) {
         return;
       }
       const newList = [...list];
@@ -44,9 +44,12 @@ export default {
         },
       });
     },
-    * deleteProject({ payload: { projectId } }: DvaAction<{ projectId: IProject['id'] }>, { put, select }: DvaSagaEffect) {
-      const list: IProject[] = yield select(state => state.projects.list);
-      const newList = list.filter(project => project.id !== projectId);
+    *deleteProject(
+      { payload: { projectId } }: DvaAction<{ projectId: IProject['id'] }>,
+      { put, select }: DvaSagaEffect,
+    ) {
+      const list: IProject[] = yield select((state) => state.projects.list);
+      const newList = list.filter((project) => project.id !== projectId);
       yield put({
         type: 'setProjects',
         payload: {

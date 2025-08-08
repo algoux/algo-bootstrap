@@ -4,8 +4,6 @@ src/renderer/pages/.umi
 src/renderer/pages/.umi-production
 release
 yarn-error.log
-yarn.lock
-package-lock.json
+npm-debug.log
 .history
-/.vscode
 .DS_Store

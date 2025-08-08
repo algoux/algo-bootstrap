@@ -24,7 +24,10 @@ export async function appendToWindowsUserPath(PATH: string) {
   logMain.info('[appendToWindowsUserPath] PATH to append:', PATH);
   const userPath = (await getWindowsUserPath()) ?? '%PATH%';
   // TODO 防止重复添加 path。已添加则返回 false
-  await spawn('[appendToWindowsUserPath]', 'setx', ['PATH', `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${PATH}"`]);
+  await spawn('[appendToWindowsUserPath]', 'setx', [
+    'PATH',
+    `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${PATH}"`,
+  ]);
   return true;
 }
 
@@ -43,11 +46,17 @@ export async function refreshWindowsPath() {
     logMain.error('[refreshWindowsPath] system or user path is null');
     throw Error('system or user path is null');
   }
-  const newPath = [...systemPath.split(';').filter(p => !!p), ...userPath.split(';').filter(p => !!p)].join(';');
+  const newPath = [
+    ...systemPath.split(';').filter((p) => !!p),
+    ...userPath.split(';').filter((p) => !!p),
+  ].join(';');
   // 将 PATH 中的变量替换为实际值
-  let parsedPath = newPath.replace(/%(\S)+?%/g, match => match.toUpperCase());
+  let parsedPath = newPath.replace(/%(\S)+?%/g, (match) => match.toUpperCase());
   for (const key of Object.keys(process.env)) {
-    parsedPath = parsedPath.replace(new RegExp(`%${escapeRegExp(key.toUpperCase())}%`, 'g'), process.env[key]!);
+    parsedPath = parsedPath.replace(
+      new RegExp(`%${escapeRegExp(key.toUpperCase())}%`, 'g'),
+      process.env[key]!,
+    );
   }
   logMain.info('[refreshWindowsPath]', parsedPath);
   process.env.PATH = parsedPath;
@@ -68,19 +77,27 @@ export async function getMingwUncompressedSize(): Promise<number> {
   const installPath = 'C:\\MinGW64';
   return new Promise((resolve, reject) => {
     const __start = Date.now();
-    getFolderSize(installPath, (err, size) => {
-      if (err) {
+    getFolderSize(installPath)
+      .then((sizeResult) => {
+        if (sizeResult.errors) {
+          logMain.error(
+            `[getMingwUncompressedSize.error ${Date.now() - __start + 'ms'}]`,
+            sizeResult.errors,
+          );
+          reject(sizeResult.errors);
+          return;
+        }
+        resolve(sizeResult.size);
+      })
+      .catch((err) => {
         logMain.error(`[getMingwUncompressedSize.error ${Date.now() - __start + 'ms'}]`, err);
         reject(err);
-        return;
-      }
-      resolve(size);
-    });
+      });
   });
 }
 
 export async function installGcc(force = false) {
-  if (!force && await isEnvInstalled('gcc')) {
+  if (!force && (await isEnvInstalled('gcc'))) {
     return;
   }
   if (isMac) {
@@ -91,13 +108,13 @@ export async function installGcc(force = false) {
     // 解压 MinGW64
     const installPath = 'C:\\MinGW64';
     await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
-    await appendToWindowsUserPath(`${installPath}\\bin`) && await refreshWindowsPath();
+    (await appendToWindowsUserPath(`${installPath}\\bin`)) && (await refreshWindowsPath());
     await getEnvironments(true);
   }
 }
 
 export async function installPython(force = false) {
-  if (!force && await isEnvInstalled('python')) {
+  if (!force && (await isEnvInstalled('python'))) {
     return;
   }
   if (isWindows) {
@@ -109,7 +126,7 @@ export async function installPython(force = false) {
 }
 
 export async function installCpplint(force = false) {
-  if (!force && await isEnvInstalled('cpplint')) {
+  if (!force && (await isEnvInstalled('cpplint'))) {
     return;
   }
   const py = await getEnvironment('python');
@@ -129,12 +146,19 @@ export async function installCpplint(force = false) {
         await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`);
       } else if (isWindows) {
         // https://github.com/jorangreef/sudo-prompt/issues/116
-        const { stdout, stderr } = await sudoExec('[installCpplint]', `cd /d "${installPath}" && python setup.py install`, {
-          env: { PATH: process.env.PATH },
-        });
-        const pythonScriptPath = matchOne(/^Installing cpplint.exe script to (.*)/m, stdout || stderr);
+        const { stdout, stderr } = await sudoExec(
+          '[installCpplint]',
+          `cd /d "${installPath}" && python setup.py install`,
+          {
+            env: { PATH: process.env.PATH || '' },
+          },
+        );
+        const pythonScriptPath = matchOne(
+          /^Installing cpplint.exe script to (.*)/m,
+          stdout || stderr || '',
+        );
         if (pythonScriptPath) {
-          await appendToWindowsUserPath(pythonScriptPath) && await refreshWindowsPath();
+          (await appendToWindowsUserPath(pythonScriptPath)) && (await refreshWindowsPath());
         }
       } else {
         await spawn('[installCpplint]', 'python', ['setup.py', 'install'], {
@@ -149,7 +173,7 @@ export async function installCpplint(force = false) {
 }
 
 export async function installVSCode(force = false) {
-  if (!force && await isEnvInstalled('code')) {
+  if (!force && (await isEnvInstalled('code'))) {
     return;
   }
   const res = await Respack.readResFromLocalManifestOrThrow('vscode');
@@ -176,7 +200,7 @@ export async function installVSCode(force = false) {
 }
 
 export async function installVsix(vsixId: SupportedVSIXId, force = false) {
-  if (!force && await isVsixInstalled(vsixId)) {
+  if (!force && (await isVsixInstalled(vsixId))) {
     return;
   }
   const code = await getEnvironment('code');
@@ -185,6 +209,9 @@ export async function installVsix(vsixId: SupportedVSIXId, force = false) {
   }
   const res = await Respack.readResFromLocalManifestOrThrow(`vsix/${vsixId}`);
   const filePath = path.join(RESPACK_PATH, res.name);
-  await spawn('[installVsix]', `"${code.path || 'code'}"`, ['--install-extension', `"${filePath}"`]);
+  await spawn('[installVsix]', `"${code.path || 'code'}"`, [
+    '--install-extension',
+    `"${filePath}"`,
+  ]);
   await getEnvironments(true);
 }

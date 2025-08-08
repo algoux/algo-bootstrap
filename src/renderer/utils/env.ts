@@ -21,15 +21,19 @@ export function isVsixAllInstalled(environments: IEnvironments) {
 }
 
 export function isAllInstalled(environments: IEnvironments) {
-  return environments.gcc.installed &&
+  return (
+    environments.gcc.installed &&
     environments.python.installed &&
     environments.cpplint.installed &&
     environments.code.installed &&
-    isVsixAllInstalled(environments);
+    isVsixAllInstalled(environments)
+  );
 }
 
 export function getNextInstallerItem(environments: IEnvironments) {
-  const envIds = sm.envChecker.EnvIds.filter(envId => envId !== 'gdb') as Array<Exclude<SupportedEnvId, 'gdb'>>;
+  const envIds = sm.envChecker.EnvIds.filter((envId) => envId !== 'gdb') as Array<
+    Exclude<SupportedEnvId, 'gdb'>
+  >;
   for (const envId of envIds) {
     if (!isEnvInstalled(environments, envId)) {
       return envId;

@@ -9,12 +9,10 @@ function genInitialState(): CurrentState {
 
 export default {
   state: genInitialState(),
-  reducers: {
-  },
-  effects: {
-  },
+  reducers: {},
+  effects: {},
   subscriptions: {
-    setup({ dispatch, history }: { dispatch: Function, history: History }) {
+    setup({ dispatch, history }: { dispatch: Function; history: History }) {
       return history.listen((location) => {
         sm.track.pageview(location.pathname);
       });

@@ -13,8 +13,7 @@ import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
 
-export interface IPythonInstallerProps {
-}
+export interface IPythonInstallerProps {}
 
 interface State {
   checkCompleteLoading: boolean;
@@ -65,7 +64,7 @@ class PythonInstaller extends React.Component<Props, State> {
       msg.error('安装环境失败');
       sm.track.event('install', 'error', 'python', 1);
     }
-  }
+  };
 
   checkComplete = async () => {
     this.setState({
@@ -83,31 +82,37 @@ class PythonInstaller extends React.Component<Props, State> {
     if (isEnvInstalled(environments, 'python')) {
       router.push(getNextInstallerItemPage(environments));
     }
-  }
+  };
 
   renderWindows = () => {
     const props = this.props;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
-          <p>{formatMessage({ id: 'env.installer.desc' })}</p>
-          <div className="article">
-            <h3 className="section-header">1. 勾选「Add Python to PATH」并点击「Install Now」</h3>
-            <p className="color-secondary">* 你看到的界面可能与指引存在些许差异。</p>
-            <p><img src={windowsStep_1} /></p>
-            <h3 className="section-header">2. 等待安装完成</h3>
-            <p><img src={windowsStep_2} /></p>
-            <h3 className="section-header">3. 安装完成时，点击「Disable path length limit」</h3>
-            <p>如果没有找到此按钮，你可以跳过这个步骤。</p>
-            <p><img src={windowsStep_3} /></p>
-            <p>安装完成后，点击「Close」关闭安装器。</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
+            <p>{formatMessage({ id: 'env.installer.desc' })}</p>
+            <div className="article">
+              <h3 className="section-header">1. 勾选「Add Python to PATH」并点击「Install Now」</h3>
+              <p className="color-secondary">* 你看到的界面可能与指引存在些许差异。</p>
+              <p>
+                <img src={windowsStep_1} />
+              </p>
+              <h3 className="section-header">2. 等待安装完成</h3>
+              <p>
+                <img src={windowsStep_2} />
+              </p>
+              <h3 className="section-header">3. 安装完成时，点击「Disable path length limit」</h3>
+              <p>如果没有找到此按钮，你可以跳过这个步骤。</p>
+              <p>
+                <img src={windowsStep_3} />
+              </p>
+              <p>安装完成后，点击「Close」关闭安装器。</p>
+            </div>
           </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installPython',
               type: 'primary',
@@ -115,26 +120,26 @@ class PythonInstaller extends React.Component<Props, State> {
               loading: props.loading,
               onClick: this.installPython,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
-  }
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
+  };
 
   renderMac = () => {
     const state = this.state;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
-          <p>Python 已内置于 macOS，请点击「完成安装」。</p>
-          <p>如果问题依然存在，请尝试自行安装。</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
+            <p>Python 已内置于 macOS，请点击「完成安装」。</p>
+            <p>如果问题依然存在，请尝试自行安装。</p>
+          </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installPython',
               type: 'primary',
@@ -142,12 +147,12 @@ class PythonInstaller extends React.Component<Props, State> {
               loading: state.checkCompleteLoading,
               onClick: this.checkComplete,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
-  }
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
+  };
 
   render() {
     if (sm.platform.isWindows) {

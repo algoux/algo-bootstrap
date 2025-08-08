@@ -211,6 +211,19 @@
   white-space: nowrap;
 }
 
+.--draggable {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.--draggable * {
+  -webkit-app-region: no-drag;
+}
+
+.--non-draggable {
+  -webkit-app-region: no-drag;
+}
+
 // anim
 
 @default-anim-duration: .5s;

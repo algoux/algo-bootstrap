@@ -46,14 +46,7 @@ export default {
   externals(_context: any, request: any, callback: (error: any, result: any) => void) {
     const isDev = process.env.NODE_ENV === 'development';
     let isExternal: boolean | string = false;
-    const load = [
-      'electron',
-      'fs',
-      'path',
-      'os',
-      'url',
-      'child_process',
-    ];
+    const load = ['electron', 'fs', 'path', 'os', 'url', 'child_process'];
     if (load.includes(request)) {
       isExternal = `require("${request}")`;
     }

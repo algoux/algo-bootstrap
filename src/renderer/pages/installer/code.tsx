@@ -15,17 +15,14 @@ import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
 
-export interface ICodeInstallerProps {
-}
+export interface ICodeInstallerProps {}
 
-interface State {
-}
+interface State {}
 
 type Props = ICodeInstallerProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 function genInitialState(): State {
-  return {
-  };
+  return {};
 }
 
 let cachedState = genInitialState();
@@ -68,32 +65,42 @@ class CodeInstaller extends React.Component<Props, State> {
       msg.error('安装环境失败');
       sm.track.event('install', 'error', 'code', 1);
     }
-  }
+  };
 
   renderWindows = () => {
     const props = this.props;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.code' })}</h1>
-          <p>{formatMessage({ id: 'env.installer.desc' })}</p>
-          <div className="article">
-            <h3 className="section-header">1. 选择「我接受协议」并点击「下一步」</h3>
-            <p><img src={windowsStep_1} /></p>
-            <h3 className="section-header">2. 确保「其他」中的选项全部勾选并点击「下一步」</h3>
-            <p><img src={windowsStep_2} /></p>
-            <h3 className="section-header">3. 点击「安装」</h3>
-            <p><img src={windowsStep_3} /></p>
-            <h3 className="section-header">4. 等待安装完成</h3>
-            <p><img src={windowsStep_4} /></p>
-            <h3 className="section-header">5. 取消勾选「启动 Visual Studio Code」并点击完成</h3>
-            <p><img src={windowsStep_5} /></p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.code' })}</h1>
+            <p>{formatMessage({ id: 'env.installer.desc' })}</p>
+            <div className="article">
+              <h3 className="section-header">1. 选择「我接受协议」并点击「下一步」</h3>
+              <p>
+                <img src={windowsStep_1} />
+              </p>
+              <h3 className="section-header">2. 确保「其他」中的选项全部勾选并点击「下一步」</h3>
+              <p>
+                <img src={windowsStep_2} />
+              </p>
+              <h3 className="section-header">3. 点击「安装」</h3>
+              <p>
+                <img src={windowsStep_3} />
+              </p>
+              <h3 className="section-header">4. 等待安装完成</h3>
+              <p>
+                <img src={windowsStep_4} />
+              </p>
+              <h3 className="section-header">5. 取消勾选「启动 Visual Studio Code」并点击完成</h3>
+              <p>
+                <img src={windowsStep_5} />
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installVSCode',
               type: 'primary',
@@ -101,25 +108,27 @@ class CodeInstaller extends React.Component<Props, State> {
               loading: props.loading,
               onClick: this.installVSCode,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
-  }
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
+  };
 
   renderMac = () => {
     const props = this.props;
-    return <div>
-      <div className="container --slide-left">
-        <div className="content-block">
-          <h1 className="top-title">安装 {formatMessage({ id: 'env.code' })}</h1>
-          <p>正在拷贝 {formatMessage({ id: 'env.code' })} 到「应用程序」，这只需要花费一点时间。</p>
+    return (
+      <div>
+        <div className="container --slide-left">
+          <div className="content-block">
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.code' })}</h1>
+            <p>
+              正在拷贝 {formatMessage({ id: 'env.code' })} 到「应用程序」，这只需要花费一点时间。
+            </p>
+          </div>
         </div>
-      </div>
-      <ActionBar
-        actions={
-          [
+        <ActionBar
+          actions={[
             {
               key: 'installVSCode',
               type: 'primary',
@@ -127,12 +136,12 @@ class CodeInstaller extends React.Component<Props, State> {
               loading: props.loading,
               onClick: this.installVSCode,
             },
-          ]
-        }
-        delay={1000}
-      />
-    </div>;
-  }
+          ]}
+          delay={1000}
+        />
+      </div>
+    );
+  };
 
   render() {
     if (sm.platform.isWindows) {

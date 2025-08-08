@@ -1,4 +1,4 @@
-import { app, BrowserWindow, systemPreferences, Menu, shell, dialog } from 'electron';
+import { app, BrowserWindow, nativeTheme, Menu, shell, dialog } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import { ipcMain as ipc } from 'electron-better-ipc';
@@ -14,9 +14,10 @@ import compareVersions from 'compare-versions';
 import log from 'electron-log';
 import { currentPlatform } from '@/utils/platform';
 import { download } from 'electron-dl';
-import filesize from 'filesize';
+import { filesize } from 'filesize';
 import fs from 'fs-extra';
 import track from './utils/track';
+import { initialize, enable } from '@electron/remote/main';
 
 logMain.info('[app.start]');
 logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
@@ -36,10 +37,12 @@ global.modules = _modules;
 
 let downloadTaskId = 1;
 
-// console.log(1, systemPreferences.isDarkMode());
-// console.log(2, systemPreferences.getEffectiveAppearance());
-// console.log(3, systemPreferences.getAppLevelAppearance());
-// systemPreferences.setAppLevelAppearance('light');
+console.log('nativeTheme', {
+  shouldUseDarkColors: nativeTheme.shouldUseDarkColors,
+  themeSource: nativeTheme.themeSource,
+});
+// TODO 暂不支持 dark theme
+nativeTheme.themeSource = 'light';
 
 let mainWindow: Electron.BrowserWindow | null;
 
@@ -52,15 +55,20 @@ function createWindow() {
     height: 660,
     webPreferences: {
       nodeIntegration: true,
-      // preload: path.join(__dirname, './ preload.js'),
+      contextIsolation: false,
+      preload: path.join(__dirname, './preload.js'),
     },
     title: `${constants.appName} v${app.getVersion()}`,
     // show: false,
+    ...(process.platform === 'darwin' && {
+      vibrancy: 'sidebar',
+      transparent: true,
+      titleBarStyle: 'hiddenInset',
+    }),
   });
 
-  if (process.platform === 'darwin') {
-    mainWindow.setVibrancy('sidebar');
-  }
+  // 启用 remote 模块
+  enable(mainWindow.webContents);
 
   updateAppTheme();
 
@@ -75,7 +83,7 @@ function createWindow() {
         pathname: path.join(__dirname, './index.html'),
         protocol: 'file:',
         slashes: true,
-      })
+      }),
     );
     // mainWindow.webContents.openDevTools({
     //   mode: 'detach',
@@ -92,21 +100,14 @@ function createWindow() {
 }
 
 function updateAppTheme() {
-  if (process.platform === 'darwin') {
-    const isDarkMode = systemPreferences.isDarkMode();
-    const theme = isDarkMode ? 'dark' : 'light';
-    track.event('app', 'setTheme', theme);
-    console.log('[updateAppTheme] theme:', theme);
-    // systemPreferences.setAppLevelAppearance(theme);
-  }
+  const isDarkMode = nativeTheme.shouldUseDarkColors;
+  const theme = isDarkMode ? 'dark' : 'light';
+  track.event('app', 'setTheme', theme);
+  console.log('[updateAppTheme] theme:', theme);
+  // nativeTheme.themeSource = theme;
 }
 
-if (process.platform === 'darwin') {
-  systemPreferences.subscribeNotification(
-    'AppleInterfaceThemeChangedNotification',
-    () => updateAppTheme(),
-  );
-}
+nativeTheme.on('updated', () => updateAppTheme());
 
 type MenuItem = Electron.MenuItemConstructorOptions | Electron.MenuItem;
 
@@ -114,42 +115,52 @@ const menuTemplate: MenuItem[] = [
   {
     label: '文件',
     role: 'fileMenu',
-    submenu: [{
-      label: '关闭窗口',
-      accelerator: 'CmdOrCtrl+W',
-      role: 'close',
-    }],
+    submenu: [
+      {
+        label: '关闭窗口',
+        accelerator: 'CmdOrCtrl+W',
+        role: 'close',
+      },
+    ],
   },
   {
     label: '编辑', // Edit
     role: 'editMenu',
-    submenu: [{
-      label: '撤销', // Undo
-      accelerator: 'CmdOrCtrl+Z',
-      role: 'undo'
-    }, {
-      label: '重做', // Redo
-      accelerator: 'Shift+CmdOrCtrl+Z',
-      role: 'redo'
-    }, {
-      type: 'separator'
-    }, {
-      label: '剪切', // Cut
-      accelerator: 'CmdOrCtrl+X',
-      role: 'cut'
-    }, {
-      label: isMac ? '拷贝' : '复制', // Copy
-      accelerator: 'CmdOrCtrl+C',
-      role: 'copy'
-    }, {
-      label: '粘贴', // Paste
-      accelerator: 'CmdOrCtrl+V',
-      role: 'paste'
-    }, {
-      label: '全选', // Select All
-      accelerator: 'CmdOrCtrl+A',
-      role: 'selectAll'
-    }]
+    submenu: [
+      {
+        label: '撤销', // Undo
+        accelerator: 'CmdOrCtrl+Z',
+        role: 'undo',
+      },
+      {
+        label: '重做', // Redo
+        accelerator: 'Shift+CmdOrCtrl+Z',
+        role: 'redo',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: '剪切', // Cut
+        accelerator: 'CmdOrCtrl+X',
+        role: 'cut',
+      },
+      {
+        label: isMac ? '拷贝' : '复制', // Copy
+        accelerator: 'CmdOrCtrl+C',
+        role: 'copy',
+      },
+      {
+        label: '粘贴', // Paste
+        accelerator: 'CmdOrCtrl+V',
+        role: 'paste',
+      },
+      {
+        label: '全选', // Select All
+        accelerator: 'CmdOrCtrl+A',
+        role: 'selectAll',
+      },
+    ],
   },
   // {
   //   label: '显示', // View
@@ -185,22 +196,26 @@ const menuTemplate: MenuItem[] = [
   // },
   {
     label: '调试',
-    submenu: [{
-      label: '打开日志目录',
-      click: (_item, focusedWindow) => {
-        track.event('app', 'openLogDir');
-        openLogDir();
-      }
-    }],
+    submenu: [
+      {
+        label: '打开日志目录',
+        click: (_item, focusedWindow) => {
+          track.event('app', 'openLogDir');
+          openLogDir();
+        },
+      },
+    ],
   },
   {
     label: '窗口', // Window
     role: 'window',
-    submenu: [{
-      label: '最小化', // Minimize
-      accelerator: 'CmdOrCtrl+M',
-      role: 'minimize'
-    }]
+    submenu: [
+      {
+        label: '最小化', // Minimize
+        accelerator: 'CmdOrCtrl+M',
+        role: 'minimize',
+      },
+    ],
   },
   {
     label: '帮助', // 帮助
@@ -218,75 +233,89 @@ const menuTemplate: MenuItem[] = [
         click: (_item, focusedWindow) => {
           track.event('app', 'openQQGroup');
           const options = {
-            type: 'info',
+            type: 'info' as const,
             message: '加入 QQ 群聊',
             detail: '搜索群号码 445813999 以加入',
           };
-          dialog.showMessageBox(focusedWindow || null, options);
-        }
+          focusedWindow && dialog.showMessageBox(focusedWindow || null, options);
+        },
       },
-    ]
-  }];
+    ],
+  },
+];
 
 function addUpdateMenuItems(items, position) {
   if (process.mas) {
     return;
   }
 
-  const updateItems = [{
-    label: '检查更新',
-    key: 'checkForUpdate',
-    click: () => {
-      track.event('app', 'checkUpdate');
-      checkUpdate();
-    }
-  }];
+  const updateItems = [
+    {
+      label: '检查更新',
+      key: 'checkForUpdate',
+      click: () => {
+        track.event('app', 'checkUpdate');
+        checkUpdate();
+      },
+    },
+  ];
 
   items.splice.apply(items, [position, 0].concat(updateItems));
 }
-
 
 if (process.platform === 'darwin') {
   const name = app.getName();
   menuTemplate.unshift({
     label: name,
-    submenu: [{
-      label: `关于 ${name}`,
-      role: 'about'
-    }, {
-      type: 'separator'
-    }, {
-      type: 'separator'
-    }, {
-      label: `隐藏 ${name}`, // Hide
-      accelerator: 'Command+H',
-      role: 'hide'
-    }, {
-      label: '隐藏其他', // Hide Others
-      accelerator: 'Command+Alt+H',
-      role: 'hideothers'
-    }, {
-      label: '全部显示', // Show All
-      role: 'unhide'
-    }, {
-      type: 'separator'
-    }, {
-      label: `退出 ${name}`, // Quit
-      accelerator: 'Command+Q',
-      click: () => {
-        app.quit();
+    submenu: [
+      {
+        label: `关于 ${name}`,
+        role: 'about',
       },
-    }]
+      {
+        type: 'separator',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: `隐藏 ${name}`, // Hide
+        accelerator: 'Command+H',
+        role: 'hide',
+      },
+      {
+        label: '隐藏其他', // Hide Others
+        accelerator: 'Command+Alt+H',
+        role: 'hideothers',
+      },
+      {
+        label: '全部显示', // Show All
+        role: 'unhide',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: `退出 ${name}`, // Quit
+        accelerator: 'Command+Q',
+        click: () => {
+          app.quit();
+        },
+      },
+    ],
   } as MenuItem);
 
   // Window menu.
   // @ts-ignore
-  menuTemplate[4].submenu.push({
-    type: 'separator',
-  }, {
-    label: '前置全部窗口', // Bring All to Front
-    role: 'front'
-  });
+  menuTemplate[4].submenu.push(
+    {
+      type: 'separator',
+    },
+    {
+      label: '前置全部窗口', // Bring All to Front
+      role: 'front',
+    },
+  );
 
   addUpdateMenuItems(menuTemplate[0].submenu, 1);
 }
@@ -312,6 +341,9 @@ if (!gotTheLock) {
   });
 
   app.on('ready', () => {
+    // 初始化 remote 模块
+    initialize();
+
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
     createWindow();
@@ -331,15 +363,6 @@ app.on('activate', () => {
   }
 });
 
-app.on('gpu-process-crashed', function () {
-  track.exception('gpuProcessCrashed', true);
-  app.exit(1);
-});
-
-app.on('renderer-process-crashed', function () {
-  track.exception('rendererProcessCrashed', true);
-});
-
 app.on('quit', () => {
   logMain.info('[app.quit]');
 });
@@ -355,6 +378,7 @@ ipc.answerRenderer(ipcKeys.getResPack, async (param) => {
 
 ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
   const opt = { ...options };
+  // @ts-ignore
   delete opt.url;
   const id = downloadTaskId++;
   let lastReceivedSize = 0;
@@ -393,7 +417,7 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
       if (lastProgressTime) {
         const duration = now - lastProgressTime;
         const size = receivedSize - lastReceivedSize;
-        speed = (size / duration * 1000) || 0;
+        speed = (size / duration) * 1000 || 0;
       }
       lastReceivedSize = receivedSize;
       lastProgressTime = now;
@@ -416,26 +440,36 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
       ipc.callRenderer(bw, ipcKeys.downloadError, {
         downloadTaskId: id,
       });
-    }
-  }).then(downloadedItem => {
-    const time = Date.now() - __start;
-    const size = downloadedItem.getTotalBytes();
-    const speed = size / time * 1000;
-    logMain.info(`[download.done #${id}]`, `time:`, `${time + 'ms'}`, 'size:', size, 'avgSpeed:', `${filesize(speed, { standard: "iec" })}/s`);
-    ipc.callRenderer(bw, ipcKeys.downloadDone, {
-      downloadTaskId: id,
-      filename: downloadedItem.getFilename(),
-      time,
-      size,
-      speed,
+    },
+  })
+    .then((downloadedItem) => {
+      const time = Date.now() - __start;
+      const size = downloadedItem.getTotalBytes();
+      const speed = (size / time) * 1000;
+      logMain.info(
+        `[download.done #${id}]`,
+        `time:`,
+        `${time + 'ms'}`,
+        'size:',
+        size,
+        'avgSpeed:',
+        `${filesize(speed, { standard: 'iec' })}/s`,
+      );
+      ipc.callRenderer(bw, ipcKeys.downloadDone, {
+        downloadTaskId: id,
+        filename: downloadedItem.getFilename(),
+        time,
+        size,
+        speed,
+      });
+    })
+    .catch((e) => {
+      logMain.error(`[download.error #${id}]`, e);
+      ipc.callRenderer(bw, ipcKeys.downloadError, {
+        downloadTaskId: id,
+        error: e.toString(),
+      });
     });
-  }).catch(e => {
-    logMain.error(`[download.error #${id}]`, e);
-    ipc.callRenderer(bw, ipcKeys.downloadError, {
-      downloadTaskId: id,
-      error: e.toString(),
-    });
-  });
   return id;
 });
 
@@ -448,7 +482,7 @@ async function checkUpdate(auto = false) {
       const okText = isMac ? '好' : '确定';
       let clicked: Electron.MessageBoxReturnValue;
       const options = {
-        type: 'info',
+        type: 'info' as const,
         message: `检查到新版本：${versionInfo.version}`,
         detail: `点击「${okText}」前往下载`,
         buttons: [okText, '取消'],
@@ -465,7 +499,7 @@ async function checkUpdate(auto = false) {
       }
     } else if (!auto) {
       const options = {
-        type: 'info',
+        type: 'info' as const,
         message: `当前版本已是最新`,
       };
       if (mainWindow) {
@@ -477,7 +511,7 @@ async function checkUpdate(auto = false) {
   } catch (e) {
     logMain.error('[checkUpdate] error:', e);
     const options = {
-      type: 'error',
+      type: 'error' as const,
       message: `检查更新失败`,
     };
     if (mainWindow) {
@@ -490,7 +524,7 @@ async function checkUpdate(auto = false) {
 
 async function openLogDir() {
   try {
-    shell.openItem(path.dirname(log.transports.file.findLogPath()));
+    shell.openPath(path.dirname(log.transports.file.getFile().path));
   } catch (e) {
     logMain.error('[openLog] error:', e);
   }

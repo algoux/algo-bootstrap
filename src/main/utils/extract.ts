@@ -32,7 +32,11 @@ function extractEntry(file: File, targetDir: string): Promise<void> {
  * @param targetDir where to extract
  * @param clearTargetDir whether remove the targetDir first
  */
-export function extractAll(filePath: string, targetDir: string, clearTargetDir = false): Promise<void> {
+export function extractAll(
+  filePath: string,
+  targetDir: string,
+  clearTargetDir = false,
+): Promise<void> {
   return new Promise(async (resolve, reject) => {
     try {
       logMain.info('[extractAll.start]', filePath, targetDir, clearTargetDir);
@@ -45,18 +49,21 @@ export function extractAll(filePath: string, targetDir: string, clearTargetDir =
       // }
       // logMain.info('[extractAll.done]', filePath, targetDir);
       // resolve();
-      clearTargetDir && await fs.emptyDir(targetDir);
+      clearTargetDir && (await fs.emptyDir(targetDir));
       const rs = fs.createReadStream(filePath);
-      rs.on('error', e => reject(e));
+      rs.on('error', (e) => reject(e));
       rs.pipe(unzipper.Extract({ path: targetDir }))
         .promise()
-        .then(r => {
-          logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`, filePath, targetDir);
-          resolve(r);
-        }, e => {
-          logMain.error('[extractAll.error]', filePath, targetDir, e);
-          reject(e);
-        });
+        .then(
+          (r) => {
+            logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`, filePath, targetDir);
+            resolve(r);
+          },
+          (e) => {
+            logMain.error('[extractAll.error]', filePath, targetDir, e);
+            reject(e);
+          },
+        );
     } catch (e) {
       logMain.error('[extractAll.error]', filePath, targetDir, e);
       reject(e);
@@ -79,7 +86,7 @@ export function getUncompressedSize(filePath: string): Promise<number> {
       logMain.error('[getUncompressedSize.error]', filePath, e);
       reject(e);
     }
-  })
+  });
 }
 
 /**
@@ -91,12 +98,16 @@ export function getUncompressedSize(filePath: string): Promise<number> {
 export function loadOne(filePath: string, entry: string, format?: 'buffer'): Promise<Buffer>;
 export function loadOne(filePath: string, entry: string, format: 'string'): Promise<string>;
 export function loadOne<T = any>(filePath: string, entry: string, format: 'json'): Promise<T>;
-export function loadOne(filePath: string, entry: string, format: 'buffer' | 'string' | 'json' = 'buffer'): Promise<Buffer | string | any> {
+export function loadOne(
+  filePath: string,
+  entry: string,
+  format: 'buffer' | 'string' | 'json' = 'buffer',
+): Promise<Buffer | string | any> {
   return new Promise(async (resolve, reject) => {
     try {
       logMain.info('[loadOne]', filePath, entry);
       const directory = await unzipper.Open.file(filePath);
-      const file = directory.files.find(f => f.type === 'File' && f.path === entry);
+      const file = directory.files.find((f) => f.type === 'File' && f.path === entry);
       if (!file) {
         reject(Error('No such entry: ' + entry));
         return;

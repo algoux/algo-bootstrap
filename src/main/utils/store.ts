@@ -3,7 +3,7 @@ import Store from 'electron-store';
 export const appConf = new Store<IAppConf>({
   name: 'conf',
   fileExtension: 'abstorage',
-  serialize: value => JSON.stringify(value, null, '  '),
+  serialize: (value) => JSON.stringify(value, null, 2),
   defaults: {
     uid: '',
   },

@@ -1,7 +1,8 @@
 import sm from './modules';
-import { remote } from 'electron';
+import { getCurrentWindow } from '@electron/remote';
 
 export const windowProgress = {
-  start: () => sm.platform.isWindows && remote.getCurrentWindow().setProgressBar(0, { mode: 'indeterminate' }),
-  end: () => sm.platform.isWindows && remote.getCurrentWindow().setProgressBar(-1),
+  start: () =>
+    sm.platform.isWindows && getCurrentWindow().setProgressBar(0, { mode: 'indeterminate' }),
+  end: () => sm.platform.isWindows && getCurrentWindow().setProgressBar(-1),
 };

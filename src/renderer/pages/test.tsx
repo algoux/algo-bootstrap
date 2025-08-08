@@ -6,7 +6,7 @@ import { Button, Progress } from 'antd';
 
 import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
-import { remote } from 'electron';
+import { dialog, getCurrentWindow } from '@electron/remote';
 import sm from '@/utils/modules';
 import { logRenderer } from 'common/utils/logger';
 import msg from '@/utils/msg';
@@ -18,8 +18,7 @@ import { DispatchProps } from '@/typings/props';
 
 const { req, Respack } = sm;
 
-export interface ITestProps {
-}
+export interface ITestProps {}
 
 interface State {
   ipc: string;
@@ -79,7 +78,7 @@ class Test extends React.Component<Props, State> {
     const ret = await ipc.callMain(ipcKeys.getResPack, 'wa');
     console.log('ipc ret:', ret);
     this.setState({ ipc: JSON.stringify(ret) });
-  }
+  };
 
   getEnvironments = async () => {
     const env = await this.props.dispatch({
@@ -89,17 +88,19 @@ class Test extends React.Component<Props, State> {
       },
     });
     logRenderer.info('getEnvironments:', env);
-  }
+  };
 
   testRemoteGlobal = async () => {
     logRenderer.info('go req');
     // logRenderer.warn('go log');
-    const ret = await req.get<IApiResp<{ apis: string[], help: string }>>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
+    const ret = await req.get<IApiResp<{ apis: string[]; help: string }>>(
+      'https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng',
+    );
     logRenderer.warn('get ret', ret);
     this.setState({
       remoteGlobal: ret.data!.help,
     });
-  }
+  };
 
   openRespack = async () => {
     // const res = await remote.dialog.showMessageBox(remote.getCurrentWindow(), {
@@ -109,11 +110,9 @@ class Test extends React.Component<Props, State> {
     //   type: "error",
     // });
     // console.log('res', res);
-    const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+    const res = await dialog.showOpenDialog(getCurrentWindow(), {
       properties: ['openFile'],
-      filters: [
-        { name: 'Algo Bootstrap 资源包', extensions: ['respack'] },
-      ],
+      filters: [{ name: 'Algo Bootstrap 资源包', extensions: ['respack'] }],
     });
     const respackPath = res.filePaths ? res.filePaths[0] : '';
     this.setState({
@@ -136,14 +135,14 @@ class Test extends React.Component<Props, State> {
         msg.error('应用资源包失败');
       }
     }
-  }
+  };
 
   getMingwTotalSize = async () => {
     const size = await sm.envInstaller.getMingwTotalSize();
     this.setState({
       mingwTotalSize: size,
     });
-  }
+  };
 
   pollMingwUncompressedSize = async () => {
     try {
@@ -151,12 +150,12 @@ class Test extends React.Component<Props, State> {
       this.setState({
         mingwUncompressedSize: size,
       });
-      remote.getCurrentWindow().setProgressBar(size / this.state.mingwTotalSize);
-    } catch (e) { }
+      getCurrentWindow().setProgressBar(size / this.state.mingwTotalSize);
+    } catch (e) {}
     this._pollMingwSizeTimer = setTimeout(() => {
       this.pollMingwUncompressedSize();
     }, 1000);
-  }
+  };
 
   installGcc = async () => {
     try {
@@ -174,10 +173,10 @@ class Test extends React.Component<Props, State> {
     } finally {
       clearTimeout(this._pollMingwSizeTimer!);
       if (sm.platform.isWindows) {
-        remote.getCurrentWindow().setProgressBar(-1);
+        getCurrentWindow().setProgressBar(-1);
       }
     }
-  }
+  };
 
   installPython = async () => {
     try {
@@ -189,7 +188,7 @@ class Test extends React.Component<Props, State> {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
     }
-  }
+  };
 
   installCpplint = async () => {
     try {
@@ -201,7 +200,7 @@ class Test extends React.Component<Props, State> {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
     }
-  }
+  };
 
   installVSCode = async () => {
     try {
@@ -213,7 +212,7 @@ class Test extends React.Component<Props, State> {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
     }
-  }
+  };
 
   installVsix = async (vsixId: SupportedVSIXId) => {
     try {
@@ -227,10 +226,10 @@ class Test extends React.Component<Props, State> {
       logRenderer.error(`[install] install failed:`, e);
       msg.error('安装环境时发生错误');
     }
-  }
+  };
 
   initializeProject = async () => {
-    const res = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+    const res = await dialog.showOpenDialog(getCurrentWindow(), {
       properties: ['openDirectory'],
     });
     const projectPath = res.filePaths ? res.filePaths[0] : '';
@@ -254,17 +253,17 @@ class Test extends React.Component<Props, State> {
         msg.error('初始化项目时发生错误');
       }
     }
-  }
+  };
 
   openProject = async (projectPath: string) => {
     try {
       logRenderer.info('[openProject]', projectPath);
-      projectPath && await sm.vsc.openProject(projectPath);
+      projectPath && (await sm.vsc.openProject(projectPath));
     } catch (e) {
       logRenderer.info('[openProject]', e);
       msg.error('初始化项目时发生错误');
     }
-  }
+  };
 
   testDownload = async () => {
     const downloadTaskId = await ipc.callMain(ipcKeys.download, {
@@ -278,7 +277,7 @@ class Test extends React.Component<Props, State> {
     this.setState({
       downloadTaskId,
     });
-  }
+  };
 
   render() {
     return (
@@ -287,26 +286,63 @@ class Test extends React.Component<Props, State> {
           <h1>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
           {/* TODO 允许自定义向导名称，影响 renderer 和 sudo prompt */}
           <p>接下来，向导将指引你完成安装和配置。</p>
-          <Button style={{ marginTop: '20px' }} onClick={this.testDownload}>下载</Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.testDownload}>
+            下载
+          </Button>
           <br />
-          <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>检查环境</Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.getEnvironments}>
+            检查环境
+          </Button>
           {/* <Button style={{ marginTop: '20px' }} onClick={this.testRemoteGlobal}>开始2</Button> */}
-          <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>选择资源包</Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.openRespack}>
+            选择资源包
+          </Button>
           <br />
-          <Button style={{ marginTop: '20px' }} onClick={this.installGcc}>安装 GCC</Button>
-          <Button style={{ marginTop: '20px' }} onClick={this.installPython}>安装 Python</Button>
-          <Button style={{ marginTop: '20px' }} onClick={this.installCpplint}>安装 cpplint</Button>
-          <Button style={{ marginTop: '20px' }} onClick={this.installVSCode}>安装 VS Code</Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.installGcc}>
+            安装 GCC
+          </Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.installPython}>
+            安装 Python
+          </Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.installCpplint}>
+            安装 cpplint
+          </Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.installVSCode}>
+            安装 VS Code
+          </Button>
           <br />
-          {sm.envChecker.VSIXIds.map(vsixId => {
-            return <Button key={vsixId} style={{ marginTop: '20px' }} onClick={() => this.installVsix(vsixId)}>{vsixId.split('.')[1]}</Button>;
+          {sm.envChecker.VSIXIds.map((vsixId) => {
+            return (
+              <Button
+                key={vsixId}
+                style={{ marginTop: '20px' }}
+                onClick={() => this.installVsix(vsixId)}
+              >
+                {vsixId.split('.')[1]}
+              </Button>
+            );
           })}
           <br />
-          <Button style={{ marginTop: '20px' }} onClick={this.initializeProject}>初始化 VSC 项目</Button>
-          <Button style={{ marginTop: '20px' }} onClick={() => this.openProject(this.state.projectPath)}>打开项目</Button>
+          <Button style={{ marginTop: '20px' }} onClick={this.initializeProject}>
+            初始化 VSC 项目
+          </Button>
+          <Button
+            style={{ marginTop: '20px' }}
+            onClick={() => this.openProject(this.state.projectPath)}
+          >
+            打开项目
+          </Button>
 
-          <Progress percent={this.state.mingwUncompressedSize / this.state.mingwTotalSize * 100} status="active" showInfo={false} />
-          <h4>test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: "iec" })} / {filesize(this.state.mingwTotalSize, { standard: "iec" })} ({formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})</h4>
+          <Progress
+            percent={(this.state.mingwUncompressedSize / this.state.mingwTotalSize) * 100}
+            status="active"
+            showInfo={false}
+          />
+          <h4>
+            test mingw size: {filesize(this.state.mingwUncompressedSize, { standard: 'iec' })} /{' '}
+            {filesize(this.state.mingwTotalSize, { standard: 'iec' })} (
+            {formatPercentage(this.state.mingwUncompressedSize, this.state.mingwTotalSize)})
+          </h4>
           <h4>test respack path: {this.state.respackPath}</h4>
           <h4>test remote require: {this.state.remoteGlobal}</h4>
           <h4>test env: {JSON.stringify(this.props.env.environments)}</h4>

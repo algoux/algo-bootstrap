@@ -1,10 +1,10 @@
-import { remote } from "electron";
+import { dialog, getCurrentWindow } from '@electron/remote';
 import sm from './modules';
 
 const Platform = sm.platform.Platform;
 
 function success(message: string, detail?: string) {
-  remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+  dialog.showMessageBox(getCurrentWindow(), {
     buttons: [],
     type: 'info',
     message,
@@ -13,7 +13,7 @@ function success(message: string, detail?: string) {
 }
 
 function error(message: string, detail?: string) {
-  remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+  dialog.showMessageBox(getCurrentWindow(), {
     buttons: [],
     type: 'error',
     message,
@@ -27,14 +27,16 @@ function confirm(message: string, detail?: string) {
     [Platform.darwin]: ['好', '取消'],
     [Platform.linux]: ['确定', '取消'],
   };
-  return remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-    buttons: buttonsMap[sm.platform.currentPlatform],
-    type: 'question',
-    message,
-    detail,
-    defaultId: 0,
-    cancelId: 1,
-  }).then(r => r.response === 0);
+  return dialog
+    .showMessageBox(getCurrentWindow(), {
+      buttons: buttonsMap[sm.platform.currentPlatform],
+      type: 'question',
+      message,
+      detail,
+      defaultId: 0,
+      cancelId: 1,
+    })
+    .then((r) => r.response === 0);
 }
 
 const msg = {
