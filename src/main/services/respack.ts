@@ -62,7 +62,8 @@ export default class Respack {
   }
 
   public static async getOnlineVersion(): Promise<ICheckVersionInfo> {
-    const versionInfo = await req.get<ICheckRespackVersion>(api.respack.version);
+    // const versionInfo = await req.get<ICheckRespackVersion>(api.respack.version);
+    const versionInfo = await req.get<any>(api.respack.version);
     logMain.info('[Respack] [getOnlineVersion]', versionInfo);
     return versionInfo[currentPlatform];
   }

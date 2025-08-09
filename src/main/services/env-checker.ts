@@ -1,5 +1,5 @@
 import { logMain } from 'common/utils/logger';
-import { isMac, SupportedPlatform, Platform } from '@/utils/platform';
+import { isMac, SupportedPlatformArch, Platform } from '@/utils/platform';
 import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
@@ -60,7 +60,7 @@ async function findPath(cmd: string) {
   const cmdMap: Record<SupportedPlatform, string> = {
     [Platform.win32]: 'where',
     [Platform.darwin]: 'which',
-    [Platform.linux]: 'which',
+    // [Platform.linux]: 'which',
   };
   try {
     const { stdout, stderr } = await spawn('[findPath]', cmdMap[process.platform], [cmd]);

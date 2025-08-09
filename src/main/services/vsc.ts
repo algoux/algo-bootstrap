@@ -36,11 +36,11 @@ async function genTmplData() {
     gccPath: {
       [Platform.win32]: fmt(isWindows ? environments.gcc.path : undefined, 'C:\\MinGW64\\bin\\g++.exe'),
       [Platform.darwin]: fmt(isMac ? environments.gcc.path : undefined, '/usr/bin/gcc'),
-      [Platform.linux]: fmt(isLinux ? environments.gcc.path : undefined, '/usr/bin/gcc'),
+      // [Platform.linux]: fmt(isLinux ? environments.gcc.path : undefined, '/usr/bin/gcc'),
     },
     gdbPath: {
       [Platform.win32]: fmt(isWindows ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined, 'C:\\MinGW64\\bin\\gdb.exe'),
-      [Platform.linux]: fmt(isLinux ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined, '/usr/bin/gdb'),
+      // [Platform.linux]: fmt(isLinux ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined, '/usr/bin/gdb'),
     },
     cpplintPath: fmt(environments.cpplint.path, ''),
   };

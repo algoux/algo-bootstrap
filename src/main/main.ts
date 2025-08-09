@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import { app, BrowserWindow, nativeTheme, Menu, shell, dialog } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
@@ -6,11 +7,11 @@ import ipcKeys from 'common/configs/ipc';
 import _modules from '@/modules';
 import { getEnvironments } from '@/services/env-checker';
 import { logMain } from 'common/utils/logger';
-import { isMac } from '@/utils/platform';
+import { currentPlatformArch, isMac, isPlatformArchIsSupported } from '@/utils/platform';
 import constants from 'common/configs/constants';
 import req from '@/utils/request';
 import api from 'common/configs/apis';
-import compareVersions from 'compare-versions';
+import { compare } from 'compare-versions';
 import log from 'electron-log';
 import { currentPlatform } from '@/utils/platform';
 import { download } from 'electron-dl';
@@ -340,13 +341,35 @@ if (!gotTheLock) {
     }
   });
 
-  app.on('ready', () => {
+  app.on('ready', async () => {
     // 初始化 remote 模块
     initialize();
 
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
     createWindow();
+
+    if (!isPlatformArchIsSupported()) {
+      const okText = isMac ? '好' : '确定';
+      const options = {
+        type: 'error' as const,
+        message: `当前平台未支持：${currentPlatformArch}`,
+        detail: `点击「${okText}」转到官方网站查看最新版本说明`,
+        buttons: [okText, '退出'],
+        defaultId: 0,
+        cancelId: 1,
+      };
+      const promise = mainWindow
+        ? dialog.showMessageBox(mainWindow, options)
+        : dialog.showMessageBox(options);
+      const clicked = await promise;
+      if (clicked?.response === 0) {
+        await shell.openExternal(constants.site);
+      }
+      app.quit();
+      return;
+    }
+
     checkUpdate(true);
   });
 }
@@ -476,14 +499,15 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
 async function checkUpdate(auto = false) {
   try {
     const res: ICheckAppVersion = await req.get(api.version);
-    logMain.info('[checkUpdate]', res);
-    const versionInfo: ICheckVersionInfo = res[currentPlatform];
-    if (compareVersions.compare(app.getVersion(), versionInfo.version, '<')) {
+    const latestVersion = res.version;
+    const versionInfo = res[currentPlatformArch];
+    logMain.info('[checkUpdate]', latestVersion, res);
+    if (compare(app.getVersion(), latestVersion, '<')) {
       const okText = isMac ? '好' : '确定';
       let clicked: Electron.MessageBoxReturnValue;
       const options = {
         type: 'info' as const,
-        message: `检查到新版本：${versionInfo.version}`,
+        message: `检查到新版本：${latestVersion}`,
         detail: `点击「${okText}」前往下载`,
         buttons: [okText, '取消'],
         defaultId: 0,

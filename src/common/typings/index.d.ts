@@ -5,7 +5,8 @@ type _GlobalSharedModules = typeof import('common/../main/modules').default;
 // type _GlobalEnvironment = PromiseResolveType<ReturnType<typeof import('common/../main/services/env-checker').default>>;
 
 type SupportedPlatform = import('common/../main/utils/platform').SupportedPlatform;
-type SupportedEnvId = Exclude<keyof IEnvironments, 'vsix'>
+type SupportedPlatformArch = import('common/../main/utils/platform').SupportedPlatformArch;
+type SupportedEnvId = Exclude<keyof IEnvironments, 'vsix'>;
 type SupportedVSIXId = import('common/../main/services/env-checker').SupportedVSIXId;
 
 interface IApiResp<T = undefined> {
@@ -25,7 +26,9 @@ interface ICheckEnvironmentResultInstalled {
   path: string | null;
 }
 
-type ICheckEnvironmentResult = ICheckEnvironmentResultNotInstalled | ICheckEnvironmentResultInstalled;
+type ICheckEnvironmentResult =
+  | ICheckEnvironmentResultNotInstalled
+  | ICheckEnvironmentResultInstalled;
 
 interface IEnvironments {
   gcc: ICheckEnvironmentResult;
@@ -52,16 +55,12 @@ interface IRespackManifest {
 }
 
 interface ICheckVersionInfo {
-  version: string;
   url: string;
+  md5: string;
 }
 
-interface ICheckAppVersion {
-  win32: ICheckVersionInfo;
-  darwin: ICheckVersionInfo;
-}
-
-interface ICheckRespackVersion {
-  win32: ICheckVersionInfo;
-  darwin: ICheckVersionInfo;
-}
+type ICheckAppVersion = {
+  [key in SupportedPlatformArch]: ICheckVersionInfo;
+} & {
+  version: string;
+};
