@@ -32,8 +32,7 @@ interface ILocation {
 
 // models
 
-interface IGlobalState {
-}
+interface IGlobalState {}
 
 interface IEnvState {
   environments: IEnvironments;
@@ -42,6 +41,19 @@ interface IEnvState {
 interface IRespackState {
   hasRespack: boolean;
   manifest: IRespackManifest | null;
+}
+
+interface IResourcesState {
+  resourceIndex: Record<
+    /** ResourceId */ string,
+    /** matched the only resource index item */ {
+      version: string;
+      path: string;
+      md5: string;
+      size: number;
+      updatedAt: string;
+    }
+  >;
 }
 
 interface IProject {
@@ -67,3 +79,5 @@ type EffectKeys =
   | 'respack/getOnlineRespackVersion'
   | 'projects/addProject'
   | 'projects/deleteProject'
+  | 'resources/getResourceIndexItem'
+  | 'resources/getResourceIndexItems';

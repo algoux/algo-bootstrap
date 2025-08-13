@@ -1,22 +1,35 @@
-import { logMain } from 'common/utils/logger';
-import { isMac, SupportedPlatformArch, Platform } from '@/utils/platform';
+import fs from 'fs-extra';
+import path from 'path';
+import { logMain } from '@/utils/logger';
+import { isMac } from '@/utils/platform';
+import { Platform } from 'common/configs/platform';
 import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
+import { ResourceId } from 'common/configs/resources';
 
-export const EnvIds = ['gcc', 'gdb', 'python', 'cpplint', 'code'] as SupportedEnvId[];
+export const EnvIds = ['gcc', 'gdb', 'python', 'cppcheck', 'cpplint', 'code'] as SupportedEnvId[];
 
-export enum VSIXId {
-  'ms-vscode.cpptools' = 'ms-vscode.cpptools',
-  'formulahendry.code-runner' = 'formulahendry.code-runner',
-  'streetsidesoftware.code-spell-checker' = 'streetsidesoftware.code-spell-checker',
-  'mine.cpplint' = 'mine.cpplint',
-  'vadimcn.vscode-lldb' = 'vadimcn.vscode-lldb',
-}
+const VSIXIdMap = {
+  [ResourceId['vsix.divyanshuagrawal.competitive-programming-helper']]:
+    'divyanshuagrawal.competitive-programming-helper',
+  [ResourceId['vsix.editorconfig.editorconfig']]: 'editorconfig.editorconfig',
+  [ResourceId['vsix.formulahendry.code-runner']]: 'formulahendry.code-runner',
+  [ResourceId['vsix.ms-ceintl.vscode-language-pack-zh-hans']]:
+    'ms-ceintl.vscode-language-pack-zh-hans',
+  [ResourceId['vsix.ms-python.debugpy']]: 'ms-python.debugpy',
+  [ResourceId['vsix.ms-python.python']]: 'ms-python.python',
+  [ResourceId['vsix.ms-python.vscode-pylance']]: 'ms-python.vscode-pylance',
+  [ResourceId['vsix.ms-python.vscode-python-envs']]: 'ms-python.vscode-python-envs',
+  [ResourceId['vsix.ms-vscode.cpptools']]: 'ms-vscode.cpptools',
+  [ResourceId['vsix.qiumingge.cpp-check-lint']]: 'qiumingge.cpp-check-lint',
+  [ResourceId['vsix.streetsidesoftware.code-spell-checker']]:
+    'streetsidesoftware.code-spell-checker',
+  [ResourceId['vsix.usernamehw.errorlens']]: 'usernamehw.errorlens',
+  [ResourceId['vsix.vadimcn.vscode-lldb']]: 'vadimcn.vscode-lldb',
+};
 
-export type SupportedVSIXId = keyof typeof VSIXId;
-
-export const VSIXIds = (isMac ? Object.keys(VSIXId) : Object.keys(VSIXId).filter(id => id !== 'vadimcn.vscode-lldb')) as SupportedVSIXId[];
+export const VSIXIds = Object.values(VSIXIdMap);
 
 const emptyEnvironments = genEmptyEnvironments();
 
@@ -26,20 +39,22 @@ function genNotInstalled(): ICheckEnvironmentResultNotInstalled {
   return { installed: false };
 }
 
-function genInstalled(
+function genInstalled<T = any>(
   version: ICheckEnvironmentResultInstalled['version'],
-  path: ICheckEnvironmentResultInstalled['path']
-): ICheckEnvironmentResultInstalled {
+  path: ICheckEnvironmentResultInstalled['path'],
+  meta: T = {} as T,
+): ICheckEnvironmentResultInstalled<T> {
   return {
     installed: true,
     version,
     path,
+    meta,
   };
 }
 
 export function genEmptyVSIXMap() {
   const map = {};
-  VSIXIds.map(id => {
+  VSIXIds.map((id) => {
     map[id] = genNotInstalled();
   });
   return map as Record<SupportedVSIXId, ICheckEnvironmentResult>;
@@ -50,6 +65,7 @@ export function genEmptyEnvironments(): IEnvironments {
     gcc: genNotInstalled(),
     gdb: genNotInstalled(),
     python: genNotInstalled(),
+    cppcheck: genNotInstalled(),
     cpplint: genNotInstalled(),
     code: genNotInstalled(),
     vsix: genEmptyVSIXMap(),
@@ -65,8 +81,36 @@ async function findPath(cmd: string) {
   try {
     const { stdout, stderr } = await spawn('[findPath]', cmdMap[process.platform], [cmd]);
     return matchOne(/(.*)/, parseStringFromProcessOutput(stdout || stderr));
-  } catch (e) { }
+  } catch (e) {}
   return null;
+}
+
+export async function findCommandsInPath(
+  searchRegExp: RegExp,
+): Promise<{ command: string; path: string }[]> {
+  const pathEnv = process.env.PATH || '';
+  const pathDirs = pathEnv.split(path.delimiter);
+  const results = [];
+
+  for (const dir of pathDirs) {
+    try {
+      const files = await fs.promises.readdir(dir);
+      for (const file of files) {
+        if (searchRegExp.test(file)) {
+          const fullPath = path.join(dir, file);
+          try {
+            await fs.promises.access(fullPath, fs.constants.X_OK);
+            results.push({
+              command: file,
+              path: fullPath,
+            });
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  }
+
+  return results;
 }
 
 export async function checkXCodeCLT(): Promise<boolean> {
@@ -75,26 +119,21 @@ export async function checkXCodeCLT(): Promise<boolean> {
       await spawn('[checkXCodeCLT]', 'xcode-select', ['-p']);
       return true;
     }
-  } catch (e) { }
+  } catch (e) {}
   return false;
 }
 
-export async function checkGcc(): Promise<ICheckEnvironmentResult> {
+export async function checkGcc(): Promise<ICheckEnvironmentResult<ICheckEnvironmentResultMetaGcc>> {
   const GCC_REG = /^gcc version (.*)$/m;
-  const APPLE_CLANG_REG = /version (.*)$/m;
+  const CLANG_REG = /clang version (.*)$/m;
   try {
-    if (isMac && !await checkXCodeCLT()) {
+    if (isMac && !(await checkXCodeCLT())) {
       return genNotInstalled();
     }
     const { stdout, stderr } = await spawn('[checkGcc]', 'gcc', ['-v']);
-    let ver: string | null = null;
-    if (isMac) {
-      ver =
-        matchOne(APPLE_CLANG_REG, parseStringFromProcessOutput(stderr || stdout)) ||
-        matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout));
-    } else {
-      ver = matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout));
-    }
+    let ver: string | null =
+      matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout)) ||
+      matchOne(CLANG_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       // if (isWindows) {
       //   // 非 MinGW-W64 版，VSC 不支持调试
@@ -102,9 +141,28 @@ export async function checkGcc(): Promise<ICheckEnvironmentResult> {
       //     return genNotInstalled();
       //   }
       // }
-      return genInstalled(ver, await findPath('gcc'));
+      const alternativesCommands = await findCommandsInPath(/^gcc-\d+$/);
+      const alternatives: ICheckEnvironmentResultMetaGcc['alternatives'] = [];
+      for (const alternative of alternativesCommands) {
+        const { stdout, stderr } = await spawn('[checkGcc]', alternative.command, ['-v']);
+        const version =
+          matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout)) ||
+          matchOne(CLANG_REG, parseStringFromProcessOutput(stderr || stdout));
+        if (version) {
+          alternatives.push({
+            command: alternative.command,
+            path: alternative.path,
+            version,
+            type: version.includes('clang') ? 'clang' : 'gcc',
+          });
+        }
+      }
+      return genInstalled(ver, await findPath('gcc'), {
+        type: ver.includes('clang') ? 'clang' : 'gcc',
+        alternatives,
+      });
     }
-  } catch (e) { }
+  } catch (e) {}
   return genNotInstalled();
 }
 
@@ -116,19 +174,32 @@ export async function checkGdb(): Promise<ICheckEnvironmentResult> {
     if (ver) {
       return genInstalled(ver, await findPath('gdb'));
     }
-  } catch (e) { }
+  } catch (e) {}
   return genNotInstalled();
 }
 
-export async function checkPython(): Promise<ICheckEnvironmentResult> {
+export async function checkPython(): Promise<
+  ICheckEnvironmentResult<ICheckEnvironmentResultMetaPython>
+> {
   const PYTHON_REG = /^Python (.*)$/m;
+  try {
+    const { stdout, stderr } = await spawn('[checkPython]', 'python3', ['-V']);
+    const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
+    if (ver) {
+      return genInstalled(ver, await findPath('python3'), {
+        isPython3: /3\.\d+\.\d+/.test(ver),
+      });
+    }
+  } catch (e) {}
   try {
     const { stdout, stderr } = await spawn('[checkPython]', 'python', ['-V']);
     const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
-      return genInstalled(ver, await findPath('python'));
+      return genInstalled(ver, await findPath('python'), {
+        isPython3: /3\.\d+\.\d+/.test(ver),
+      });
     }
-  } catch (e) { }
+  } catch (e) {}
   return genNotInstalled();
 }
 
@@ -140,7 +211,19 @@ export async function checkCpplint(): Promise<ICheckEnvironmentResult> {
     if (ver) {
       return genInstalled(ver, await findPath('cpplint'));
     }
-  } catch (e) { }
+  } catch (e) {}
+  return genNotInstalled();
+}
+
+export async function checkCppcheck(): Promise<ICheckEnvironmentResult> {
+  const CPP_CHECK_REG = /^Cppcheck (.*)$/m;
+  try {
+    const { stdout, stderr } = await spawn('[checkCppcheck]', 'cppcheck', ['--version']);
+    const ver = matchOne(CPP_CHECK_REG, parseStringFromProcessOutput(stderr || stdout));
+    if (ver) {
+      return genInstalled(ver, await findPath('cppcheck'));
+    }
+  } catch (e) {}
   return genNotInstalled();
 }
 
@@ -161,17 +244,22 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
         if (ver) {
           return genInstalled(ver, binPath);
         }
-      } catch (e) { }
+      } catch (e) {}
     }
   }
   return genNotInstalled();
 }
 
-export async function checkVsix(codePath: string): Promise<Record<SupportedVSIXId, ICheckEnvironmentResult>> {
+export async function checkVsix(
+  codePath: string,
+): Promise<Record<SupportedVSIXId, ICheckEnvironmentResult>> {
   try {
     const vsixMap = genEmptyVSIXMap();
-    const { stdout, stderr } = await spawn('[checkVSIX]', `"${codePath}"`, ['--list-extensions', '--show-versions']);
-    VSIXIds.forEach(vsixId => {
+    const { stdout, stderr } = await spawn('[checkVSIX]', `"${codePath}"`, [
+      '--list-extensions',
+      '--show-versions',
+    ]);
+    VSIXIds.forEach((vsixId) => {
       const reg = new RegExp(`^${vsixId}@([_.-\\w]+)$`, 'm');
       const ver = matchOne(reg, parseStringFromProcessOutput(stderr || stdout));
       if (ver) {
@@ -179,7 +267,7 @@ export async function checkVsix(codePath: string): Promise<Record<SupportedVSIXI
       }
     });
     return vsixMap;
-  } catch (e) { }
+  } catch (e) {}
   return genEmptyVSIXMap();
 }
 
@@ -197,17 +285,19 @@ export async function getEnvironments(force = false) {
   const gcc = await checkGcc();
   const gdb = isMac ? genNotInstalled() : await checkGdb();
   const python = await checkPython();
+  const cppcheck = await checkCppcheck();
   const cpplint = await checkCpplint();
   const code = await checkVSCode();
   const environmentResult: IEnvironments = {
     gcc,
     gdb,
     python,
+    cppcheck,
     cpplint,
     code,
     vsix: code.installed && code.path ? await checkVsix(code.path) : genEmptyVSIXMap(),
   };
-  logMain.info('[getEnvironments]', environmentResult);
+  logMain.info('[getEnvironments]', JSON.stringify(environmentResult, null, 2));
   environments = environmentResult;
   return environmentResult;
 }
@@ -241,16 +331,32 @@ export async function isVsixInstalled(vsixId: SupportedVSIXId) {
 
 export async function getWindowsSystemPath() {
   try {
-    const { stdout, stderr } = await spawn('[getWindowsSystemPath]', 'reg', ['query', `"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"`, '/v', 'PATH']);
-    return matchOne(/PATH    REG_\S*SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr));
-  } catch (e) { }
+    const { stdout, stderr } = await spawn('[getWindowsSystemPath]', 'reg', [
+      'query',
+      `"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"`,
+      '/v',
+      'PATH',
+    ]);
+    return matchOne(
+      /PATH    REG_\S*SZ    ([\S ]+)/,
+      parseStringFromProcessOutput(stdout || stderr),
+    );
+  } catch (e) {}
   return null;
 }
 
 export async function getWindowsUserPath() {
   try {
-    const { stdout, stderr } = await spawn('[getWindowsUserPath]', 'reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', 'PATH']);
-    return matchOne(/PATH    REG_\S*SZ    ([\S ]+)/, parseStringFromProcessOutput(stdout || stderr));
-  } catch (e) { }
+    const { stdout, stderr } = await spawn('[getWindowsUserPath]', 'reg', [
+      'query',
+      'HKEY_CURRENT_USER\\Environment',
+      '/v',
+      'PATH',
+    ]);
+    return matchOne(
+      /PATH    REG_\S*SZ    ([\S ]+)/,
+      parseStringFromProcessOutput(stdout || stderr),
+    );
+  } catch (e) {}
   return null;
 }

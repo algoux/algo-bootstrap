@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import unzipper, { File } from 'unzipper';
 import * as path from 'path';
-import { logMain } from 'common/utils/logger';
+import { logMain } from '@/utils/logger';
 
 // defunct. ref: https://github.com/ZJONSSON/node-unzipper/issues/104
 function extractEntry(file: File, targetDir: string): Promise<void> {

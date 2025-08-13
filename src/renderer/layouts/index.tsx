@@ -149,15 +149,22 @@ class RootLayout extends React.Component<Props, State> {
             style={{ backgroundColor: 'transparent' }}
           >
             <Menu.ItemGroup key="group-0" title="准备">
-              <Menu.Item key={pages.preparation.respack}>
+              <Menu.Item key={pages.preparation.configuration}>
+                {this.renderNavItem(
+                  pages.preparation.configuration,
+                  '配置清单',
+                  this.renderEnvRespackStatusIcon(),
+                )}
+              </Menu.Item>
+              {/* <Menu.Item key={pages.preparation.respack}>
                 {this.renderNavItem(
                   pages.preparation.respack,
                   '环境和资源包',
                   this.renderEnvRespackStatusIcon(),
                 )}
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu.ItemGroup>
-            <Menu.ItemGroup key="group-1" title="安装开发环境">
+            <Menu.ItemGroup key="group-1" title="配置开发环境">
               <Menu.Item key={pages.installer.gcc}>
                 {this.renderNavItem(
                   pages.installer.gcc,
@@ -172,13 +179,13 @@ class RootLayout extends React.Component<Props, State> {
                   this.renderEnvStatusIcon('python'),
                 )}
               </Menu.Item>
-              <Menu.Item key={pages.installer.cpplint}>
+              {/* <Menu.Item key={pages.installer.cpplint}>
                 {this.renderNavItem(
                   pages.installer.cpplint,
                   formatMessage({ id: 'env.cpplint' }),
                   this.renderEnvStatusIcon('cpplint'),
                 )}
-              </Menu.Item>
+              </Menu.Item> */}
               <Menu.Item key={pages.installer.code}>
                 {this.renderNavItem(
                   pages.installer.code,
@@ -186,15 +193,31 @@ class RootLayout extends React.Component<Props, State> {
                   this.renderEnvStatusIcon('code'),
                 )}
               </Menu.Item>
-              <Menu.Item key={pages.installer.vsix}>
+              {/* <Menu.Item key={pages.installer.vsix}>
                 {this.renderNavItem(
                   pages.installer.vsix,
                   formatMessage({ id: 'env.vsix' }),
                   this.renderVsixStatusIcon(),
                 )}
+              </Menu.Item> */}
+              <Menu.Item key={pages.installer.ext}>
+                {this.renderNavItem(
+                  pages.installer.ext,
+                  formatMessage({ id: 'env.ext' }),
+                  this.renderVsixStatusIcon(),
+                )}
+              </Menu.Item>
+              <Menu.Item key={pages.installer.magic}>
+                {this.renderNavItem(
+                  pages.installer.magic,
+                  formatMessage({ id: 'env.magic' }),
+                  this.renderVsixStatusIcon(),
+                )}
               </Menu.Item>
             </Menu.ItemGroup>
-            <Menu.Item key={pages.board}>{this.renderNavItem(pages.board, '开始使用')}</Menu.Item>
+            <Menu.ItemGroup key="group-2" title="开始使用">
+              <Menu.Item key={pages.board}>{this.renderNavItem(pages.board, '功能盘')}</Menu.Item>
+            </Menu.ItemGroup>
           </Menu>
         </Layout.Sider>
         <Layout

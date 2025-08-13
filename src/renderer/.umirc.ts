@@ -41,8 +41,30 @@ export default {
   // ],
   alias: {
     // '@': require('path').resolve(__dirname, 'src'),
-    common: require('path').resolve(__dirname, '../common'),
+    common: path.resolve(__dirname, '../common'),
   },
+  chainWebpack: (config: any) => {
+    config.resolve.alias.set('common', path.resolve(__dirname, '../common'));
+    config.resolve.modules.add(path.resolve(__dirname, '../common'));
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+    };
+    // 配置ts-loader忽略类型检查错误
+    config.module
+      .rule('ts')
+      .use('ts-loader')
+      .options({
+        transpileOnly: true,
+        ignoreDiagnostics: [1110],
+      });
+    return config;
+  },
+  define: {
+    'process.env.NODE_ENV': process.env.NODE_ENV,
+  },
+  extraBabelIncludes: [path.resolve(__dirname, '../../node_modules/electron-log')],
   externals(_context: any, request: any, callback: (error: any, result: any) => void) {
     const isDev = process.env.NODE_ENV === 'development';
     let isExternal: boolean | string = false;

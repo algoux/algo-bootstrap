@@ -8,7 +8,7 @@ import ipcKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
 import { dialog, getCurrentWindow } from '@electron/remote';
 import sm from '@/utils/modules';
-import { logRenderer } from 'common/utils/logger';
+import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { filesize } from 'filesize';
 import { formatPercentage } from 'common/utils/format';

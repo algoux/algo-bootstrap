@@ -10,6 +10,32 @@ module.exports = {
       // '@aws-sdk/client-s3': path.resolve(__dirname, '../src/main/utils/aws-s3-stub.js')
     }
   },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        include: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              ['@babel/preset-env', {
+                targets: {
+                  node: '20'
+                }
+              }]
+            ],
+            plugins: [
+              '@babel/plugin-transform-optional-chaining',
+              '@babel/plugin-transform-nullish-coalescing-operator',
+              '@babel/plugin-transform-class-properties',
+              '@babel/plugin-transform-logical-assignment-operators'
+            ]
+          }
+        }
+      }
+    ]
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.GA_TC': JSON.stringify(

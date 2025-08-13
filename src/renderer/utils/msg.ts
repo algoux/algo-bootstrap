@@ -1,7 +1,6 @@
+import { Platform } from 'common/configs/platform';
 import { dialog, getCurrentWindow } from '@electron/remote';
 import sm from './modules';
-
-const Platform = sm.platform.Platform;
 
 function success(message: string, detail?: string) {
   dialog.showMessageBox(getCurrentWindow(), {
@@ -25,7 +24,7 @@ function confirm(message: string, detail?: string) {
   const buttonsMap = {
     [Platform.win32]: ['确定', '取消'],
     [Platform.darwin]: ['好', '取消'],
-    [Platform.linux]: ['确定', '取消'],
+    // [Platform.linux]: ['确定', '取消'],
   };
   return dialog
     .showMessageBox(getCurrentWindow(), {

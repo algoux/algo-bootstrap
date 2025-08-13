@@ -4,8 +4,8 @@ type _GlobalSharedModules = typeof import('common/../main/modules').default;
 
 // type _GlobalEnvironment = PromiseResolveType<ReturnType<typeof import('common/../main/services/env-checker').default>>;
 
-type SupportedPlatform = import('common/../main/utils/platform').SupportedPlatform;
-type SupportedPlatformArch = import('common/../main/utils/platform').SupportedPlatformArch;
+type SupportedPlatform = import('common/configs/platform').SupportedPlatform;
+type SupportedPlatformArch = import('common/configs/platform').SupportedPlatformArch;
 type SupportedEnvId = Exclude<keyof IEnvironments, 'vsix'>;
 type SupportedVSIXId = import('common/../main/services/env-checker').SupportedVSIXId;
 
@@ -20,21 +20,32 @@ interface ICheckEnvironmentResultNotInstalled {
   installed: false;
 }
 
-interface ICheckEnvironmentResultInstalled {
+interface ICheckEnvironmentResultInstalled<T = any> {
   installed: true;
   version: string;
   path: string | null;
+  meta: T;
 }
 
-type ICheckEnvironmentResult =
+type ICheckEnvironmentResult<T = any> =
   | ICheckEnvironmentResultNotInstalled
-  | ICheckEnvironmentResultInstalled;
+  | ICheckEnvironmentResultInstalled<T>;
+
+type ICheckEnvironmentResultMetaGcc = {
+  type: 'gcc' | 'clang';
+  alternatives: { command: string; path: string; version: string; type: 'gcc' | 'clang' }[];
+};
+
+type ICheckEnvironmentResultMetaPython = {
+  isPython3: boolean;
+};
 
 interface IEnvironments {
-  gcc: ICheckEnvironmentResult;
+  gcc: ICheckEnvironmentResult<ICheckEnvironmentResultMetaGcc>;
   gdb: ICheckEnvironmentResult;
-  python: ICheckEnvironmentResult;
+  python: ICheckEnvironmentResult<ICheckEnvironmentResultMetaPython>;
   cpplint: ICheckEnvironmentResult;
+  cppcheck: ICheckEnvironmentResult;
   code: ICheckEnvironmentResult;
   vsix: Record<SupportedVSIXId, ICheckEnvironmentResult>;
 }

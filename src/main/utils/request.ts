@@ -2,7 +2,7 @@ import got, { Got, Options, Response } from 'got';
 import constants from 'common/configs/constants';
 // import api from 'common/configs/apis';
 import moment from 'moment';
-import { logMain } from 'common/utils/logger';
+import { logMain } from '@/utils/logger';
 
 let requestTaskId = 1;
 

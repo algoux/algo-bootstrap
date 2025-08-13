@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from '@/utils/dva';
 import router from 'umi/router';
 import ActionBar from '@/components/ActionBar';
-import { logRenderer } from 'common/utils/logger';
+import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';

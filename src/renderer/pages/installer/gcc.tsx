@@ -3,7 +3,7 @@ import { connect } from '@/utils/dva';
 import router from 'umi/router';
 import ActionBar from '@/components/ActionBar';
 import sm from '@/utils/modules';
-import { logRenderer } from 'common/utils/logger';
+import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import macStep_1 from '@/assets/guides/gcc/gcc-darwin-light-step-1.png';

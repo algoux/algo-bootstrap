@@ -5,7 +5,7 @@ import {
   PromisifySpawnOptions,
   Output,
 } from 'promisify-child-process';
-import { logProcess } from 'common/utils/logger';
+import { logProcess } from './logger';
 import constants from 'common/configs/constants';
 import sudo from 'sudo-prompt';
 import * as path from 'path';

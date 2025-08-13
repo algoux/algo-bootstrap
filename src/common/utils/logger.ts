@@ -1,19 +1,16 @@
-import log from 'electron-log';
-import { purifyObject } from './format';
+import { Logger } from 'electron-log';
+// import { purifyObject } from './format';
 
-const genLogger = (type: string, f: (...params: any) => void) => (...params: any[]) => {
-  f(type, ...params.map(param => purifyObject(param)));
-};
+const genLogger =
+  (type: string, f: (...params: any) => void) =>
+  (...params: any[]) =>
+    f(type, ...params);
 
-const genAllLoggers = (type: string) => ({
-  info: genLogger(type, log.info),
-  warn: genLogger(type, log.warn),
-  error: genLogger(type, log.error),
-  verbose: genLogger(type, log.verbose),
-  debug: genLogger(type, log.debug),
-  silly: genLogger(type, log.silly),
+export const genAllLoggers = (logger: Logger, type: string) => ({
+  info: genLogger(type, logger.info),
+  warn: genLogger(type, logger.warn),
+  error: genLogger(type, logger.error),
+  verbose: genLogger(type, logger.verbose),
+  debug: genLogger(type, logger.debug),
+  silly: genLogger(type, logger.silly),
 });
-
-export const logMain = genAllLoggers('[main]');
-export const logProcess = genAllLoggers('[process]');
-export const logRenderer = genAllLoggers('[renderer]');

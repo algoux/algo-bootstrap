@@ -3,7 +3,7 @@ import { connect } from '@/utils/dva';
 import router from 'umi/router';
 import ActionBar from '@/components/ActionBar';
 import sm from '@/utils/modules';
-import { logRenderer } from 'common/utils/logger';
+import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import windowsStep_1 from '@/assets/guides/python/python-win32-light-step-1.png';
@@ -134,8 +134,8 @@ class PythonInstaller extends React.Component<Props, State> {
         <div className="container --slide-left">
           <div className="content-block">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
-            <p>Python 已内置于 macOS，请点击「完成安装」。</p>
-            <p>如果问题依然存在，请尝试自行安装。</p>
+            <p>Python 已内置于 macOS，因此这只是一个仪式。请轻点「完成安装」。</p>
+            <p>如果此环境在你的系统上缺失，请尝试自行安装。</p>
           </div>
         </div>
         <ActionBar

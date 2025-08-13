@@ -1,5 +1,5 @@
 import { getGlobal } from '@electron/remote';
-import { purifyObject } from '@/../common/utils/format';
+import { purifyObject } from 'common/utils/format';
 
 const sharedModules: _GlobalSharedModules = getGlobal('modules');
 

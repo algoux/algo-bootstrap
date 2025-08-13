@@ -1,4 +1,4 @@
-import { logMain } from 'common/utils/logger';
+import { logMain } from '@/utils/logger';
 import req from '@/utils/request';
 import api from 'common/configs/apis';
 import * as sha from 'sha';

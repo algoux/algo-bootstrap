@@ -1,10 +1,11 @@
 import * as path from 'path';
 import fs from 'fs-extra';
 import paths from 'common/configs/paths';
-import { logMain } from 'common/utils/logger';
+import { logMain } from '@/utils/logger';
 import ejs from 'ejs';
 import { getEnvironments, isEnvInstalled, getEnvironment } from './env-checker';
-import { isWindows, isMac, isLinux, Platform } from '@/utils/platform';
+import { isWindows, isMac } from '@/utils/platform';
+import { Platform } from 'common/configs/platform';
 import { spawn } from '@/utils/child-process';
 import { app } from 'electron';
 

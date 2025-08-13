@@ -14,7 +14,7 @@ import { app } from 'electron';
 import paths from 'common/configs/paths';
 import * as path from 'path';
 import { matchOne, escapeRegExp } from 'common/utils/regexp';
-import { logMain } from 'common/utils/logger';
+import { logMain } from '@/utils/logger';
 import getFolderSize from 'get-folder-size';
 
 const RESPACK_PATH = path.join(app.getPath('userData'), paths.respack);

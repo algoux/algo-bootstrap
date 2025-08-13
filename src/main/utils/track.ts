@@ -1,7 +1,7 @@
 import ua from 'universal-analytics';
 import { v4 as uuidv4 } from 'uuid';
 import { appConf } from './store';
-import { logMain } from 'common/utils/logger';
+import { logMain } from '@/utils/logger';
 import { app } from 'electron';
 import constants from 'common/configs/constants';
 import { genUA } from './ua';

@@ -75,6 +75,7 @@
     "lodash": "^4.17.21",
     "math-precision": "^1.0.5",
     "moment": "^2.30.1",
+    "p-retry": "^4.6.2",
     "promisify-child-process": "^4.1.2",
     "sha": "^3.0.0",
     "source-map-support": "^0.5.21",

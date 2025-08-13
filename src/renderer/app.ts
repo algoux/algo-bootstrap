@@ -1,5 +1,4 @@
 import { createLogger } from 'redux-logger';
-import { logRenderer } from '../common/utils/logger';
 
 let extraConfig = {};
 

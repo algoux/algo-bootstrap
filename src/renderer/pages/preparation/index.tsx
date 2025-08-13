@@ -32,7 +32,7 @@ class Preparation extends React.Component<Props, State> {
               type: 'primary',
               text: '开始',
               onClick: () => {
-                router.push(pages.preparation.respack);
+                router.push(pages.preparation.configuration);
               },
             },
           ]}

@@ -4,7 +4,7 @@ import { List, Icon, Row, Col } from 'antd';
 import ExternalLink from '@/components/ExternalLink';
 import sm from '@/utils/modules';
 import { dialog, getCurrentWindow } from '@electron/remote';
-import { logRenderer } from 'common/utils/logger';
+import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { DispatchProps } from '@/typings/props';
 import PageAnimation from '@/components/PageAnimation';

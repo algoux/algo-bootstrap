@@ -3,6 +3,7 @@ const pages = {
   test: '/test',
   preparation: {
     index: '/preparation',
+    configuration: '/preparation/configuration',
     respack: '/preparation/respack',
   },
   installer: {
@@ -11,6 +12,8 @@ const pages = {
     cpplint: '/installer/cpplint',
     code: '/installer/code',
     vsix: '/installer/vsix',
+    ext: '/installer/ext',
+    magic: '/installer/magic',
   },
   board: '/board',
   settings: '/settings',

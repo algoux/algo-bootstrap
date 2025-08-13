@@ -6,6 +6,8 @@ import pages from '@/configs/pages';
 import PageAnimation from '@/components/PageAnimation';
 import { DispatchProps } from '@/typings/props';
 import { isAllInstalled } from '@/utils/env';
+import sm from '@/utils/modules';
+import { logRenderer } from '@/utils/logger';
 
 export interface IIndexProps {}
 
@@ -29,6 +31,22 @@ class Index extends React.Component<Props, State> {
       router.push(pages.board);
       return;
     }
+    const envComponents = sm.envComponents;
+    const resourceIds = Object.values(envComponents).flatMap((c) => c.resources);
+    logRenderer.info('fetching resource indexes:', resourceIds);
+    const { successful, failed } = await this.props.dispatch({
+      type: 'resources/getResourceIndexItems',
+      payload: {
+        resourceIds,
+      },
+    });
+    logRenderer.info(
+      'resource index items fetch completed. successful:',
+      successful,
+      'failed:',
+      failed,
+    );
+
     const hasRespack = await this.props.dispatch({
       type: 'respack/getHasRespack',
       payload: {},
@@ -58,7 +76,8 @@ function mapStateToProps(state: IState) {
     loading:
       !!state.loading.effects['env/getEnvironments'] ||
       !!state.loading.effects['respack/getHasRespack'] ||
-      !!state.loading.effects['respack/getManifest'],
+      !!state.loading.effects['respack/getManifest'] ||
+      !!state.loading.effects['resources/getResourceIndexItems'],
   };
 }
 

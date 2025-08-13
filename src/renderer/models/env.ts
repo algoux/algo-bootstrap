@@ -1,6 +1,6 @@
 import { DvaSagaEffect } from '@/utils/dva';
 import sm from '@/utils/modules';
-import { purifyObject } from '@/../common/utils/format';
+import { purifyObject } from 'common/utils/format';
 
 type CurrentState = IEnvState;
 

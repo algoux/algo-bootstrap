@@ -10,8 +10,8 @@
     "baseUrl": ".",
     "strict": true,
     "paths": {
-      "@/*": ["./*"],
-      "common/*": ["../common/*"]
+      "common/*": ["../common/*"],
+      "@/*": ["./*"]
     },
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,

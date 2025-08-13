@@ -1,4 +1,4 @@
-import { logRenderer } from '@/../common/utils/logger';
+import { logRenderer } from '@/utils/logger';
 
 function get<T = any>(key: string): T | null {
   const storage = window.localStorage;
