@@ -21,17 +21,22 @@ class Index extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
+    // TODO 可用硬盘空间检测
     // router.push(pages.test);
     // return;
+    const _envStart = performance.now();
     const environments = await this.props.dispatch({
       type: 'env/getEnvironments',
       payload: {},
     });
+    const _envEnd = performance.now();
+    logRenderer.info(`environments fetched in ${_envEnd - _envStart}ms.`);
     if (isAllInstalled(environments)) {
       router.push(pages.board);
       return;
     }
     const envComponents = sm.envComponents;
+    const _riStart = performance.now();
     const resourceIds = Object.values(envComponents).flatMap((c) => c.resources);
     logRenderer.info('fetching resource indexes:', resourceIds);
     const { successful, failed } = await this.props.dispatch({
@@ -40,8 +45,9 @@ class Index extends React.Component<Props, State> {
         resourceIds,
       },
     });
+    const _riEnd = performance.now();
     logRenderer.info(
-      'resource index items fetch completed. successful:',
+      `resource indexes fetched in ${_riEnd - _riStart}ms. successful:`,
       successful,
       'failed:',
       failed,

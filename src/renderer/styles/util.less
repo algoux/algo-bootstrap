@@ -136,7 +136,6 @@
   margin-bottom: 32px;
 }
 
-
 .--display-none {
   display: none !important;
 }
@@ -147,6 +146,10 @@
 
 .--display-block {
   display: block;
+}
+
+.--visibility-hidden {
+  visibility: hidden;
 }
 
 .--text-left {
@@ -226,11 +229,47 @@
 
 // anim
 
-@default-anim-duration: .5s;
-@default-anim-cubic-bezier: cubic-bezier(0.215, 0.610, 0.355, 1);
+@default-anim-duration: 0.5s;
+@default-anim-cubic-bezier: cubic-bezier(0.215, 0.61, 0.355, 1);
 
 .--fade-in {
   animation: fade-in @default-anim-duration @default-anim-cubic-bezier;
+}
+
+.--fade-in-delay-300 {
+  animation:
+    hidden 0.3s,
+    fade-in @default-anim-duration @default-anim-cubic-bezier 0.32s;
+}
+
+.--fade-in-delay-500 {
+  animation:
+    hidden 0.5s,
+    fade-in @default-anim-duration @default-anim-cubic-bezier 0.5s;
+}
+
+.--fade-in-delay-700 {
+  animation:
+    hidden 0.7s,
+    fade-in @default-anim-duration @default-anim-cubic-bezier 0.7s;
+}
+
+.--fade-in-delay-1000 {
+  animation:
+    hidden 1s,
+    fade-in @default-anim-duration @default-anim-cubic-bezier 1s;
+}
+
+.--fade-in-delay-1500 {
+  animation:
+    hidden 1.5s,
+    fade-in @default-anim-duration @default-anim-cubic-bezier 1.5s;
+}
+
+.--fade-in-delay-2000 {
+  animation:
+    hidden 2s,
+    fade-in @default-anim-duration @default-anim-cubic-bezier 2s;
 }
 
 .--fade-out {
@@ -258,27 +297,39 @@
 }
 
 .--p-slide-up-delay-300 {
-  animation: hidden .3s, p-slide-up @default-anim-duration @default-anim-cubic-bezier .32s;
+  animation:
+    hidden 0.3s,
+    p-slide-up @default-anim-duration @default-anim-cubic-bezier 0.32s;
 }
 
 .--p-slide-up-delay-500 {
-  animation: hidden .5s, p-slide-up @default-anim-duration @default-anim-cubic-bezier .5s;
+  animation:
+    hidden 0.5s,
+    p-slide-up @default-anim-duration @default-anim-cubic-bezier 0.5s;
 }
 
 .--p-slide-up-delay-700 {
-  animation: hidden .7s, p-slide-up @default-anim-duration @default-anim-cubic-bezier .7s;
+  animation:
+    hidden 0.7s,
+    p-slide-up @default-anim-duration @default-anim-cubic-bezier 0.7s;
 }
 
 .--p-slide-up-delay-1000 {
-  animation: hidden 1s, p-slide-up @default-anim-duration @default-anim-cubic-bezier 1s;
+  animation:
+    hidden 1s,
+    p-slide-up @default-anim-duration @default-anim-cubic-bezier 1s;
 }
 
 .--p-slide-up-delay-1500 {
-  animation: hidden 1.5s, p-slide-up @default-anim-duration @default-anim-cubic-bezier 1.5s;
+  animation:
+    hidden 1.5s,
+    p-slide-up @default-anim-duration @default-anim-cubic-bezier 1.5s;
 }
 
 .--p-slide-up-delay-2000 {
-  animation: hidden 2s, p-slide-up @default-anim-duration @default-anim-cubic-bezier 2s;
+  animation:
+    hidden 2s,
+    p-slide-up @default-anim-duration @default-anim-cubic-bezier 2s;
 }
 
 @keyframes hidden {

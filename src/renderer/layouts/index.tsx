@@ -6,6 +6,8 @@ import { RouteProps, DispatchProps } from '@/typings/props';
 import pages from '@/configs/pages';
 import { Link } from 'react-router-dom';
 import { formatMessage } from 'umi-plugin-locale';
+import { VSIXIds } from 'common/configs/resources';
+import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 
 interface IRootLayoutProps {}
 
@@ -40,15 +42,13 @@ class RootLayout extends React.Component<Props, State> {
     return null;
   };
 
-  renderEnvStatusIcon = (envId: Exclude<SupportedEnvId, 'gdb'>) => {
-    const props = this.props;
-    const environments = props.environments;
-    if (props.loadings[envId]) {
+  renderEnvStatusIcon = (module: EnvComponentModule) => {
+    const { moduleConfigStatus } = this.props;
+    if (moduleConfigStatus[module] === EnvComponentModuleConfigStatus.PROCESSING) {
       return this.renderStatusIcon('loading');
     }
-    const env = environments[envId];
-    if (env.installed) {
-      return this.renderStatusIcon('done', `已安装：${envId} ${env.version}`);
+    if (moduleConfigStatus[module] === EnvComponentModuleConfigStatus.DONE) {
+      return this.renderStatusIcon('done');
     }
     return null;
   };
@@ -60,7 +60,7 @@ class RootLayout extends React.Component<Props, State> {
       return this.renderStatusIcon('loading');
     }
     let installed = true;
-    for (const vsixId of sm.envChecker.VSIXIds) {
+    for (const vsixId of VSIXIds) {
       if (!environments.vsix[vsixId].installed) {
         installed = false;
         break;
@@ -164,19 +164,19 @@ class RootLayout extends React.Component<Props, State> {
                 )}
               </Menu.Item> */}
             </Menu.ItemGroup>
-            <Menu.ItemGroup key="group-1" title="配置开发环境">
+            <Menu.ItemGroup key="group-1" title="配置编程环境">
               <Menu.Item key={pages.installer.gcc}>
                 {this.renderNavItem(
                   pages.installer.gcc,
                   formatMessage({ id: 'env.gcc' }),
-                  this.renderEnvStatusIcon('gcc'),
+                  this.renderEnvStatusIcon(EnvComponentModule.c_cpp),
                 )}
               </Menu.Item>
               <Menu.Item key={pages.installer.python}>
                 {this.renderNavItem(
                   pages.installer.python,
                   formatMessage({ id: 'env.python' }),
-                  this.renderEnvStatusIcon('python'),
+                  this.renderEnvStatusIcon(EnvComponentModule.python),
                 )}
               </Menu.Item>
               {/* <Menu.Item key={pages.installer.cpplint}>
@@ -186,11 +186,11 @@ class RootLayout extends React.Component<Props, State> {
                   this.renderEnvStatusIcon('cpplint'),
                 )}
               </Menu.Item> */}
-              <Menu.Item key={pages.installer.code}>
+              <Menu.Item key={pages.installer.vscode}>
                 {this.renderNavItem(
-                  pages.installer.code,
-                  formatMessage({ id: 'env.code' }),
-                  this.renderEnvStatusIcon('code'),
+                  pages.installer.vscode,
+                  formatMessage({ id: 'env.vscode' }),
+                  this.renderEnvStatusIcon(EnvComponentModule.vscode),
                 )}
               </Menu.Item>
               {/* <Menu.Item key={pages.installer.vsix}>
@@ -204,14 +204,14 @@ class RootLayout extends React.Component<Props, State> {
                 {this.renderNavItem(
                   pages.installer.ext,
                   formatMessage({ id: 'env.ext' }),
-                  this.renderVsixStatusIcon(),
+                  this.renderEnvStatusIcon(EnvComponentModule.extensions),
                 )}
               </Menu.Item>
               <Menu.Item key={pages.installer.magic}>
                 {this.renderNavItem(
                   pages.installer.magic,
-                  formatMessage({ id: 'env.magic' }),
-                  this.renderVsixStatusIcon(),
+                  formatMessage({ id: 'env.finaleMagic' }),
+                  this.renderEnvStatusIcon(EnvComponentModule.magic),
                 )}
               </Menu.Item>
             </Menu.ItemGroup>
@@ -239,12 +239,13 @@ function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
     hasRespack: state.respack.hasRespack,
+    moduleConfigStatus: state.env.moduleConfigStatus,
     loadings: {
       getEnvironments: !!state.loading.effects['env/getEnvironments'],
       gcc: !!state.loading.effects['env/installGcc'],
       python: !!state.loading.effects['env/installPython'],
       cpplint: !!state.loading.effects['env/installCpplint'],
-      code: !!state.loading.effects['env/installVSCode'],
+      vscode: !!state.loading.effects['env/installVSCode'],
       vsix: !!state.loading.effects['env/installVsix'],
       getHasRespack: !!state.loading.effects['respack/getHasRespack'],
     },

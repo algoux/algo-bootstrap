@@ -14,6 +14,7 @@ import { filesize } from 'filesize';
 import { formatPercentage } from 'common/utils/format';
 import PageAnimation from '@/components/PageAnimation';
 import { DispatchProps } from '@/typings/props';
+import { VSIXIds } from 'common/configs/resources';
 
 const { req, Respack } = sm;
 
@@ -310,7 +311,7 @@ class Test extends React.Component<Props, State> {
             安装 VS Code
           </Button>
           <br />
-          {sm.envChecker.VSIXIds.map((vsixId) => {
+          {VSIXIds.map((vsixId) => {
             return (
               <Button
                 key={vsixId}

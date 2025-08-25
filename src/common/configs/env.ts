@@ -7,7 +7,7 @@ export interface SystemEnvInfo {
 
 type EnvComponentCondition = (env: SystemEnvInfo) => boolean;
 
-type EnvComponentConfig = Record<
+type EnvComponentMeta = Record<
   EnvComponent,
   {
     resources: ResourceId[];
@@ -19,7 +19,7 @@ type EnvComponentConfig = Record<
   }
 >;
 
-export type EnvComponentConfigParsed = Record<
+export type EnvComponentMetaParsed = Record<
   EnvComponent,
   {
     resources: ResourceId[];
@@ -36,7 +36,7 @@ export enum EnvComponent {
   languagePackages = 'languagePackages',
 }
 
-const envComponents: EnvComponentConfig = {
+const envComponents: EnvComponentMeta = {
   [EnvComponent.c_cpp]: {
     resources: [],
     conditionalResources: [
@@ -83,10 +83,12 @@ const envComponents: EnvComponentConfig = {
     required: true,
   },
   [EnvComponent.codeStyleExtensions]: {
-    resources: [
-      ResourceId['vsix.qiumingge.cpp-check-lint'],
-      ResourceId['deps.cppcheck'],
-      ResourceId['deps.cpplint'],
+    resources: [ResourceId['vsix.qiumingge.cpp-check-lint']],
+    conditionalResources: [
+      {
+        condition: (env) => env.platform === 'darwin',
+        resources: [ResourceId['deps.cppcheck'], ResourceId['deps.cpplint']],
+      },
     ],
   },
   [EnvComponent.languagePackages]: {
@@ -94,9 +96,9 @@ const envComponents: EnvComponentConfig = {
   },
 };
 
-export function getEnvComponents(env: SystemEnvInfo): EnvComponentConfigParsed {
+export function getEnvComponents(env: SystemEnvInfo): EnvComponentMetaParsed {
   // @ts-ignore
-  const result: EnvComponentConfigParsed = {};
+  const result: EnvComponentMetaParsed = {};
   Object.entries(envComponents).forEach(([component, config]) => {
     const resources = [...config.resources];
     if (config.conditionalResources) {

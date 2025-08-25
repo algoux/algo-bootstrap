@@ -6,11 +6,11 @@ import sm from '@/utils/modules';
 import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
-import windowsStep_1 from '@/assets/guides/code/code-win32-light-step-1.png';
-import windowsStep_2 from '@/assets/guides/code/code-win32-light-step-2.png';
-import windowsStep_3 from '@/assets/guides/code/code-win32-light-step-3.png';
-import windowsStep_4 from '@/assets/guides/code/code-win32-light-step-4.png';
-import windowsStep_5 from '@/assets/guides/code/code-win32-light-step-5.png';
+import windowsStep_1 from '@/assets/guides/vscode/vscode-win32-light-step-1.png';
+import windowsStep_2 from '@/assets/guides/vscode/vscode-win32-light-step-2.png';
+import windowsStep_3 from '@/assets/guides/vscode/vscode-win32-light-step-3.png';
+import windowsStep_4 from '@/assets/guides/vscode/vscode-win32-light-step-4.png';
+import windowsStep_5 from '@/assets/guides/vscode/vscode-win32-light-step-5.png';
 import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
@@ -55,15 +55,15 @@ class CodeInstaller extends React.Component<Props, State> {
         payload: {},
       });
       windowProgress.end();
-      if (isEnvInstalled(environments, 'code')) {
-        sm.track.timing('install', 'code', Date.now() - _startAt);
+      if (isEnvInstalled(environments, 'vscode')) {
+        sm.track.timing('install', 'vscode', Date.now() - _startAt);
         router.push(getNextInstallerItemPage(environments));
       }
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installVSCode]`, e);
       msg.error('安装环境失败');
-      sm.track.event('install', 'error', 'code', 1);
+      sm.track.event('install', 'error', 'vscode', 1);
     }
   };
 
@@ -73,7 +73,7 @@ class CodeInstaller extends React.Component<Props, State> {
       <div>
         <div className="container --slide-left">
           <div className="content-block">
-            <h1 className="top-title">安装 {formatMessage({ id: 'env.code' })}</h1>
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.vscode' })}</h1>
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
             <div className="article">
               <h3 className="section-header">1. 选择「我接受协议」并点击「下一步」</h3>
@@ -121,9 +121,9 @@ class CodeInstaller extends React.Component<Props, State> {
       <div>
         <div className="container --slide-left">
           <div className="content-block">
-            <h1 className="top-title">安装 {formatMessage({ id: 'env.code' })}</h1>
+            <h1 className="top-title">安装 {formatMessage({ id: 'env.vscode' })}</h1>
             <p>
-              正在拷贝 {formatMessage({ id: 'env.code' })} 到「应用程序」，这只需要花费一点时间。
+              正在拷贝 {formatMessage({ id: 'env.vscode' })} 到「应用程序」，这只需要花费一点时间。
             </p>
           </div>
         </div>

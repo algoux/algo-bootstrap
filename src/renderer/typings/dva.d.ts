@@ -1,3 +1,8 @@
+type EnvComponentConfig = import('./env').EnvComponentConfig;
+type EnvComponentModuleConfigStatus = import('./env').EnvComponentModuleConfigStatus;
+type EnvComponent = import('common/configs/env').EnvComponent;
+type EnvComponentModule = import('./env').EnvComponentModule;
+
 interface DvaAction<P = any> {
   type: string;
   payload: P;
@@ -18,6 +23,7 @@ interface IDvaModelState {
   env: IEnvState;
   respack: IRespackState;
   projects: IProjectsState;
+  resources: IResourcesState;
 }
 
 type IState = IDvaBaseState & IDvaModelState;
@@ -36,6 +42,8 @@ interface IGlobalState {}
 
 interface IEnvState {
   environments: IEnvironments;
+  config: EnvComponentConfig;
+  moduleConfigStatus: Record<EnvComponentModule, EnvComponentModuleConfigStatus>;
 }
 
 interface IRespackState {

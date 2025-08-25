@@ -9,6 +9,7 @@ import { getNextInstallerItemPage, isVsixAllInstalled } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import sm from '@/utils/modules';
 import { windowProgress } from '@/utils/native';
+import { VSIXIds } from 'common/configs/resources';
 
 export interface IVsixInstallerProps {}
 
@@ -64,8 +65,8 @@ class VsixInstaller extends React.Component<Props, State> {
     try {
       const _startAt = Date.now();
       windowProgress.start();
-      for (let i = 0; i < sm.envChecker.VSIXIds.length; ++i) {
-        const vsixId = sm.envChecker.VSIXIds[i];
+      for (let i = 0; i < VSIXIds.length; ++i) {
+        const vsixId = VSIXIds[i];
         this.setState({
           installingVsixIndex: i,
           installingVsixId: vsixId,

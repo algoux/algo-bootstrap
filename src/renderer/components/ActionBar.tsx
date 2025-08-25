@@ -11,6 +11,7 @@ export interface IActionBarProps {
     disabled?: boolean;
     loading?: boolean;
     loadingText?: string;
+    highlight?: boolean;
     className?: string;
     style?: React.CSSProperties;
     onClick?: React.MouseEventHandler;
@@ -35,7 +36,9 @@ const ActionBar: React.FC<IActionBarProps> = (props) => {
             type={action.type}
             disabled={!!action.disabled}
             loading={!!action.loading}
-            className={action.className}
+            className={classnames(action.className, {
+              'action-bar-highlight': action.highlight,
+            })}
             style={action.style}
             onClick={action.onClick}
           >

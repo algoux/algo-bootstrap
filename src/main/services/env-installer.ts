@@ -173,7 +173,7 @@ export async function installCpplint(force = false) {
 }
 
 export async function installVSCode(force = false) {
-  if (!force && (await isEnvInstalled('code'))) {
+  if (!force && (await isEnvInstalled('vscode'))) {
     return;
   }
   const res = await Respack.readResFromLocalManifestOrThrow('vscode');
@@ -203,13 +203,13 @@ export async function installVsix(vsixId: SupportedVSIXId, force = false) {
   if (!force && (await isVsixInstalled(vsixId))) {
     return;
   }
-  const code = await getEnvironment('code');
-  if (!code.installed) {
+  const vscode = await getEnvironment('vscode');
+  if (!vscode.installed) {
     throw Error('No VS Code installed');
   }
   const res = await Respack.readResFromLocalManifestOrThrow(`vsix/${vsixId}`);
   const filePath = path.join(RESPACK_PATH, res.name);
-  await spawn('[installVsix]', `"${code.path || 'code'}"`, [
+  await spawn('[installVsix]', `"${vscode.path || 'code'}"`, [
     '--install-extension',
     `"${filePath}"`,
   ]);

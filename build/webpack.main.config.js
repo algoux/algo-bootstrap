@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const baseConfig = require('./webpack.base.config');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // const x = path.resolve(__dirname);
 
@@ -69,6 +70,14 @@ module.exports = merge.smart(baseConfig, {
       '__static': JSON.stringify(path.join(__dirname, '../static')),
     }),
     new webpack.IgnorePlugin({ resourceRegExp: /^@aws-sdk\/client-s3$/ }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, '../src/main/utils/md5-worker.js'),
+          to: 'utils/md5-worker.js'
+        },
+      ]
+    }),
   ],
   mode: 'development',
   node: {

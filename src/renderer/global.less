@@ -13,6 +13,10 @@ body {
   margin: 0;
 }
 
+p {
+  margin-bottom: 0.5em;
+}
+
 p:last-of-type {
   margin-bottom: 0;
 }
@@ -21,6 +25,7 @@ p:last-of-type {
 @divider-border: 1px solid #ddd;
 @action-bar-height: 75px;
 
+@color-primary: #1890ff;
 @color-secondary: #999;
 @color-green: #4fb24f;
 @color-red: #e23a36;
@@ -90,7 +95,6 @@ p:last-of-type {
   align-content: center;
 }
 
-
 .container {
   margin: 32px 42px 16px;
   padding-bottom: @action-bar-height;
@@ -121,7 +125,7 @@ p:last-of-type {
   position: fixed;
   bottom: 0px;
   border-top: @divider-border;
-  background: rgba(255, 255, 255, .85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   display: flex;
 
@@ -138,6 +142,24 @@ p:last-of-type {
 
     button {
       margin-left: 8px;
+    }
+
+    .action-bar-highlight {
+      animation: action-bar-highlight 1s ease-in-out infinite;
+
+      @keyframes action-bar-highlight {
+        0% {
+          background-color: @color-primary;
+        }
+
+        50% {
+          background-color: darken(@color-primary, 12%);
+        }
+
+        100% {
+          background-color: @color-primary;
+        }
+      }
     }
   }
 }
@@ -177,32 +199,66 @@ p:last-of-type {
 
 .env-card {
   .ant-card-body {
-    display: flex;
-    padding: 12px;
-  }
+    padding: 0;
 
-  .icon {
-    width: 42px;
-    height: 42px;
-  }
+    .env-card-content {
+      display: flex;
+      padding: 12px 12px 6px;
+      transition: opacity 0.15s ease-in-out;
 
-  .info {
-    padding-left: 12px;
-    overflow: hidden;
+      .icon {
+        width: 42px;
+        height: 42px;
+      }
 
-    .name {
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-      margin-bottom: 3px;
+      .info {
+        padding-left: 12px;
+        overflow: hidden;
+
+        .name {
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 20px;
+          margin-bottom: 3px;
+        }
+
+        .desc {
+          color: @color-secondary;
+          font-size: 12px;
+        }
+      }
     }
 
-    .desc {
-      color: @color-secondary;
-      font-size: 12px;
+    .env-card-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #eee;
+      padding: 6px 12px;
+
+      .summary {
+        font-size: 12px;
+        color: @color-secondary;
+      }
+
+      .action {
+        margin-left: 6px;
+      }
     }
   }
+}
 
+.env-card-tips {
+  max-width: 320px;
+  user-select: none;
+
+  p {
+    margin-bottom: 0.5em;
+  }
+
+  p:last-of-type {
+    margin-bottom: 0;
+  }
 }
 
 .list-hover-action {

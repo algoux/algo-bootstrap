@@ -62,13 +62,11 @@ export default {
       { payload: { resourceId } }: DvaAction<{ resourceId: ResourceId }>,
       { call, put }: DvaSagaEffect,
     ) {
-      logRenderer.info('fetching resource index item for:', resourceId);
       const resourceIndexItem: ResourceIndexItem = yield call(
         sm.resources.getRemoteResourceIndexItem,
         resourceId,
       );
       const selectedValue = getMatchedResourceIndexValue(resourceId, resourceIndexItem);
-      logRenderer.info('selected resource index value for:', resourceId, selectedValue);
       yield put({
         type: 'addResourceIndexItem',
         payload: {
@@ -82,8 +80,6 @@ export default {
       { payload: { resourceIds } }: DvaAction<{ resourceIds: ResourceId[] }>,
       { call, put, all }: DvaSagaEffect,
     ): Generator<any, { successful: ResourceId[]; failed: ResourceId[] }, any> {
-      logRenderer.info('fetching resource index items for', resourceIds);
-
       const effects = resourceIds.map((resourceId) =>
         call(async () => {
           try {
@@ -92,7 +88,6 @@ export default {
               { retries: 1, minTimeout: 100 },
             );
             const selectedValue = getMatchedResourceIndexValue(resourceId, resourceIndexItem);
-            logRenderer.info('selected resource index value for:', resourceId, selectedValue);
 
             return { success: true, resourceId, value: selectedValue };
           } catch (e: any) {
@@ -123,13 +118,6 @@ export default {
             })),
         },
       });
-
-      logRenderer.info(
-        'resource index items fetch completed. successful:',
-        successfulIds,
-        'failed:',
-        failedIds,
-      );
 
       return {
         successful: successfulIds,

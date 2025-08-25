@@ -7,7 +7,7 @@ type _GlobalSharedModules = typeof import('common/../main/modules').default;
 type SupportedPlatform = import('common/configs/platform').SupportedPlatform;
 type SupportedPlatformArch = import('common/configs/platform').SupportedPlatformArch;
 type SupportedEnvId = Exclude<keyof IEnvironments, 'vsix'>;
-type SupportedVSIXId = import('common/../main/services/env-checker').SupportedVSIXId;
+type SupportedVSIXId = import('common/configs/resources').SupportedVSIXId;
 
 interface IApiResp<T = undefined> {
   success: boolean;
@@ -33,10 +33,18 @@ type ICheckEnvironmentResult<T = any> =
 
 type ICheckEnvironmentResultMetaGcc = {
   type: 'gcc' | 'clang';
-  alternatives: { command: string; path: string; version: string; type: 'gcc' | 'clang' }[];
+  fullVersion: string;
+  alternatives: {
+    command: string;
+    path: string;
+    version: string;
+    fullVersion: string;
+    type: 'gcc' | 'clang';
+  }[];
 };
 
 type ICheckEnvironmentResultMetaPython = {
+  command: string;
   isPython3: boolean;
 };
 
@@ -46,7 +54,7 @@ interface IEnvironments {
   python: ICheckEnvironmentResult<ICheckEnvironmentResultMetaPython>;
   cpplint: ICheckEnvironmentResult;
   cppcheck: ICheckEnvironmentResult;
-  code: ICheckEnvironmentResult;
+  vscode: ICheckEnvironmentResult;
   vsix: Record<SupportedVSIXId, ICheckEnvironmentResult>;
 }
 

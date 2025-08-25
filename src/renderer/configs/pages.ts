@@ -10,7 +10,7 @@ const pages = {
     gcc: '/installer/gcc',
     python: '/installer/python',
     cpplint: '/installer/cpplint',
-    code: '/installer/code',
+    vscode: '/installer/vscode',
     vsix: '/installer/vsix',
     ext: '/installer/ext',
     magic: '/installer/magic',

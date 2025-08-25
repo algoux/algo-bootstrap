@@ -6,30 +6,7 @@ import { Platform } from 'common/configs/platform';
 import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
-import { ResourceId } from 'common/configs/resources';
-
-export const EnvIds = ['gcc', 'gdb', 'python', 'cppcheck', 'cpplint', 'code'] as SupportedEnvId[];
-
-const VSIXIdMap = {
-  [ResourceId['vsix.divyanshuagrawal.competitive-programming-helper']]:
-    'divyanshuagrawal.competitive-programming-helper',
-  [ResourceId['vsix.editorconfig.editorconfig']]: 'editorconfig.editorconfig',
-  [ResourceId['vsix.formulahendry.code-runner']]: 'formulahendry.code-runner',
-  [ResourceId['vsix.ms-ceintl.vscode-language-pack-zh-hans']]:
-    'ms-ceintl.vscode-language-pack-zh-hans',
-  [ResourceId['vsix.ms-python.debugpy']]: 'ms-python.debugpy',
-  [ResourceId['vsix.ms-python.python']]: 'ms-python.python',
-  [ResourceId['vsix.ms-python.vscode-pylance']]: 'ms-python.vscode-pylance',
-  [ResourceId['vsix.ms-python.vscode-python-envs']]: 'ms-python.vscode-python-envs',
-  [ResourceId['vsix.ms-vscode.cpptools']]: 'ms-vscode.cpptools',
-  [ResourceId['vsix.qiumingge.cpp-check-lint']]: 'qiumingge.cpp-check-lint',
-  [ResourceId['vsix.streetsidesoftware.code-spell-checker']]:
-    'streetsidesoftware.code-spell-checker',
-  [ResourceId['vsix.usernamehw.errorlens']]: 'usernamehw.errorlens',
-  [ResourceId['vsix.vadimcn.vscode-lldb']]: 'vadimcn.vscode-lldb',
-};
-
-export const VSIXIds = Object.values(VSIXIdMap);
+import { VSIXIds } from 'common/configs/resources';
 
 const emptyEnvironments = genEmptyEnvironments();
 
@@ -67,7 +44,7 @@ export function genEmptyEnvironments(): IEnvironments {
     python: genNotInstalled(),
     cppcheck: genNotInstalled(),
     cpplint: genNotInstalled(),
-    code: genNotInstalled(),
+    vscode: genNotInstalled(),
     vsix: genEmptyVSIXMap(),
   };
 }
@@ -126,14 +103,27 @@ export async function checkXCodeCLT(): Promise<boolean> {
 export async function checkGcc(): Promise<ICheckEnvironmentResult<ICheckEnvironmentResultMetaGcc>> {
   const GCC_REG = /^gcc version (.*)$/m;
   const CLANG_REG = /clang version (.*)$/m;
+  const verMatcher = (ver: string) => {
+    const fullVer = matchOne(GCC_REG, ver) || matchOne(CLANG_REG, ver);
+    if (!fullVer) {
+      return null;
+    }
+    const verNum = matchOne(/^(\d+\.\d+\.\d+)/, fullVer);
+    if (!verNum) {
+      return null;
+    }
+    return {
+      fullVersion: fullVer,
+      version: verNum,
+    };
+  };
+
   try {
     if (isMac && !(await checkXCodeCLT())) {
       return genNotInstalled();
     }
     const { stdout, stderr } = await spawn('[checkGcc]', 'gcc', ['-v']);
-    let ver: string | null =
-      matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout)) ||
-      matchOne(CLANG_REG, parseStringFromProcessOutput(stderr || stdout));
+    let ver = verMatcher(parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       // if (isWindows) {
       //   // 非 MinGW-W64 版，VSC 不支持调试
@@ -145,20 +135,24 @@ export async function checkGcc(): Promise<ICheckEnvironmentResult<ICheckEnvironm
       const alternatives: ICheckEnvironmentResultMetaGcc['alternatives'] = [];
       for (const alternative of alternativesCommands) {
         const { stdout, stderr } = await spawn('[checkGcc]', alternative.command, ['-v']);
-        const version =
-          matchOne(GCC_REG, parseStringFromProcessOutput(stderr || stdout)) ||
-          matchOne(CLANG_REG, parseStringFromProcessOutput(stderr || stdout));
-        if (version) {
+        const altVer = verMatcher(parseStringFromProcessOutput(stderr || stdout));
+        if (altVer) {
           alternatives.push({
             command: alternative.command,
             path: alternative.path,
-            version,
-            type: version.includes('clang') ? 'clang' : 'gcc',
+            version: altVer.version,
+            fullVersion: altVer.fullVersion,
+            type:
+              altVer.fullVersion.includes('clang') || altVer.fullVersion.includes('llvm')
+                ? 'clang'
+                : 'gcc',
           });
         }
       }
-      return genInstalled(ver, await findPath('gcc'), {
-        type: ver.includes('clang') ? 'clang' : 'gcc',
+      return genInstalled(ver.version, await findPath('gcc'), {
+        fullVersion: ver.fullVersion,
+        type:
+          ver.fullVersion.includes('clang') || ver.fullVersion.includes('llvm') ? 'clang' : 'gcc',
         alternatives,
       });
     }
@@ -187,6 +181,7 @@ export async function checkPython(): Promise<
     const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       return genInstalled(ver, await findPath('python3'), {
+        command: 'python3',
         isPython3: /3\.\d+\.\d+/.test(ver),
       });
     }
@@ -196,6 +191,7 @@ export async function checkPython(): Promise<
     const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {
       return genInstalled(ver, await findPath('python'), {
+        command: 'python',
         isPython3: /3\.\d+\.\d+/.test(ver),
       });
     }
@@ -275,7 +271,7 @@ export async function getEnvironments(force = false) {
   if (!force && environments !== emptyEnvironments) {
     return environments;
   }
-  // const [gcc, gdb, python, cpplint, code] = await Promise.all([
+  // const [gcc, gdb, python, cpplint, vscode] = await Promise.all([
   //   checkGcc(),
   //   isMac ? genNotInstalled() : checkGdb(),
   //   checkPython(),
@@ -287,15 +283,15 @@ export async function getEnvironments(force = false) {
   const python = await checkPython();
   const cppcheck = await checkCppcheck();
   const cpplint = await checkCpplint();
-  const code = await checkVSCode();
+  const vscode = await checkVSCode();
   const environmentResult: IEnvironments = {
     gcc,
     gdb,
     python,
     cppcheck,
     cpplint,
-    code,
-    vsix: code.installed && code.path ? await checkVsix(code.path) : genEmptyVSIXMap(),
+    vscode,
+    vsix: vscode.installed && vscode.path ? await checkVsix(vscode.path) : genEmptyVSIXMap(),
   };
   logMain.info('[getEnvironments]', JSON.stringify(environmentResult, null, 2));
   environments = environmentResult;

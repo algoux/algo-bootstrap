@@ -1,5 +1,12 @@
+import {
+  EnvComponentAction,
+  EnvComponentConfigItem,
+  EnvComponentModuleConfigStatus,
+  EnvComponentModule,
+} from '@/typings/env';
 import { DvaSagaEffect } from '@/utils/dva';
 import sm from '@/utils/modules';
+import { EnvComponent } from 'common/configs/env';
 import { purifyObject } from 'common/utils/format';
 
 type CurrentState = IEnvState;
@@ -7,6 +14,33 @@ type CurrentState = IEnvState;
 function genInitialState(): CurrentState {
   return {
     environments: purifyObject(sm.envChecker.genEmptyEnvironments()),
+    config: {
+      [EnvComponent.c_cpp]: {
+        action: EnvComponentAction.SKIP,
+      },
+      [EnvComponent.python]: {
+        action: EnvComponentAction.SKIP,
+      },
+      [EnvComponent.vscode]: {
+        action: EnvComponentAction.SKIP,
+      },
+      [EnvComponent.basicExtensions]: {
+        action: EnvComponentAction.SKIP,
+      },
+      [EnvComponent.codeStyleExtensions]: {
+        action: EnvComponentAction.SKIP,
+      },
+      [EnvComponent.languagePackages]: {
+        action: EnvComponentAction.SKIP,
+      },
+    },
+    moduleConfigStatus: {
+      [EnvComponentModule.c_cpp]: EnvComponentModuleConfigStatus.PENDING,
+      [EnvComponentModule.python]: EnvComponentModuleConfigStatus.PENDING,
+      [EnvComponentModule.vscode]: EnvComponentModuleConfigStatus.PENDING,
+      [EnvComponentModule.extensions]: EnvComponentModuleConfigStatus.PENDING,
+      [EnvComponentModule.magic]: EnvComponentModuleConfigStatus.PENDING,
+    },
   };
 }
 
@@ -18,6 +52,28 @@ export default {
       { payload: { environments } }: DvaAction<Pick<CurrentState, 'environments'>>,
     ) {
       state.environments = environments;
+    },
+    setConfig(
+      state: CurrentState,
+      { payload: { config } }: DvaAction<Pick<CurrentState, 'config'>>,
+    ) {
+      state.config = config;
+    },
+    setConfigItem(
+      state: CurrentState,
+      {
+        payload: { component, item },
+      }: DvaAction<{ component: EnvComponent; item: EnvComponentConfigItem }>,
+    ) {
+      state.config[component] = item;
+    },
+    setModuleConfigStatus(
+      state: CurrentState,
+      {
+        payload: { module, status },
+      }: DvaAction<{ module: EnvComponentModule; status: EnvComponentModuleConfigStatus }>,
+    ) {
+      state.moduleConfigStatus[module] = status;
     },
   },
   effects: {

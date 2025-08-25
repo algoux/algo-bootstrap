@@ -55,4 +55,46 @@ export interface ResourceIndexValue {
   updatedAt: string;
 }
 
-export type ResourceIndexItem = Record<string, ResourceIndexValue>;
+export type ResourceIndexItem<T extends string = string> = Record<T, ResourceIndexValue>;
+
+export const EnvIds = ['gcc', 'gdb', 'python', 'cppcheck', 'cpplint', 'vscode'] as SupportedEnvId[];
+
+export type SupportedVSIXId =
+  | 'divyanshuagrawal.competitive-programming-helper'
+  | 'editorconfig.editorconfig'
+  | 'formulahendry.code-runner'
+  | 'ms-ceintl.vscode-language-pack-zh-hans'
+  | 'ms-python.debugpy'
+  | 'ms-python.python'
+  | 'ms-python.vscode-pylance'
+  | 'ms-python.vscode-python-envs'
+  | 'ms-vscode.cpptools'
+  | 'qiumingge.cpp-check-lint'
+  | 'streetsidesoftware.code-spell-checker'
+  | 'usernamehw.errorlens'
+  | 'vadimcn.vscode-lldb';
+
+export const VSIXIdMap = {
+  [ResourceId['vsix.divyanshuagrawal.competitive-programming-helper']]:
+    'divyanshuagrawal.competitive-programming-helper',
+  [ResourceId['vsix.editorconfig.editorconfig']]: 'editorconfig.editorconfig',
+  [ResourceId['vsix.formulahendry.code-runner']]: 'formulahendry.code-runner',
+  [ResourceId['vsix.ms-ceintl.vscode-language-pack-zh-hans']]:
+    'ms-ceintl.vscode-language-pack-zh-hans',
+  [ResourceId['vsix.ms-python.debugpy']]: 'ms-python.debugpy',
+  [ResourceId['vsix.ms-python.python']]: 'ms-python.python',
+  [ResourceId['vsix.ms-python.vscode-pylance']]: 'ms-python.vscode-pylance',
+  [ResourceId['vsix.ms-python.vscode-python-envs']]: 'ms-python.vscode-python-envs',
+  [ResourceId['vsix.ms-vscode.cpptools']]: 'ms-vscode.cpptools',
+  [ResourceId['vsix.qiumingge.cpp-check-lint']]: 'qiumingge.cpp-check-lint',
+  [ResourceId['vsix.streetsidesoftware.code-spell-checker']]:
+    'streetsidesoftware.code-spell-checker',
+  [ResourceId['vsix.usernamehw.errorlens']]: 'usernamehw.errorlens',
+  [ResourceId['vsix.vadimcn.vscode-lldb']]: 'vadimcn.vscode-lldb',
+} as Record<ResourceId, SupportedVSIXId>;
+
+export const VSIXIdMapReverse = Object.fromEntries(
+  Object.entries(VSIXIdMap).map(([k, v]) => [v, k]),
+) as Record<SupportedVSIXId, ResourceId>;
+
+export const VSIXIds = Object.values(VSIXIdMap) as SupportedVSIXId[];

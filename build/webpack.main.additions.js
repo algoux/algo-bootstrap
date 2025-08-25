@@ -1,4 +1,6 @@
+const path = require('path');
 const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   devtool: process.env.NODE_ENV === 'development' ? 'source-map' : 'source-map',
@@ -43,5 +45,13 @@ module.exports = {
       ),
     }),
     new webpack.IgnorePlugin({ resourceRegExp: /^@aws-sdk\/client-s3$/ }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, '../src/main/utils/md5-worker.js'),
+          to: 'utils/md5-worker.js'
+        },
+      ]
+    }),
   ],
 };

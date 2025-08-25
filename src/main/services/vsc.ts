@@ -71,9 +71,9 @@ export async function genProjectFiles(projectPath: string) {
 }
 
 export async function openProject(projectPath: string) {
-  const code = await getEnvironment('code');
-  if (!code.installed) {
+  const vscode = await getEnvironment('vscode');
+  if (!vscode.installed) {
     throw Error('VS Code not installed');
   }
-  await spawn('[openProject]', `"${code.path}"`, [`"${projectPath}"`]);
+  await spawn('[openProject]', `"${vscode.path}"`, [`"${projectPath}"`]);
 }

@@ -18,6 +18,9 @@ import { filesize } from 'filesize';
 import fs from 'fs-extra';
 import track from './utils/track';
 import { initialize, enable } from '@electron/remote/main';
+import { getPath } from './utils/path';
+import { PathKey } from 'common/configs/paths';
+import { ElectronDownloadManager } from 'electron-dl-manager';
 
 logMain.info('[app.start]');
 logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
@@ -35,7 +38,7 @@ logMain.info('[env]', process.env);
 // 将需要共享到渲染进程的模块暴露到 global
 global.modules = _modules;
 
-let downloadTaskId = 1;
+let downloadTaskIdNum = 1;
 
 console.log('nativeTheme', {
   shouldUseDarkColors: nativeTheme.shouldUseDarkColors,
@@ -398,101 +401,200 @@ ipc.answerRenderer(ipcKeys.getResPack, async (param) => {
   return getEnvironments(true);
 });
 
+const dlManager = new ElectronDownloadManager();
+
 ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
-  const opt = { ...options };
+  const commOptions = { ...options };
+  const requests = commOptions.requests;
   // @ts-ignore
-  delete opt.url;
-  const id = downloadTaskId++;
-  let lastReceivedSize = 0;
-  let lastProgressTime = 0;
-  logMain.info(`[download.start #${id}]`, options);
+  delete commOptions.requests;
+  const curDownloadTaskId = downloadTaskIdNum++;
+  let lastAllReceivedSize = 0;
+  let lastAllProgressTime = 0;
+  logMain.info(`[download.start #${curDownloadTaskId}]`, options);
   const __start = Date.now();
-  if (opt.directory) {
-    if (opt.clearDir) {
-      await fs.emptyDir(opt.directory);
-    } else {
-      await fs.ensureDir(opt.directory);
-    }
+  const directorySet = new Set<string>(
+    requests.map((req) => getPath(req.directory as PathKey)).filter(Boolean),
+  );
+  for (const directory of directorySet) {
+    await fs.ensureDir(directory);
   }
-  download(bw, options.url, {
-    ...opt,
-    onStarted(item) {
-      item.on('updated', (_event, state) => {
-        if (state === 'interrupted') {
-          setTimeout(() => {
-            item.cancel();
-          }, 0);
-        }
+
+  const downloadIds: string[] = new Array(requests.length).fill('');
+  const itemStatuses: IPCDownloadItemStatus[] = new Array(requests.length).fill('pending');
+  const itemDownloadProgress: { received: number; total: number }[] = new Array(requests.length)
+    .fill(undefined)
+    .map(() => ({
+      received: 0,
+      total: 0,
+    }));
+  const checkFinished = () => {
+    if (
+      itemStatuses.every((state) => state === 'done' || state === 'error' || state === 'cancelled')
+    ) {
+      ipc.callRenderer(bw, ipcKeys.downloadFinished, {
+        downloadTaskId: curDownloadTaskId,
+        itemStatuses,
       });
-      item.once('done', (_event, state) => {
-        if (state === 'interrupted') {
-          setTimeout(() => {
-            item.cancel();
-          }, 0);
-        }
-      });
-    },
-    onProgress({ percent, transferredBytes, totalBytes }) {
-      const receivedSize = transferredBytes;
-      const now = Date.now();
-      let speed = 0;
-      if (lastProgressTime) {
-        const duration = now - lastProgressTime;
-        const size = receivedSize - lastReceivedSize;
-        speed = (size / duration) * 1000 || 0;
+      if (itemStatuses.some((state) => state === 'error')) {
+        dialog.showMessageBox(bw, {
+          buttons: [],
+          type: 'error',
+          message: options.errorTitle,
+          detail: options.errorMessage,
+        });
       }
-      lastReceivedSize = receivedSize;
-      lastProgressTime = now;
-      ipc.callRenderer(bw, ipcKeys.downloadProgress, {
-        downloadTaskId: id,
-        percent,
-        received: transferredBytes,
-        total: totalBytes,
-        speed,
+    }
+  };
+
+  for (let itemIndex = 0; itemIndex < requests.length; itemIndex++) {
+    const req = requests[itemIndex];
+    logMain.info(`[download.start #${curDownloadTaskId}:${itemIndex}]`, req.url, {
+      filename: req.saveAsFilename,
+      directory: getPath(req.directory as PathKey),
+    });
+
+    try {
+      const id = await dlManager.download({
+        window: bw,
+        url: req.url,
+        saveAsFilename: req.saveAsFilename,
+        directory: getPath(req.directory as PathKey) || req.directory,
+        overwrite: commOptions.overwrite,
+        callbacks: {
+          onDownloadStarted() {
+            itemStatuses[itemIndex] = 'downloading';
+          },
+          onDownloadProgress({
+            id,
+            item,
+            percentCompleted,
+            downloadRateBytesPerSecond,
+            estimatedTimeRemainingSeconds,
+          }) {
+            const totalBytes = item.getTotalBytes();
+            const receivedSize = item.getReceivedBytes();
+            itemDownloadProgress[itemIndex].received = receivedSize;
+            itemDownloadProgress[itemIndex].total = totalBytes;
+            ipc.callRenderer(bw, ipcKeys.downloadProgress, {
+              downloadTaskId: curDownloadTaskId,
+              downloadId: id,
+              itemIndex,
+              percent: percentCompleted / 100,
+              received: receivedSize,
+              total: totalBytes,
+              speed: downloadRateBytesPerSecond,
+            });
+
+            const now = Date.now();
+            const allReceivedSize = itemDownloadProgress.reduce(
+              (acc, cur) => acc + cur.received,
+              0,
+            );
+            const allTotalSize = itemDownloadProgress.reduce((acc, cur) => acc + cur.total, 0);
+            let speed = 0;
+            if (!lastAllProgressTime) {
+              lastAllProgressTime = now;
+              lastAllReceivedSize = allReceivedSize;
+            } else if (now - lastAllProgressTime > 400) {
+              const duration = now - lastAllProgressTime;
+              const size = allReceivedSize - lastAllReceivedSize;
+              speed = (size / duration) * 1000 || 0;
+              lastAllReceivedSize = allReceivedSize;
+              lastAllProgressTime = now;
+              ipc.callRenderer(bw, ipcKeys.downloadTotalProgress, {
+                downloadTaskId: curDownloadTaskId,
+                percent: allReceivedSize / allTotalSize,
+                received: allReceivedSize,
+                total: allTotalSize,
+                speed,
+              });
+            }
+          },
+          onDownloadInterrupted({ id }) {
+            logMain.error(`[download.interrupted #${curDownloadTaskId}:${itemIndex} ${id}]`);
+            itemStatuses[itemIndex] = 'error';
+            checkFinished();
+            ipc.callRenderer(bw, ipcKeys.downloadError, {
+              downloadTaskId: curDownloadTaskId,
+              downloadId: id,
+              itemIndex,
+            });
+          },
+          onError(error, { id }) {
+            logMain.error(`[download.error #${curDownloadTaskId}:${itemIndex} ${id}]`, error);
+            itemStatuses[itemIndex] = 'error';
+            checkFinished();
+            ipc.callRenderer(bw, ipcKeys.downloadError, {
+              downloadTaskId: curDownloadTaskId,
+              downloadId: id,
+              itemIndex,
+              error: error.toString(),
+            });
+          },
+          onDownloadCompleted({ id, item }) {
+            const time = Date.now() - __start;
+            const size = item.getTotalBytes();
+            const speed = (size / time) * 1000;
+            logMain.info(
+              `[download.done #${curDownloadTaskId}:${itemIndex}]`,
+              `time:`,
+              `${time + 'ms'}`,
+              'size:',
+              size,
+              'avgSpeed:',
+              `${filesize(speed, { standard: 'iec' })}/s`,
+            );
+            itemStatuses[itemIndex] = 'done';
+            ipc.callRenderer(bw, ipcKeys.downloadDone, {
+              downloadTaskId: curDownloadTaskId,
+              downloadId: id,
+              itemIndex,
+              filename: item.getFilename(),
+              time,
+              size,
+              speed,
+            });
+            checkFinished();
+          },
+        },
+        // onTotalProgress({ percent, transferredBytes, totalBytes }) {
+        //   const receivedSize = transferredBytes;
+        //   const now = Date.now();
+        //   let speed = 0;
+        //   if (lastAllProgressTime) {
+        //     const duration = now - lastAllProgressTime;
+        //     const size = receivedSize - lastAllReceivedSize;
+        //     speed = (size / duration) * 1000 || 0;
+        //   }
+        //   lastAllReceivedSize = receivedSize;
+        //   lastAllProgressTime = now;
+        //   ipc.callRenderer(bw, ipcKeys.downloadTotalProgress, {
+        //     percent,
+        //     received: transferredBytes,
+        //     total: totalBytes,
+        //     speed,
+        //   });
+        // },
       });
-    },
-    onCancel(_item) {
-      logMain.error(`[download.cancel #${id}]`);
-      dialog.showMessageBox(bw, {
-        buttons: [],
-        type: 'error',
-        message: options.errorTitle,
-        detail: options.errorMessage,
-      });
+      downloadIds[itemIndex] = id;
+    } catch (e) {
+      logMain.error(`[download.error #${curDownloadTaskId}:${itemIndex}]`, e);
+      itemStatuses[itemIndex] = 'error';
       ipc.callRenderer(bw, ipcKeys.downloadError, {
-        downloadTaskId: id,
-      });
-    },
-  })
-    .then((downloadedItem) => {
-      const time = Date.now() - __start;
-      const size = downloadedItem.getTotalBytes();
-      const speed = (size / time) * 1000;
-      logMain.info(
-        `[download.done #${id}]`,
-        `time:`,
-        `${time + 'ms'}`,
-        'size:',
-        size,
-        'avgSpeed:',
-        `${filesize(speed, { standard: 'iec' })}/s`,
-      );
-      ipc.callRenderer(bw, ipcKeys.downloadDone, {
-        downloadTaskId: id,
-        filename: downloadedItem.getFilename(),
-        time,
-        size,
-        speed,
-      });
-    })
-    .catch((e) => {
-      logMain.error(`[download.error #${id}]`, e);
-      ipc.callRenderer(bw, ipcKeys.downloadError, {
-        downloadTaskId: id,
+        downloadTaskId: curDownloadTaskId,
+        downloadId: '',
+        itemIndex,
         error: e.toString(),
       });
-    });
-  return id;
+      checkFinished();
+    }
+  }
+
+  return {
+    downloadTaskId: curDownloadTaskId,
+    downloadIds,
+  };
 });
 
 async function checkUpdate(auto = false) {

@@ -180,7 +180,7 @@ class EnvAndRespack extends React.Component<Props, State> {
           <div className="content-block">
             <h1 className="top-title">环境</h1>
             <Row gutter={8}>
-              <Col {...colProps}>
+              {/* <Col {...colProps}>
                 <EnvCard
                   name={formatMessage({ id: 'env.gcc' })}
                   icon={ccppIcon}
@@ -208,10 +208,10 @@ class EnvAndRespack extends React.Component<Props, State> {
               </Col>
               <Col {...colProps}>
                 <EnvCard
-                  name={formatMessage({ id: 'env.code' })}
+                  name={formatMessage({ id: 'env.vscode' })}
                   icon={vscodeIcon}
-                  installed={environments.code.installed}
-                  version={(environments.code as ICheckEnvironmentResultInstalled).version}
+                  installed={environments.vscode.installed}
+                  version={(environments.vscode as ICheckEnvironmentResultInstalled).version}
                 />
               </Col>
               <Col {...colProps}>
@@ -220,7 +220,7 @@ class EnvAndRespack extends React.Component<Props, State> {
                   icon={vscodeExtensionIcon}
                   installed={isVsixAllInstalled(environments)}
                 />
-              </Col>
+              </Col> */}
             </Row>
           </div>
 
