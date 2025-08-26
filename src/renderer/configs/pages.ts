@@ -1,3 +1,5 @@
+import { EnvComponentModule } from '@/typings/env';
+
 const pages = {
   index: '/',
   test: '/test',
@@ -14,6 +16,13 @@ const pages = {
     vsix: '/installer/vsix',
     ext: '/installer/ext',
     magic: '/installer/magic',
+  },
+  configurationModule: {
+    [EnvComponentModule.c_cpp]: '/configuration/c_cpp',
+    [EnvComponentModule.python]: '/configuration/python',
+    [EnvComponentModule.vscode]: '/configuration/vscode',
+    [EnvComponentModule.extensions]: '/configuration/extensions',
+    [EnvComponentModule.magic]: '/configuration/magic',
   },
   board: '/board',
   settings: '/settings',

@@ -69,6 +69,12 @@ export default {
     },
     setModuleConfigStatus(
       state: CurrentState,
+      { payload: { moduleConfigStatus } }: DvaAction<Pick<CurrentState, 'moduleConfigStatus'>>,
+    ) {
+      state.moduleConfigStatus = moduleConfigStatus;
+    },
+    setModuleConfigStatusItem(
+      state: CurrentState,
       {
         payload: { module, status },
       }: DvaAction<{ module: EnvComponentModule; status: EnvComponentModuleConfigStatus }>,
@@ -92,6 +98,52 @@ export default {
         },
       });
       return environments;
+    },
+    // no need any param
+    *initModuleConfigStatusByConfig(
+      { payload }: DvaAction<{}>,
+      { call, put, select }: DvaSagaEffect,
+    ) {
+      const config: EnvComponentConfig = yield select((state: IState) => state.env.config);
+      const cppConfig = config[EnvComponent.c_cpp];
+      const pythonConfig = config[EnvComponent.python];
+      const vscodeConfig = config[EnvComponent.vscode];
+      const extensionsConfig = config[EnvComponent.basicExtensions];
+      const codeStyleExtensionsConfig = config[EnvComponent.codeStyleExtensions];
+      const languagePackagesConfig = config[EnvComponent.languagePackages];
+
+      const needProcess = (action: EnvComponentAction) => {
+        return [
+          EnvComponentAction.INSTALL,
+          EnvComponentAction.UPDATE,
+          EnvComponentAction.REINSTALL,
+          EnvComponentAction.SWITCH_INSTALLED,
+        ].includes(action);
+      };
+
+      const moduleConfigStatus: Record<EnvComponentModule, EnvComponentModuleConfigStatus> = {
+        [EnvComponentModule.c_cpp]: !needProcess(cppConfig.action)
+          ? EnvComponentModuleConfigStatus.DONE
+          : EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.python]: !needProcess(pythonConfig.action)
+          ? EnvComponentModuleConfigStatus.DONE
+          : EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.vscode]: !needProcess(vscodeConfig.action)
+          ? EnvComponentModuleConfigStatus.DONE
+          : EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.extensions]:
+          !needProcess(extensionsConfig.action) &&
+          !needProcess(codeStyleExtensionsConfig.action) &&
+          !needProcess(languagePackagesConfig.action)
+            ? EnvComponentModuleConfigStatus.DONE
+            : EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.magic]: EnvComponentModuleConfigStatus.PENDING,
+      };
+
+      yield put({
+        type: 'setModuleConfigStatus',
+        payload: { moduleConfigStatus },
+      });
     },
     *installGcc(
       { payload: { force = false } }: DvaAction<{ force?: boolean }>,

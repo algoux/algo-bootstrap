@@ -12,7 +12,7 @@ import vscodeIcon from '@/assets/icons/vscode.svg';
 import vscodeExtensionIcon from '@/assets/icons/vscode-extension.svg';
 import languageIcon from '@/assets/icons/language.svg';
 import EnvCard from '@/components/EnvCard';
-import { getNextInstallerItemPage, getRequiredResourceIdsByEnvConfig } from '@/utils/env';
+import { getNextConfigurationModulePage, getRequiredResourceIdsByEnvConfig } from '@/utils/env';
 import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
@@ -728,8 +728,13 @@ class Configuration extends React.Component<Props, State> {
     }
   };
 
-  startInstall = () => {
-    router.push(getNextInstallerItemPage(this.props.environments));
+  startConfigure = async () => {
+    const { dispatch } = this.props;
+    await dispatch({
+      type: 'env/initModuleConfigStatusByConfig',
+      payload: {},
+    });
+    router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
   };
 
   renderDownloadInfo = () => {
@@ -941,12 +946,12 @@ class Configuration extends React.Component<Props, State> {
                 ]
               : [
                   {
-                    key: 'startInstall',
+                    key: 'startConfigure',
                     type: 'primary',
                     text: '开始配置',
                     highlight: true,
                     disabled: downloading || validating,
-                    onClick: this.startInstall,
+                    onClick: this.startConfigure,
                   },
                 ]
           }
@@ -961,6 +966,7 @@ function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
     resourceIndex: state.resources.resourceIndex as ResourceIndexItem<ResourceId>,
+    moduleConfigStatus: state.env.moduleConfigStatus,
   };
 }
 

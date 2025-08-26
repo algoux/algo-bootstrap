@@ -1,7 +1,12 @@
 import sm from '@/utils/modules';
 import pages from '@/configs/pages';
 import { EnvIds, ResourceId, VSIXIdMap, VSIXIds } from 'common/configs/resources';
-import { EnvComponentAction, EnvComponentOptions } from '@/typings/env';
+import {
+  EnvComponentAction,
+  EnvComponentOptions,
+  EnvComponentModule,
+  EnvComponentModuleConfigStatus,
+} from '@/typings/env';
 import { EnvComponent } from 'common/configs/env';
 
 export function isEnvInstalled(environments: IEnvironments, envId: SupportedEnvId) {
@@ -50,6 +55,27 @@ export function getNextInstallerItemPage(environments: IEnvironments) {
   const next = getNextInstallerItem(environments);
   if (next) {
     return pages.installer[next];
+  }
+  return pages.board;
+}
+
+export function getNextConfigurationModuleItem(
+  envConfigStatus: Record<EnvComponentModule, EnvComponentModuleConfigStatus>,
+) {
+  for (const module of Object.keys(envConfigStatus) as EnvComponentModule[]) {
+    if (envConfigStatus[module] === EnvComponentModuleConfigStatus.PENDING) {
+      return module;
+    }
+  }
+  return null;
+}
+
+export function getNextConfigurationModulePage(
+  envConfigStatus: Record<EnvComponentModule, EnvComponentModuleConfigStatus>,
+) {
+  const next = getNextConfigurationModuleItem(envConfigStatus);
+  if (next) {
+    return pages.configurationModule[next];
   }
   return pages.board;
 }
