@@ -3,6 +3,8 @@ const paths = {
   respackTemp: '/respack_temp',
   respackDownload: '/respack_download',
   resourcesDownload: '/ab-resources-dl',
+  resourcesTemp: '/ab-resources-temp',
+  userlibSrc: '/userlib',
   tmpl: '/tmpl',
   tmplProject: '/tmpl/project',
 };

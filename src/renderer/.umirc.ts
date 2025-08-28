@@ -51,6 +51,7 @@ export default {
       fs: false,
       path: false,
     };
+
     // 配置ts-loader忽略类型检查错误
     config.module
       .rule('ts')
@@ -59,6 +60,27 @@ export default {
         transpileOnly: true,
         ignoreDiagnostics: [1110],
       });
+
+    // 处理@xterm模块的ES6+语法
+    config.module
+      .rule('xterm-js')
+      .test(/\.js$/)
+      .include
+      .add(/node_modules\/@xterm/)
+      .end()
+      .use('babel-loader')
+      .loader('babel-loader')
+      .options({
+        presets: [
+          ['@babel/preset-env', {
+            targets: {
+              browsers: ['last 2 versions', 'ie >= 11']
+            },
+            modules: 'commonjs'
+          }]
+        ]
+      });
+
     return config;
   },
   define: {

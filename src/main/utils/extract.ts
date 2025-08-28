@@ -1,30 +1,6 @@
 import fs from 'fs-extra';
-import unzipper, { File } from 'unzipper';
-import * as path from 'path';
+import unzipper from 'unzipper';
 import { logMain } from '@/utils/logger';
-
-// defunct. ref: https://github.com/ZJONSSON/node-unzipper/issues/104
-function extractEntry(file: File, targetDir: string): Promise<void> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const targetPath = path.join(targetDir, file.path);
-      logMain.info('[extractEntry]', file.type, file.path, targetPath);
-      if (file.type === 'Directory') {
-        await fs.ensureDir(targetPath);
-        resolve();
-        return;
-      }
-      await fs.ensureDir(path.dirname(targetPath));
-      file
-        .stream()
-        .pipe(fs.createWriteStream(targetPath, { flags: 'w+' }))
-        .on('error', reject)
-        .on('finish', resolve);
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
 
 /**
  * Extract all files in zip
@@ -50,20 +26,10 @@ export function extractAll(
       // logMain.info('[extractAll.done]', filePath, targetDir);
       // resolve();
       clearTargetDir && (await fs.emptyDir(targetDir));
-      const rs = fs.createReadStream(filePath);
-      rs.on('error', (e) => reject(e));
-      rs.pipe(unzipper.Extract({ path: targetDir }))
-        .promise()
-        .then(
-          (r) => {
-            logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`, filePath, targetDir);
-            resolve(r);
-          },
-          (e) => {
-            logMain.error('[extractAll.error]', filePath, targetDir, e);
-            reject(e);
-          },
-        );
+      const directory = await unzipper.Open.file(filePath);
+      await directory.extract({ path: targetDir });
+      logMain.info(`[extractAll.done ${Date.now() - __start + 'ms'}]`, filePath, targetDir);
+      resolve();
     } catch (e) {
       logMain.error('[extractAll.error]', filePath, targetDir, e);
       reject(e);

@@ -1,3 +1,6 @@
+import fs from 'fs-extra';
+import os from 'os';
+import path from 'path';
 import { isMac, isWindows } from '@/utils/platform';
 import { spawn, execFile, sudoExec } from '@/utils/child-process';
 import {
@@ -12,13 +15,18 @@ import Respack from './respack';
 import { extractAll, getUncompressedSize } from '@/utils/extract';
 import { app } from 'electron';
 import paths from 'common/configs/paths';
-import * as path from 'path';
 import { matchOne, escapeRegExp } from 'common/utils/regexp';
 import { logMain } from '@/utils/logger';
 import getFolderSize from 'get-folder-size';
+import { TerminalManager } from '@/utils/terminal';
+import { v4 as uuidv4 } from 'uuid';
 
 const RESPACK_PATH = path.join(app.getPath('userData'), paths.respack);
 const RESPACK_TEMP_PATH = path.join(app.getPath('userData'), paths.respackTemp);
+const RESOURCES_DOWNLOAD_PATH = path.join(app.getPath('userData'), paths.resourcesDownload);
+const RESOURCES_TEMP_PATH = path.join(os.tmpdir(), paths.resourcesTemp);
+const USERLIB_SRC_PATH = path.join(__static, paths.userlibSrc);
+const USERLIB_PATH = path.join(os.homedir(), '.algo-bootstrap');
 
 export async function appendToWindowsUserPath(PATH: string) {
   logMain.info('[appendToWindowsUserPath] PATH to append:', PATH);
@@ -213,5 +221,99 @@ export async function installVsix(vsixId: SupportedVSIXId, force = false) {
     '--install-extension',
     `"${filePath}"`,
   ]);
+  await getEnvironments(true);
+}
+
+export async function installUserLib(force = false) {
+  const srcPath = path.join(USERLIB_SRC_PATH);
+  const targetPath = path.join(USERLIB_PATH);
+  const iJsonPath = path.join(targetPath, 'i.json');
+  let version: string | undefined;
+  try {
+    const obj = await fs.readJson(iJsonPath);
+    version = obj?.version;
+  } catch (error) {}
+  const currentVersion = app.getVersion();
+  if (!force && version === currentVersion) {
+    return;
+  }
+
+  logMain.info('[installUserLib] install to', targetPath);
+  await fs.remove(targetPath);
+  await fs.copy(srcPath, targetPath, { recursive: true });
+  const binPath = path.join(targetPath, 'bin');
+  const binFiles = await fs.readdir(binPath);
+  for (const file of binFiles) {
+    const filePath = path.join(binPath, file);
+    const stat = await fs.stat(filePath);
+    if (stat.isFile()) {
+      const newMode = stat.mode | 0o111;
+      stat.mode !== newMode && (await fs.chmod(filePath, newMode));
+    }
+  }
+  await fs.writeJson(iJsonPath, { version: currentVersion }, { spaces: 2 });
+}
+
+export async function installCppcheckFromSrc(
+  srcFileName: string,
+  options: { terminalId?: string; force?: boolean } = {},
+) {
+  if (!options.force && (await isEnvInstalled('cppcheck'))) {
+    return;
+  }
+  if (isWindows) {
+    throw Error('cppcheck installation is not supported on Windows');
+  }
+  await installUserLib();
+  const cppcheckSrcZipPath = path.join(RESOURCES_DOWNLOAD_PATH, srcFileName);
+  await extractAll(cppcheckSrcZipPath, RESOURCES_TEMP_PATH);
+  const extractedPath = path.join(
+    RESOURCES_TEMP_PATH,
+    path.basename(cppcheckSrcZipPath, path.extname(cppcheckSrcZipPath)),
+  );
+  const depsDirPath = path.join(USERLIB_PATH, 'deps');
+  await fs.ensureDir(depsDirPath);
+  const targetPath = path.join(depsDirPath, 'cppcheck');
+  await fs.remove(targetPath);
+  await fs.move(extractedPath, targetPath);
+  const tm = TerminalManager.getInstance();
+  const terminal = tm.createCommandTerminal({
+    id: options.terminalId || `cppcheck-${uuidv4().slice(0, 6)}`,
+  });
+  await terminal.exec('bash', ['tools/cppcheck-user-install.sh'], {
+    cwd: USERLIB_PATH,
+  });
+  await getEnvironments(true);
+}
+
+export async function installCpplintV2FromSrc(
+  srcFileName: string,
+  options: { terminalId?: string; force?: boolean } = {},
+) {
+  if (!options.force && (await isEnvInstalled('cpplint'))) {
+    return;
+  }
+  if (isWindows) {
+    throw Error('cpplint v2 installation is not supported on Windows');
+  }
+  await installUserLib();
+  const cpplintSrcZipPath = path.join(RESOURCES_DOWNLOAD_PATH, srcFileName);
+  await extractAll(cpplintSrcZipPath, RESOURCES_TEMP_PATH);
+  const extractedPath = path.join(
+    RESOURCES_TEMP_PATH,
+    path.basename(cpplintSrcZipPath, path.extname(cpplintSrcZipPath)),
+  );
+  const depsDirPath = path.join(USERLIB_PATH, 'deps');
+  await fs.ensureDir(depsDirPath);
+  const targetPath = path.join(depsDirPath, 'cpplint');
+  await fs.remove(targetPath);
+  await fs.move(extractedPath, targetPath);
+  const tm = TerminalManager.getInstance();
+  const terminal = tm.createCommandTerminal({
+    id: options.terminalId || `cpplint-${uuidv4().slice(0, 6)}`,
+  });
+  await terminal.exec('bash', ['tools/cpplint-user-install.sh'], {
+    cwd: USERLIB_PATH,
+  });
   await getEnvironments(true);
 }

@@ -4,7 +4,7 @@ import { connect } from '@/utils/dva';
 import { formatMessage } from 'umi-plugin-locale';
 import { Button, Progress } from 'antd';
 
-import ipcKeys from 'common/configs/ipc';
+import IPCKeys from 'common/configs/ipc';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
 import { dialog, getCurrentWindow } from '@electron/remote';
 import sm from '@/utils/modules';
@@ -56,18 +56,18 @@ class Test extends React.Component<Props, State> {
     // ipc.send('get-emoji', 'unicorn');
     // this.testIpc();
     // this.testRemoteGlobal();
-    ipc.answerMain(ipcKeys.downloadProgress, async (res) => {
+    ipc.answerMain(IPCKeys.downloadProgress, async (res) => {
       console.log('on progress', this.state.downloadTaskId, res.downloadTaskId);
       if (res.downloadTaskId === this.state.downloadTaskId) {
         console.log('download progress:', res);
       }
     });
-    ipc.answerMain(ipcKeys.downloadDone, async (res) => {
+    ipc.answerMain(IPCKeys.downloadDone, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         console.log('下载完成', res);
       }
     });
-    ipc.answerMain(ipcKeys.downloadError, async (res) => {
+    ipc.answerMain(IPCKeys.downloadError, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         console.log('下载失败', res);
       }
@@ -75,7 +75,7 @@ class Test extends React.Component<Props, State> {
   }
 
   testIpc = async () => {
-    const ret = await ipc.callMain(ipcKeys.getResPack, 'wa');
+    const ret = await ipc.callMain(IPCKeys.getResPack, 'wa');
     console.log('ipc ret:', ret);
     this.setState({ ipc: JSON.stringify(ret) });
   };
@@ -266,7 +266,7 @@ class Test extends React.Component<Props, State> {
   };
 
   testDownload = async () => {
-    const downloadTaskId = await ipc.callMain(ipcKeys.download, {
+    const downloadTaskId = await ipc.callMain(IPCKeys.download, {
       url: 'https://algoux.org/downloads/respack/ab-fullpack-darwin-1911270.respack',
       // url: 'http://localhost:9009/algo-bootstrap-static/respack/ab-fullpack-darwin-1911270.respack',
       errorTitle: '下载失败',
@@ -347,7 +347,7 @@ class Test extends React.Component<Props, State> {
           <h4>test remote require: {this.state.remoteGlobal}</h4>
           <h4>test env: {JSON.stringify(this.props.env.environments)}</h4>
           <h4>test ipc: {this.state.ipc}</h4>
-          <h4>test common: {ipcKeys.getResPack}</h4>
+          <h4>test common: {IPCKeys.getResPack}</h4>
           {/* <h4>test image: <img src={yay} style={{ width: '25px', height: '25px' }} /></h4> */}
         </div>
       </PageAnimation>

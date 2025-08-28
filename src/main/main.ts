@@ -3,7 +3,7 @@ import { app, BrowserWindow, nativeTheme, Menu, shell, dialog } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import { ipcMain as ipc } from 'electron-better-ipc';
-import ipcKeys from 'common/configs/ipc';
+import IPCKeys from 'common/configs/ipc';
 import _modules from '@/modules';
 import { getEnvironments } from '@/services/env-checker';
 import { logMain, log } from '@/utils/logger';
@@ -21,6 +21,7 @@ import { initialize, enable } from '@electron/remote/main';
 import { getPath } from './utils/path';
 import { PathKey } from 'common/configs/paths';
 import { ElectronDownloadManager } from 'electron-dl-manager';
+import { IPCDownloadItemStatus } from 'common/typings/ipc';
 
 logMain.info('[app.start]');
 logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
@@ -47,10 +48,10 @@ console.log('nativeTheme', {
 // TODO 暂不支持 dark theme
 nativeTheme.themeSource = 'light';
 
-let mainWindow: Electron.BrowserWindow | null;
+let mainWindow: Electron.BrowserWindow | null = null;
+global.getMainWindow = () => mainWindow;
 
 // console.log(path.join(__dirname, './preload.js'));
-// console.log('ipc', ipcKeys);
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -392,7 +393,7 @@ app.on('quit', () => {
   logMain.info('[app.quit]');
 });
 
-ipc.answerRenderer(ipcKeys.getResPack, async (param) => {
+ipc.answerRenderer(IPCKeys.getResPack, async (param) => {
   // const ret = await global.modules.req.get<{ apis: string[], help: string }>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
   // console.log('in main ret', ret);
   // return param + ' haha' + ret.data!.help;
@@ -403,7 +404,7 @@ ipc.answerRenderer(ipcKeys.getResPack, async (param) => {
 
 const dlManager = new ElectronDownloadManager();
 
-ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
+ipc.answerRenderer(IPCKeys.download, async (options, bw) => {
   const commOptions = { ...options };
   const requests = commOptions.requests;
   // @ts-ignore
@@ -432,7 +433,7 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
     if (
       itemStatuses.every((state) => state === 'done' || state === 'error' || state === 'cancelled')
     ) {
-      ipc.callRenderer(bw, ipcKeys.downloadFinished, {
+      ipc.callRenderer(bw, IPCKeys.downloadFinished, {
         downloadTaskId: curDownloadTaskId,
         itemStatuses,
       });
@@ -476,7 +477,7 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
             const receivedSize = item.getReceivedBytes();
             itemDownloadProgress[itemIndex].received = receivedSize;
             itemDownloadProgress[itemIndex].total = totalBytes;
-            ipc.callRenderer(bw, ipcKeys.downloadProgress, {
+            ipc.callRenderer(bw, IPCKeys.downloadProgress, {
               downloadTaskId: curDownloadTaskId,
               downloadId: id,
               itemIndex,
@@ -502,7 +503,7 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
               speed = (size / duration) * 1000 || 0;
               lastAllReceivedSize = allReceivedSize;
               lastAllProgressTime = now;
-              ipc.callRenderer(bw, ipcKeys.downloadTotalProgress, {
+              ipc.callRenderer(bw, IPCKeys.downloadTotalProgress, {
                 downloadTaskId: curDownloadTaskId,
                 percent: allReceivedSize / allTotalSize,
                 received: allReceivedSize,
@@ -511,11 +512,13 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
               });
             }
           },
-          onDownloadInterrupted({ id }) {
-            logMain.error(`[download.interrupted #${curDownloadTaskId}:${itemIndex} ${id}]`);
+          onDownloadInterrupted({ id, interruptedVia }) {
+            logMain.error(
+              `[download.interrupted #${curDownloadTaskId}:${itemIndex} ${id}] interruptedVia: ${interruptedVia}`,
+            );
             itemStatuses[itemIndex] = 'error';
             checkFinished();
-            ipc.callRenderer(bw, ipcKeys.downloadError, {
+            ipc.callRenderer(bw, IPCKeys.downloadError, {
               downloadTaskId: curDownloadTaskId,
               downloadId: id,
               itemIndex,
@@ -525,7 +528,7 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
             logMain.error(`[download.error #${curDownloadTaskId}:${itemIndex} ${id}]`, error);
             itemStatuses[itemIndex] = 'error';
             checkFinished();
-            ipc.callRenderer(bw, ipcKeys.downloadError, {
+            ipc.callRenderer(bw, IPCKeys.downloadError, {
               downloadTaskId: curDownloadTaskId,
               downloadId: id,
               itemIndex,
@@ -546,7 +549,7 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
               `${filesize(speed, { standard: 'iec' })}/s`,
             );
             itemStatuses[itemIndex] = 'done';
-            ipc.callRenderer(bw, ipcKeys.downloadDone, {
+            ipc.callRenderer(bw, IPCKeys.downloadDone, {
               downloadTaskId: curDownloadTaskId,
               downloadId: id,
               itemIndex,
@@ -558,30 +561,12 @@ ipc.answerRenderer(ipcKeys.download, async (options, bw) => {
             checkFinished();
           },
         },
-        // onTotalProgress({ percent, transferredBytes, totalBytes }) {
-        //   const receivedSize = transferredBytes;
-        //   const now = Date.now();
-        //   let speed = 0;
-        //   if (lastAllProgressTime) {
-        //     const duration = now - lastAllProgressTime;
-        //     const size = receivedSize - lastAllReceivedSize;
-        //     speed = (size / duration) * 1000 || 0;
-        //   }
-        //   lastAllReceivedSize = receivedSize;
-        //   lastAllProgressTime = now;
-        //   ipc.callRenderer(bw, ipcKeys.downloadTotalProgress, {
-        //     percent,
-        //     received: transferredBytes,
-        //     total: totalBytes,
-        //     speed,
-        //   });
-        // },
       });
       downloadIds[itemIndex] = id;
     } catch (e) {
       logMain.error(`[download.error #${curDownloadTaskId}:${itemIndex}]`, e);
       itemStatuses[itemIndex] = 'error';
-      ipc.callRenderer(bw, ipcKeys.downloadError, {
+      ipc.callRenderer(bw, IPCKeys.downloadError, {
         downloadTaskId: curDownloadTaskId,
         downloadId: '',
         itemIndex,

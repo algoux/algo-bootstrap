@@ -1,4 +1,4 @@
-enum ipcKeys {
+enum IPCKeys {
   getResPack = 'getResPack',
   download = 'download',
   downloadProgress = 'downloadProgress',
@@ -6,6 +6,10 @@ enum ipcKeys {
   downloadDone = 'downloadDone',
   downloadError = 'downloadError',
   downloadFinished = 'downloadFinished',
+  // Terminal related
+  terminalConnect = 'terminalConnect',
+  terminalOutput = 'terminalOutput',
+  terminalClosed = 'terminalClosed',
 }
 
-export default ipcKeys;
+export default IPCKeys;

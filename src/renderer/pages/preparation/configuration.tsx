@@ -18,7 +18,7 @@ import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import { DispatchProps } from '@/typings/props';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
-import ipcKeys from 'common/configs/ipc';
+import IPCKeys from 'common/configs/ipc';
 import { PathKey } from 'common/configs/paths';
 import * as path from 'path';
 import { formatFileSize, formatPercentage } from 'common/utils/format';
@@ -28,6 +28,7 @@ import { EnvComponent } from 'common/configs/env';
 import { EnvComponentAction, IEnvComponentUIOption } from '@/typings/env';
 import { cloneDeep } from 'lodash';
 import api from 'common/configs/apis';
+import { IIpcDownloadRequest } from 'common/typings/ipc';
 
 enum ResourceStatus {
   PENDING = 'PENDING',
@@ -473,25 +474,25 @@ class Configuration extends React.Component<Props, State> {
     logRenderer.info('[Configuration] initial config:', this.state.config);
     this.syncConfig();
 
-    ipc.answerMain(ipcKeys.downloadTotalProgress, async (res) => {
+    ipc.answerMain(IPCKeys.downloadTotalProgress, async (res) => {
       this.setState({
         receivedSize: res.received,
         totalSize: res.total,
         speed: res.speed,
       });
     });
-    ipc.answerMain(ipcKeys.downloadDone, async (res) => {
+    ipc.answerMain(IPCKeys.downloadDone, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         // do nothing
       }
     });
-    ipc.answerMain(ipcKeys.downloadError, async (res) => {
+    ipc.answerMain(IPCKeys.downloadError, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         logRenderer.error('[configuration] downloadError:', res);
         sm.track.event('download', 'error');
       }
     });
-    ipc.answerMain(ipcKeys.downloadFinished, async (res) => {
+    ipc.answerMain(IPCKeys.downloadFinished, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         logRenderer.info('[configuration] downloadFinished:', res);
         await this.checkResourcesStatus().catch((e) => {
@@ -698,7 +699,7 @@ class Configuration extends React.Component<Props, State> {
     }
 
     logRenderer.info('[configuration] needDownloadResources:', needDownloadResources);
-    const downloadRequests = needDownloadResources.map((resource) => ({
+    const downloadRequests: IIpcDownloadRequest[] = needDownloadResources.map((resource) => ({
       url: api.res.base + resource.path,
       directory: PathKey.resourcesDownload,
     }));
@@ -711,7 +712,7 @@ class Configuration extends React.Component<Props, State> {
     });
 
     try {
-      const { downloadTaskId } = await ipc.callMain(ipcKeys.download, {
+      const { downloadTaskId } = await ipc.callMain(IPCKeys.download, {
         requests: downloadRequests,
         errorTitle: '下载失败',
         errorMessage: '无法完成下载，因为网络错误',

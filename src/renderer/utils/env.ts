@@ -105,7 +105,7 @@ export function getRequiredResourceIdsByEnvConfig(envConfig: EnvComponentConfig)
       if (Array.isArray(options.installVSIXIds)) {
         componentResourceIds = componentResourceIds.filter(
           (resourceId) =>
-            resourceId.startsWith('vsix.') &&
+            !resourceId.startsWith('vsix.') ||
             options.installVSIXIds!.includes(VSIXIdMap[resourceId]),
         );
       }

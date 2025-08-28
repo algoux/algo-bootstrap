@@ -19,7 +19,7 @@ import constants from 'common/configs/constants';
 import { formatMessage } from 'umi-plugin-locale';
 import { DispatchProps } from '@/typings/props';
 import { ipcRenderer as ipc } from 'electron-better-ipc';
-import ipcKeys from 'common/configs/ipc';
+import IPCKeys from 'common/configs/ipc';
 import paths from 'common/configs/paths';
 import * as path from 'path';
 import { formatFileSize, formatPercentage } from 'common/utils/format';
@@ -51,7 +51,7 @@ class EnvAndRespack extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    ipc.answerMain(ipcKeys.downloadProgress, async (res) => {
+    ipc.answerMain(IPCKeys.downloadProgress, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         this.setState({
           receivedSize: res.received,
@@ -60,7 +60,7 @@ class EnvAndRespack extends React.Component<Props, State> {
         });
       }
     });
-    ipc.answerMain(ipcKeys.downloadDone, async (res) => {
+    ipc.answerMain(IPCKeys.downloadDone, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         this.setState({
           downloading: false,
@@ -70,7 +70,7 @@ class EnvAndRespack extends React.Component<Props, State> {
         sm.track.timing('download', 'done', res.time);
       }
     });
-    ipc.answerMain(ipcKeys.downloadError, async (res) => {
+    ipc.answerMain(IPCKeys.downloadError, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         this.setState({
           downloading: false,
@@ -95,7 +95,7 @@ class EnvAndRespack extends React.Component<Props, State> {
       msg.error('查询资源包版本失败');
     }
     if (downloadUrl) {
-      const downloadTaskId = await ipc.callMain(ipcKeys.download, {
+      const downloadTaskId = await ipc.callMain(IPCKeys.download, {
         url: downloadUrl,
         directory: RESPACK_DOWNLOAD_PATH,
         clearDir: true,
