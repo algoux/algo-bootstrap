@@ -92,7 +92,7 @@ class VsixInstaller extends React.Component<Props, State> {
     return (
       <div>
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.vsix' })}</h1>
             <p>
               正在安装（{state.installingVsixIndex + 1}/{sm.envChecker.VSIXIds.length}）：

@@ -1,6 +1,5 @@
 import * as path from 'path';
 import fs from 'fs-extra';
-import paths from 'common/configs/paths';
 import { logMain } from '@/utils/logger';
 import ejs from 'ejs';
 import { getEnvironments, isEnvInstalled, getEnvironment } from './env-checker';
@@ -8,10 +7,13 @@ import { isWindows, isMac } from '@/utils/platform';
 import { Platform } from 'common/configs/platform';
 import { spawn } from '@/utils/child-process';
 import { app } from 'electron';
+import { getMingwInstallPath } from './env-installer';
+import { getPath } from '@/utils/path';
+import { PathKey } from 'common/configs/paths';
 
 export async function isDirEmpty(dirPath: string) {
   const dirFiles = await fs.readdir(dirPath);
-  const files = dirFiles.filter(f => f !== '.DS_Store');
+  const files = dirFiles.filter((f) => f !== '.DS_Store');
   return files.length === 0;
 }
 
@@ -35,12 +37,18 @@ async function genTmplData() {
   const data = {
     appVersion: app.getVersion(),
     gccPath: {
-      [Platform.win32]: fmt(isWindows ? environments.gcc.path : undefined, 'C:\\MinGW64\\bin\\g++.exe'),
+      [Platform.win32]: fmt(
+        isWindows ? environments.gcc.path : undefined,
+        `${getMingwInstallPath()}\\bin\\g++.exe`,
+      ),
       [Platform.darwin]: fmt(isMac ? environments.gcc.path : undefined, '/usr/bin/gcc'),
       // [Platform.linux]: fmt(isLinux ? environments.gcc.path : undefined, '/usr/bin/gcc'),
     },
     gdbPath: {
-      [Platform.win32]: fmt(isWindows ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined, 'C:\\MinGW64\\bin\\gdb.exe'),
+      [Platform.win32]: fmt(
+        isWindows ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined,
+        `${getMingwInstallPath()}\\bin\\gdb.exe`,
+      ),
       // [Platform.linux]: fmt(isLinux ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined, '/usr/bin/gdb'),
     },
     cpplintPath: fmt(environments.cpplint.path, ''),
@@ -53,10 +61,12 @@ export async function genProjectFiles(projectPath: string) {
   logMain.info('[genProjectFiles]', projectPath);
   // TODO 递归遍历目录文件拷贝
   // 读取模板文件列表
-  const tmplProjectPath = path.join(__static, paths.tmplProject);
+  const tmplProjectPath = getPath(PathKey.staticTmplProject);
   const tmplProjectVscodePath = path.join(tmplProjectPath, '.vscode');
   const dirFiles = await fs.readdir(tmplProjectVscodePath);
-  const files = dirFiles.filter(f => f !== '.DS_Store' && fs.statSync(path.join(tmplProjectVscodePath, f)).isFile());
+  const files = dirFiles.filter(
+    (f) => f !== '.DS_Store' && fs.statSync(path.join(tmplProjectVscodePath, f)).isFile(),
+  );
   logMain.info('[genProjectFiles] files:', files);
   // 向项目目录写入文件
   const data = await genTmplData();

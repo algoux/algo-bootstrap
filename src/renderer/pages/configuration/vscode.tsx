@@ -11,15 +11,16 @@ import windowsStep_2 from '@/assets/guides/vscode/vscode-win32-light-step-2.png'
 import windowsStep_3 from '@/assets/guides/vscode/vscode-win32-light-step-3.png';
 import windowsStep_4 from '@/assets/guides/vscode/vscode-win32-light-step-4.png';
 import windowsStep_5 from '@/assets/guides/vscode/vscode-win32-light-step-5.png';
-import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
+import { isEnvInstalled, getNextConfigurationModulePage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
+import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 
-export interface ICodeInstallerProps {}
+export interface IVSCodeConfiguratorProps {}
 
 interface State {}
 
-type Props = ICodeInstallerProps & ReturnType<typeof mapStateToProps> & DispatchProps;
+type Props = IVSCodeConfiguratorProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 function genInitialState(): State {
   return {};
@@ -27,14 +28,16 @@ function genInitialState(): State {
 
 let cachedState = genInitialState();
 
-class CodeInstaller extends React.Component<Props, State> {
+class VSCodeConfigurator extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = cachedState;
   }
 
   componentDidMount() {
-    sm.platform.isMac && this.installVSCode();
+    if (this.props.moduleConfigStatus.vscode === EnvComponentModuleConfigStatus.PENDING) {
+      this.autoConfigure();
+    }
   }
 
   componentWillUnmount() {
@@ -43,10 +46,23 @@ class CodeInstaller extends React.Component<Props, State> {
     };
   }
 
+  autoConfigure = () => {
+    if (sm.platform.isMac) {
+      this.installVSCode();
+    }
+  };
+
   installVSCode = async () => {
     if (this.props.loading) {
       return;
     }
+    await this.props.dispatch({
+      type: 'env/setModuleConfigStatusItem',
+      payload: {
+        module: EnvComponentModule.vscode,
+        status: EnvComponentModuleConfigStatus.PROCESSING,
+      },
+    });
     try {
       const _startAt = Date.now();
       windowProgress.start();
@@ -55,10 +71,8 @@ class CodeInstaller extends React.Component<Props, State> {
         payload: {},
       });
       windowProgress.end();
-      if (isEnvInstalled(environments, 'vscode')) {
-        sm.track.timing('install', 'vscode', Date.now() - _startAt);
-        router.push(getNextInstallerItemPage(environments));
-      }
+      sm.track.timing('install', 'vscode', Date.now() - _startAt);
+      await this.complete(environments);
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installVSCode]`, e);
@@ -67,14 +81,30 @@ class CodeInstaller extends React.Component<Props, State> {
     }
   };
 
+  complete = async (environments: IEnvironments | undefined) => {
+    if (environments && isEnvInstalled(environments, 'vscode')) {
+      await this.props.dispatch({
+        type: 'env/setModuleConfigStatusItem',
+        payload: {
+          module: EnvComponentModule.vscode,
+          status: EnvComponentModuleConfigStatus.DONE,
+        },
+      });
+      router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
+    } else {
+      msg.error('未检测到配置完成，请重试');
+    }
+  };
+
   renderWindows = () => {
     const props = this.props;
     return (
       <div>
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.vscode' })}</h1>
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
+            <p className="color-secondary">{formatMessage({ id: 'env.installer.tips' })}</p>
             <div className="article">
               <h3 className="section-header">1. 选择「我接受协议」并点击「下一步」</h3>
               <p>
@@ -120,7 +150,7 @@ class CodeInstaller extends React.Component<Props, State> {
     return (
       <div>
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.vscode' })}</h1>
             <p>
               正在拷贝 {formatMessage({ id: 'env.vscode' })} 到「应用程序」，这只需要花费一点时间。
@@ -157,7 +187,8 @@ function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
     loading: !!state.loading.effects['env/installVSCode'],
+    moduleConfigStatus: state.env.moduleConfigStatus,
   };
 }
 
-export default connect(mapStateToProps)(CodeInstaller);
+export default connect(mapStateToProps)(VSCodeConfigurator);

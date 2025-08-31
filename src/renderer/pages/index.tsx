@@ -31,10 +31,12 @@ class Index extends React.Component<Props, State> {
     });
     const _envEnd = performance.now();
     logRenderer.info(`environments fetched in ${_envEnd - _envStart}ms.`);
-    if (isAllInstalled(environments)) {
-      router.push(pages.board);
-      return;
-    }
+
+    // TODO
+    // if (isAllInstalled(environments)) {
+    //   router.push(pages.board);
+    //   return;
+    // }
     const envComponents = sm.envComponents;
     const _riStart = performance.now();
     const resourceIds = Object.values(envComponents).flatMap((c) => c.resources);
@@ -53,15 +55,6 @@ class Index extends React.Component<Props, State> {
       failed,
     );
 
-    const hasRespack = await this.props.dispatch({
-      type: 'respack/getHasRespack',
-      payload: {},
-    });
-    hasRespack &&
-      (await this.props.dispatch({
-        type: 'respack/getManifest',
-        payload: {},
-      }));
     router.push(pages.preparation.index);
   }
 
@@ -81,8 +74,6 @@ function mapStateToProps(state: IState) {
     env: state.env,
     loading:
       !!state.loading.effects['env/getEnvironments'] ||
-      !!state.loading.effects['respack/getHasRespack'] ||
-      !!state.loading.effects['respack/getManifest'] ||
       !!state.loading.effects['resources/getResourceIndexItems'],
   };
 }

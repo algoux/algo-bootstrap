@@ -5,7 +5,7 @@ import * as url from 'url';
 import { ipcMain as ipc } from 'electron-better-ipc';
 import IPCKeys from 'common/configs/ipc';
 import _modules from '@/modules';
-import { getEnvironments } from '@/services/env-checker';
+import { checkRemainingDiskSpace, getEnvironments } from '@/services/env-checker';
 import { logMain, log } from '@/utils/logger';
 import { currentPlatformArch, isMac, isPlatformArchIsSupported } from '@/utils/platform';
 import constants from 'common/configs/constants';
@@ -13,7 +13,6 @@ import req from '@/utils/request';
 import api from 'common/configs/apis';
 import { compare } from 'compare-versions';
 import { currentPlatform } from '@/utils/platform';
-import { download } from 'electron-dl';
 import { filesize } from 'filesize';
 import fs from 'fs-extra';
 import track from './utils/track';
@@ -57,6 +56,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 880,
     height: 660,
+    resizable: false,
+    maximizable: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -374,6 +375,17 @@ if (!gotTheLock) {
     }
 
     checkUpdate(true);
+
+    checkRemainingDiskSpace().then((res) => {
+      logMain.info('[checkRemainingDiskSpace]', res);
+      if (res.free < 1000 * 1000 * 1000 * 2.5) {
+        const options = {
+          type: 'error' as const,
+          message: `剩余空间不足 2.5 GB，配置环节可能出现问题`,
+        };
+        mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options);
+      }
+    });
   });
 }
 

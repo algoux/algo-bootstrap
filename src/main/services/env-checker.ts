@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
+import checkDiskSpace from 'check-disk-space';
 import { logMain } from '@/utils/logger';
-import { isMac } from '@/utils/platform';
+import { isMac, isWindows } from '@/utils/platform';
 import { Platform } from 'common/configs/platform';
 import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
@@ -10,7 +11,7 @@ import { VSIXIds } from 'common/configs/resources';
 
 const emptyEnvironments = genEmptyEnvironments();
 
-let environments = emptyEnvironments;
+let environmentsCache = emptyEnvironments;
 
 function genNotInstalled(): ICheckEnvironmentResultNotInstalled {
   return { installed: false };
@@ -268,8 +269,8 @@ export async function checkVsix(
 }
 
 export async function getEnvironments(force = false) {
-  if (!force && environments !== emptyEnvironments) {
-    return environments;
+  if (!force && environmentsCache !== emptyEnvironments) {
+    return environmentsCache;
   }
   // const [gcc, gdb, python, cpplint, vscode] = await Promise.all([
   //   checkGcc(),
@@ -294,7 +295,7 @@ export async function getEnvironments(force = false) {
     vsix: vscode.installed && vscode.path ? await checkVsix(vscode.path) : genEmptyVSIXMap(),
   };
   logMain.info('[getEnvironments]', JSON.stringify(environmentResult, null, 2));
-  environments = environmentResult;
+  environmentsCache = environmentResult;
   return environmentResult;
 }
 
@@ -310,8 +311,14 @@ export async function isEnvInstalled(env: Exclude<keyof IEnvironments, 'vsix'>) 
   return (await getEnvironment(env)).installed;
 }
 
-export async function isVsixInstalled(vsixId: SupportedVSIXId) {
-  return (await getVsix(vsixId)).installed;
+export async function isVsixesInstalled(vsixIds: SupportedVSIXId[]) {
+  const environments = await getEnvironments();
+  for (const vsixId of vsixIds) {
+    if (!environments.vsix[vsixId].installed) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // export async function isAllVsixInstalled() {
@@ -355,4 +362,11 @@ export async function getWindowsUserPath() {
     );
   } catch (e) {}
   return null;
+}
+
+export function checkRemainingDiskSpace(checkPath?: string) {
+  if (isWindows) {
+    return checkDiskSpace(checkPath || 'C:');
+  }
+  return checkDiskSpace(checkPath || '/');
 }

@@ -2,7 +2,18 @@ import { app } from 'electron';
 import path from 'path';
 import os from 'os';
 import { logMain, log } from './logger';
-import paths, { PathKey } from 'common/configs/paths';
+import { PathKey } from 'common/configs/paths';
+
+const paths = {
+  respack: '/respack',
+  respackTemp: '/respack_temp',
+  respackDownload: '/respack_download',
+  resourcesDownload: '/ab-resources-dl',
+  resourcesTemp: '/ab-resources-temp',
+  userlibSrc: '/userlib',
+  tmpl: '/tmpl',
+  tmplProject: '/tmpl/project',
+};
 
 function getMainProcessDirectory() {
   logMain.info(
@@ -25,6 +36,9 @@ const pathMap: Record<PathKey, string> = {
   [PathKey.log]: path.dirname(log.transports.file.getFile().path),
   [PathKey.resourcesDownload]: path.join(app.getPath('userData'), paths.resourcesDownload),
   [PathKey.resourcesTemp]: path.join(os.tmpdir(), 'ab-resources-temp'),
+  [PathKey.staticUserlibSrc]: path.join(__static, paths.userlibSrc),
+  [PathKey.staticTmpl]: path.join(__static, paths.tmpl),
+  [PathKey.staticTmplProject]: path.join(__static, paths.tmplProject),
 };
 
 export function getPath(key: PathKey) {

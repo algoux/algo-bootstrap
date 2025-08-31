@@ -75,7 +75,15 @@ class RootLayout extends React.Component<Props, State> {
     const activeLinkKey = location.pathname;
 
     return (
-      <Layout>
+      <Layout
+        className={
+          sm.platform.isMac
+            ? 'platform-mac'
+            : sm.platform.isWindows
+              ? 'platform-win'
+              : 'platform-linux'
+        }
+      >
         {/* 顶部拖拽区域 - 仅在 macOS 上显示 */}
         {sm.platform.isMac && (
           <div
@@ -85,7 +93,7 @@ class RootLayout extends React.Component<Props, State> {
               top: 0,
               left: 0,
               right: 0,
-              height: 28 + 10 + 'px', // macOS 标题栏高度 + 额外热区
+              height: 'calc(var(--extra-title-bar-height) + 10px)', // macOS 标题栏高度 + 额外热区
               zIndex: 1000,
               pointerEvents: 'auto',
             }}
@@ -100,9 +108,6 @@ class RootLayout extends React.Component<Props, State> {
             position: 'fixed',
             left: 0,
             ...bgStyle,
-            ...(sm.platform.isMac && {
-              paddingTop: '28px', // 补偿隐藏的标题栏高度
-            }),
           }}
         >
           <div
@@ -135,37 +140,37 @@ class RootLayout extends React.Component<Props, State> {
               </Menu.Item>
             </Menu.ItemGroup>
             <Menu.ItemGroup key="group-1" title="配置编程环境">
-              <Menu.Item key={pages.installer.gcc}>
+              <Menu.Item key={pages.configurationModule.c_cpp}>
                 {this.renderNavItem(
-                  pages.installer.gcc,
-                  formatMessage({ id: 'env.gcc' }),
+                  pages.configurationModule.c_cpp,
+                  formatMessage({ id: 'env.c_cpp' }),
                   this.renderEnvStatusIcon(EnvComponentModule.c_cpp),
                 )}
               </Menu.Item>
-              <Menu.Item key={pages.installer.python}>
+              <Menu.Item key={pages.configurationModule.python}>
                 {this.renderNavItem(
-                  pages.installer.python,
+                  pages.configurationModule.python,
                   formatMessage({ id: 'env.python' }),
                   this.renderEnvStatusIcon(EnvComponentModule.python),
                 )}
               </Menu.Item>
-              <Menu.Item key={pages.installer.vscode}>
+              <Menu.Item key={pages.configurationModule.vscode}>
                 {this.renderNavItem(
-                  pages.installer.vscode,
+                  pages.configurationModule.vscode,
                   formatMessage({ id: 'env.vscode' }),
                   this.renderEnvStatusIcon(EnvComponentModule.vscode),
                 )}
               </Menu.Item>
-              <Menu.Item key={pages.installer.ext}>
+              <Menu.Item key={pages.configurationModule.extensions}>
                 {this.renderNavItem(
-                  pages.installer.ext,
-                  formatMessage({ id: 'env.ext' }),
+                  pages.configurationModule.extensions,
+                  formatMessage({ id: 'env.extensions' }),
                   this.renderEnvStatusIcon(EnvComponentModule.extensions),
                 )}
               </Menu.Item>
-              <Menu.Item key={pages.installer.magic}>
+              <Menu.Item key={pages.configurationModule.magic}>
                 {this.renderNavItem(
-                  pages.installer.magic,
+                  pages.configurationModule.magic,
                   formatMessage({ id: 'env.finaleMagic' }),
                   this.renderEnvStatusIcon(EnvComponentModule.magic),
                 )}
@@ -179,9 +184,10 @@ class RootLayout extends React.Component<Props, State> {
         <Layout
           style={{
             marginLeft: 200,
-            ...(sm.platform.isMac && {
-              paddingTop: '28px', // 补偿隐藏的标题栏高度
-            }),
+            ...(sm.platform.isMac &&
+              {
+                // paddingTop: '28px', // 补偿隐藏的标题栏高度
+              }),
           }}
         >
           <Layout.Content>{props.children}</Layout.Content>

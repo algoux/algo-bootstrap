@@ -9,17 +9,18 @@ import { formatMessage } from 'umi-plugin-locale';
 import windowsStep_1 from '@/assets/guides/python/python-win32-light-step-1.png';
 import windowsStep_2 from '@/assets/guides/python/python-win32-light-step-2.png';
 import windowsStep_3 from '@/assets/guides/python/python-win32-light-step-3.png';
-import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
+import { isEnvInstalled, getNextConfigurationModulePage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
+import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 
-export interface IPythonInstallerProps {}
+export interface IPythonConfigurator {}
 
 interface State {
   checkCompleteLoading: boolean;
 }
 
-type Props = IPythonInstallerProps & ReturnType<typeof mapStateToProps> & DispatchProps;
+type Props = IPythonConfigurator & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 function genInitialState(): State {
   return {
@@ -29,7 +30,7 @@ function genInitialState(): State {
 
 let cachedState = genInitialState();
 
-class PythonInstaller extends React.Component<Props, State> {
+class PythonConfigurator extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = cachedState;
@@ -46,6 +47,13 @@ class PythonInstaller extends React.Component<Props, State> {
     if (this.props.loading) {
       return;
     }
+    await this.props.dispatch({
+      type: 'env/setModuleConfigStatusItem',
+      payload: {
+        module: EnvComponentModule.python,
+        status: EnvComponentModuleConfigStatus.PROCESSING,
+      },
+    });
     try {
       const _startAt = Date.now();
       windowProgress.start();
@@ -54,10 +62,8 @@ class PythonInstaller extends React.Component<Props, State> {
         payload: {},
       });
       windowProgress.end();
-      if (isEnvInstalled(environments, 'python')) {
-        sm.track.timing('install', 'python', Date.now() - _startAt);
-        router.push(getNextInstallerItemPage(environments));
-      }
+      sm.track.timing('install', 'python', Date.now() - _startAt);
+      await this.complete(environments);
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installPython]`, e);
@@ -79,19 +85,62 @@ class PythonInstaller extends React.Component<Props, State> {
     this.setState({
       checkCompleteLoading: false,
     });
-    if (isEnvInstalled(environments, 'python')) {
-      router.push(getNextInstallerItemPage(environments));
+    await this.complete(environments);
+  };
+
+  complete = async (environments: IEnvironments | undefined) => {
+    if (environments && isEnvInstalled(environments, 'python')) {
+      await this.props.dispatch({
+        type: 'env/setModuleConfigStatusItem',
+        payload: {
+          module: EnvComponentModule.python,
+          status: EnvComponentModuleConfigStatus.DONE,
+        },
+      });
+      router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
+    } else {
+      msg.error('未检测到配置完成，请重试');
     }
   };
 
   renderWindows = () => {
     const props = this.props;
+    const state = this.state;
+
+    if (
+      props.moduleConfigStatus[EnvComponentModule.python] === EnvComponentModuleConfigStatus.DONE
+    ) {
+      return (
+        <div>
+          <div className="container --slide-left">
+            <div className="content-block --pb-xl">
+              <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
+              <p>你已安装了Python，因此这只是一个仪式。请轻点「完成安装」。</p>
+            </div>
+          </div>
+          <ActionBar
+            actions={[
+              {
+                key: 'installPython',
+                type: 'primary',
+                text: '完成安装',
+                loading: state.checkCompleteLoading,
+                onClick: this.checkComplete,
+              },
+            ]}
+            delay={1000}
+          />
+        </div>
+      );
+    }
+
     return (
       <div>
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
+            <p className="color-secondary">{formatMessage({ id: 'env.installer.tips' })}</p>
             <div className="article">
               <h3 className="section-header">1. 勾选「Add Python to PATH」并点击「Install Now」</h3>
               <p className="color-secondary">* 你看到的界面可能与指引存在些许差异。</p>
@@ -132,7 +181,7 @@ class PythonInstaller extends React.Component<Props, State> {
     return (
       <div>
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
             <p>Python 已内置于 macOS，因此这只是一个仪式。请轻点「完成安装」。</p>
             <p>如果此环境在你的系统上缺失，请尝试自行安装。</p>
@@ -168,7 +217,8 @@ function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
     loading: !!state.loading.effects['env/installPython'],
+    moduleConfigStatus: state.env.moduleConfigStatus,
   };
 }
 
-export default connect(mapStateToProps)(PythonInstaller);
+export default connect(mapStateToProps)(PythonConfigurator);

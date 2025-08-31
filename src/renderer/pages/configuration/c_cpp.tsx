@@ -9,13 +9,17 @@ import { formatMessage } from 'umi-plugin-locale';
 import macStep_1 from '@/assets/guides/gcc/gcc-darwin-light-step-1.png';
 import macStep_2 from '@/assets/guides/gcc/gcc-darwin-light-step-2.png';
 import macStep_3 from '@/assets/guides/gcc/gcc-darwin-light-step-3.png';
-import { isEnvInstalled, getNextInstallerItemPage } from '@/utils/env';
+import { isEnvInstalled } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { getCurrentWindow } from '@electron/remote';
 import { formatPercentage, formatFileSize } from 'common/utils/format';
 import { Progress } from 'antd';
+import { ResourceId } from 'common/configs/resources';
+import path from 'path';
+import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
+import pages from '@/configs/pages';
 
-export interface IGccInstallerProps {}
+export interface IC_CppConfiguratorProps {}
 
 interface State {
   mingwTotalSize: number;
@@ -24,7 +28,7 @@ interface State {
   checkCompleteLoading: boolean;
 }
 
-type Props = IGccInstallerProps & ReturnType<typeof mapStateToProps> & DispatchProps;
+type Props = IC_CppConfiguratorProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 function genInitialState(): State {
   return {
@@ -37,7 +41,7 @@ function genInitialState(): State {
 
 let cachedState = genInitialState();
 
-class GccInstaller extends React.Component<Props, State> {
+class C_CppConfigurator extends React.Component<Props, State> {
   _pollMingwSizeTimer?: number;
   _startAt: number = 0;
 
@@ -47,7 +51,9 @@ class GccInstaller extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    sm.platform.isWindows && this.installGccWindows();
+    if (this.props.moduleConfigStatus.c_cpp === EnvComponentModuleConfigStatus.PENDING) {
+      this.autoConfigure();
+    }
   }
 
   componentWillUnmount() {
@@ -60,8 +66,16 @@ class GccInstaller extends React.Component<Props, State> {
     getCurrentWindow().setProgressBar(-1);
   }
 
+  autoConfigure = () => {
+    if (sm.platform.isWindows) {
+      this.installGccWindows();
+    }
+  };
+
   getMingwTotalSize = async () => {
-    const size = await sm.envInstaller.getMingwTotalSize();
+    const { path: resourcePath } = this.props.resourceIndex[ResourceId.c_cpp];
+    const resourceFilename = path.basename(resourcePath);
+    const size = await sm.envInstaller.getMingwTotalSize(resourceFilename);
     this.setState({
       mingwTotalSize: size,
     });
@@ -84,6 +98,7 @@ class GccInstaller extends React.Component<Props, State> {
     if (!sm.platform.isWindows || this.props.loading) {
       return;
     }
+    await this.setProcessing();
     let environments: IEnvironments | undefined;
     try {
       this._startAt = Date.now();
@@ -108,14 +123,13 @@ class GccInstaller extends React.Component<Props, State> {
           mingwUncompressedSize: this.state.mingwTotalSize,
         });
       }
-      if (environments && isEnvInstalled(environments, 'gcc')) {
-        router.push(getNextInstallerItemPage(environments));
-      }
+      await this.complete(environments);
     }
   };
 
   installGccMac = async () => {
     try {
+      await this.setProcessing();
       await this.props.dispatch({
         type: 'env/installGcc',
         payload: {},
@@ -142,9 +156,31 @@ class GccInstaller extends React.Component<Props, State> {
     this.setState({
       checkCompleteLoading: false,
     });
-    if (isEnvInstalled(environments, 'gcc')) {
-      sm.track.timing('install', 'gcc', Date.now() - this._startAt);
-      router.push(getNextInstallerItemPage(environments));
+    await this.complete(environments);
+  };
+
+  setProcessing = async () => {
+    await this.props.dispatch({
+      type: 'env/setModuleConfigStatusItem',
+      payload: {
+        module: EnvComponentModule.c_cpp,
+        status: EnvComponentModuleConfigStatus.PROCESSING,
+      },
+    });
+  };
+
+  complete = async (environments: IEnvironments | undefined) => {
+    if (environments && isEnvInstalled(environments, 'gcc')) {
+      await this.props.dispatch({
+        type: 'env/setModuleConfigStatusItem',
+        payload: {
+          module: EnvComponentModule.c_cpp,
+          status: EnvComponentModuleConfigStatus.DONE,
+        },
+      });
+      router.push(pages.configurationModule.python);
+    } else {
+      msg.error('未检测到配置完成，请重试');
     }
   };
 
@@ -161,8 +197,8 @@ class GccInstaller extends React.Component<Props, State> {
     const state = this.state;
     return (
       <div>
-        <div className="container --slide-left">
-          <div className="content-block">
+        <div className="container --slide-leftl">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
             <p>正在应用和配置 {formatMessage({ id: 'env.gcc' })}，这可能需要花费一些时间。</p>
             <p className="color-secondary">* 这个过程将不会消耗你的数据流量。</p>
@@ -193,11 +229,12 @@ class GccInstaller extends React.Component<Props, State> {
   renderMac = () => {
     const state = this.state;
     return (
-      <div>
+      <div className="--full-height">
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
+            <p className="color-secondary">{formatMessage({ id: 'env.installer.tips' })}</p>
             <div className="article">
               <h3 className="section-header">1. 安装命令行开发者工具</h3>
               <img src={macStep_1} />
@@ -256,8 +293,10 @@ class GccInstaller extends React.Component<Props, State> {
 function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
+    resourceIndex: state.resources.resourceIndex,
+    moduleConfigStatus: state.env.moduleConfigStatus,
     loading: !!state.loading.effects['env/installGcc'],
   };
 }
 
-export default connect(mapStateToProps)(GccInstaller);
+export default connect(mapStateToProps)(C_CppConfigurator);

@@ -10,7 +10,7 @@ module.exports = {
   resolve: {
     alias: {
       // '@aws-sdk/client-s3': path.resolve(__dirname, '../src/main/utils/aws-s3-stub.js')
-    }
+    },
   },
   module: {
     rules: [
@@ -21,37 +21,38 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: [
-              ['@babel/preset-env', {
-                targets: {
-                  node: '20'
-                }
-              }]
+              [
+                '@babel/preset-env',
+                {
+                  targets: {
+                    node: '20',
+                  },
+                },
+              ],
             ],
             plugins: [
               '@babel/plugin-transform-optional-chaining',
               '@babel/plugin-transform-nullish-coalescing-operator',
               '@babel/plugin-transform-class-properties',
-              '@babel/plugin-transform-logical-assignment-operators'
-            ]
-          }
-        }
-      }
-    ]
+              '@babel/plugin-transform-logical-assignment-operators',
+            ],
+          },
+        },
+      },
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.GA_TC': JSON.stringify(
-        process.env.GA_TC || ''
-      ),
+      'process.env.GA_TC': JSON.stringify(process.env.GA_TC || ''),
     }),
     new webpack.IgnorePlugin({ resourceRegExp: /^@aws-sdk\/client-s3$/ }),
     new CopyWebpackPlugin({
       patterns: [
         {
           from: path.resolve(__dirname, '../src/main/utils/md5-worker.js'),
-          to: 'utils/md5-worker.js'
+          to: 'utils/md5-worker.js',
         },
-      ]
+      ],
     }),
   ],
 };

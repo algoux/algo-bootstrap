@@ -68,7 +68,7 @@ class CpplintInstaller extends React.Component<Props, State> {
     return (
       <div>
         <div className="container --slide-left">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.cpplint' })}</h1>
             <p>正在安装，这只需要花费一点时间。</p>
           </div>

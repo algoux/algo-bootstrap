@@ -56,6 +56,28 @@ export function getUncompressedSize(filePath: string): Promise<number> {
 }
 
 /**
+ * Get top dir name of zip file
+ * @param filePath zip file path
+ */
+export function getTopDirName(filePath: string): Promise<string | null> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const directory = await unzipper.Open.file(filePath);
+      if (directory.files[0]?.type === 'Directory') {
+        if (directory.files.every((file) => file.path.startsWith(directory.files[0].path))) {
+          resolve(directory.files[0].path.split('/')[0]);
+          return;
+        }
+      }
+      resolve(null);
+    } catch (e) {
+      logMain.error('[getTopDirName.error]', filePath, e);
+      reject(e);
+    }
+  });
+}
+
+/**
  * Load one entry content in zip
  * @param filePath zip file path
  * @param entry entry path

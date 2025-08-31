@@ -117,7 +117,7 @@ export default {
           EnvComponentAction.INSTALL,
           EnvComponentAction.UPDATE,
           EnvComponentAction.REINSTALL,
-          EnvComponentAction.SWITCH_INSTALLED,
+          // EnvComponentAction.SWITCH_INSTALLED,
         ].includes(action);
       };
 
@@ -146,40 +146,40 @@ export default {
       });
     },
     *installGcc(
-      { payload: { force = false } }: DvaAction<{ force?: boolean }>,
+      { payload: { filename, force = false } }: DvaAction<{ filename?: string; force?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
-      yield call(sm.envInstaller.installGcc, force);
+      yield call(sm.envInstaller.installGcc, { filename, force });
       return (yield put({
         type: 'getEnvironments',
         payload: {},
       })) as IEnvironments;
     },
     *installPython(
-      { payload: { force = false } }: DvaAction<{ force?: boolean }>,
+      { payload: { filename, force = false } }: DvaAction<{ filename?: string; force?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
-      yield call(sm.envInstaller.installPython, force);
+      yield call(sm.envInstaller.installPython, { filename, force });
       return (yield put({
         type: 'getEnvironments',
         payload: {},
       })) as IEnvironments;
     },
-    *installCpplint(
-      { payload: { force = false } }: DvaAction<{ force?: boolean }>,
-      { call, put }: DvaSagaEffect,
-    ) {
-      yield call(sm.envInstaller.installCpplint, force);
-      return (yield put({
-        type: 'getEnvironments',
-        payload: {},
-      })) as IEnvironments;
-    },
+    // *installCpplint(
+    //   { payload: { force = false } }: DvaAction<{ force?: boolean }>,
+    //   { call, put }: DvaSagaEffect,
+    // ) {
+    //   yield call(sm.envInstaller.installCpplint, force);
+    //   return (yield put({
+    //     type: 'getEnvironments',
+    //     payload: {},
+    //   })) as IEnvironments;
+    // },
     *installVSCode(
-      { payload: { force = false } }: DvaAction<{ force?: boolean }>,
+      { payload: { filename, force = false } }: DvaAction<{ filename: string; force?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
-      yield call(sm.envInstaller.installVSCode, force);
+      yield call(sm.envInstaller.installVSCode, { filename, force });
       return (yield put({
         type: 'getEnvironments',
         payload: {},
@@ -187,11 +187,47 @@ export default {
     },
     *installVsix(
       {
-        payload: { vsixId, force = false },
-      }: DvaAction<{ vsixId: SupportedVSIXId; force?: boolean }>,
+        payload: { vsixId, filename, force = false, fetchEnvironments = false },
+      }: DvaAction<{ vsixId: SupportedVSIXId; filename: string; force?: boolean; fetchEnvironments?: boolean }>,
       { call, put }: DvaSagaEffect,
     ) {
-      yield call(sm.envInstaller.installVsix, vsixId, force);
+      yield call(sm.envInstaller.installVsix, { vsixId, filename, force, fetchEnvironments });
+      return (yield put({
+        type: 'getEnvironments',
+        payload: {},
+      })) as IEnvironments;
+    },
+    *installVsixes(
+      {
+        payload: { vsixes, force = false },
+      }: DvaAction<{ vsixes: { vsixId: SupportedVSIXId; filename: string }[]; force?: boolean }>,
+      { call, put }: DvaSagaEffect,
+    ) {
+      yield call(sm.envInstaller.installVsixes, { vsixes, force });
+      return (yield put({
+        type: 'getEnvironments',
+        payload: {},
+      })) as IEnvironments;
+    },
+    *installCppcheck(
+      {
+        payload: { srcFileName, terminalId, force = false },
+      }: DvaAction<{ srcFileName: string; terminalId?: string; force?: boolean }>,
+      { call, put }: DvaSagaEffect,
+    ) {
+      yield call(sm.envInstaller.installCppcheckFromSrc, { srcFileName, terminalId, force });
+      return (yield put({
+        type: 'getEnvironments',
+        payload: {},
+      })) as IEnvironments;
+    },
+    *installCpplint(
+      {
+        payload: { srcFileName, terminalId, force = false },
+      }: DvaAction<{ srcFileName: string; terminalId?: string; force?: boolean }>,
+      { call, put }: DvaSagaEffect,
+    ) {
+      yield call(sm.envInstaller.installCpplintV2FromSrc, { srcFileName, terminalId, force });
       return (yield put({
         type: 'getEnvironments',
         payload: {},

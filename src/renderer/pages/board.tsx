@@ -132,7 +132,7 @@ class Board extends React.Component<Props, State> {
     return (
       <PageAnimation>
         <div className="container no-action-bar">
-          <div className="content-block">
+          <div className="content-block --pb-xl">
             <h1 className="top-title">开始使用</h1>
             <h2 className="secondary-title">项目</h2>
             <p className="--mb-xs">

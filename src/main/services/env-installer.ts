@@ -2,30 +2,28 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { isMac, isWindows } from '@/utils/platform';
-import { spawn, execFile, sudoExec } from '@/utils/child-process';
+import { spawn, execFile } from '@/utils/child-process';
 import {
   isEnvInstalled,
-  isVsixInstalled,
+  isVsixesInstalled,
   getEnvironment,
   getWindowsUserPath,
   getWindowsSystemPath,
   getEnvironments,
 } from './env-checker';
-import Respack from './respack';
-import { extractAll, getUncompressedSize } from '@/utils/extract';
+import { extractAll, getTopDirName, getUncompressedSize } from '@/utils/extract';
 import { app } from 'electron';
-import paths from 'common/configs/paths';
-import { matchOne, escapeRegExp } from 'common/utils/regexp';
+import { escapeRegExp } from 'common/utils/regexp';
 import { logMain } from '@/utils/logger';
 import getFolderSize from 'get-folder-size';
 import { TerminalManager } from '@/utils/terminal';
 import { v4 as uuidv4 } from 'uuid';
+import { getPath } from '@/utils/path';
+import { PathKey } from 'common/configs/paths';
 
-const RESPACK_PATH = path.join(app.getPath('userData'), paths.respack);
-const RESPACK_TEMP_PATH = path.join(app.getPath('userData'), paths.respackTemp);
-const RESOURCES_DOWNLOAD_PATH = path.join(app.getPath('userData'), paths.resourcesDownload);
-const RESOURCES_TEMP_PATH = path.join(os.tmpdir(), paths.resourcesTemp);
-const USERLIB_SRC_PATH = path.join(__static, paths.userlibSrc);
+const RESOURCES_DOWNLOAD_PATH = getPath(PathKey.resourcesDownload);
+const RESOURCES_TEMP_PATH = getPath(PathKey.resourcesTemp);
+const USERLIB_SRC_PATH = getPath(PathKey.staticUserlibSrc);
 const USERLIB_PATH = path.join(os.homedir(), '.algo-bootstrap');
 
 export async function appendToWindowsUserPath(PATH: string) {
@@ -76,16 +74,14 @@ export async function installXCodeCLT() {
   }
 }
 
-export async function getMingwTotalSize(): Promise<number> {
-  const res = await Respack.readResFromLocalManifestOrThrow('c++');
-  return getUncompressedSize(path.join(RESPACK_PATH, res.name));
+export async function getMingwTotalSize(filename: string): Promise<number> {
+  return getUncompressedSize(path.join(RESOURCES_DOWNLOAD_PATH, filename));
 }
 
 export async function getMingwUncompressedSize(): Promise<number> {
-  const installPath = 'C:\\MinGW64';
   return new Promise((resolve, reject) => {
     const __start = Date.now();
-    getFolderSize(installPath)
+    getFolderSize(getMingwInstallPath())
       .then((sizeResult) => {
         if (sizeResult.errors) {
           logMain.error(
@@ -104,92 +100,68 @@ export async function getMingwUncompressedSize(): Promise<number> {
   });
 }
 
-export async function installGcc(force = false) {
-  if (!force && (await isEnvInstalled('gcc'))) {
+export function getWindowsGlobalInstallPath() {
+  return 'C:\\algo-bootstrap';
+}
+
+export function getMingwInstallPath() {
+  return path.join(getWindowsGlobalInstallPath(), 'mingw64');
+}
+
+export async function installGcc(options: { filename?: string; force?: boolean } = {}) {
+  if (!options.force && (await isEnvInstalled('gcc'))) {
     return;
   }
   if (isMac) {
     await installXCodeCLT();
     await getEnvironments(true);
   } else if (isWindows) {
-    const res = await Respack.readResFromLocalManifestOrThrow('c++');
+    if (!options.filename) {
+      throw Error('gcc installer filename is required');
+    }
+    const filePath = path.join(RESOURCES_DOWNLOAD_PATH, options.filename);
+    const topDirName = await getTopDirName(filePath);
+    if (!topDirName) {
+      throw Error('mingw64 zip should have top dir');
+    }
     // 解压 MinGW64
-    const installPath = 'C:\\MinGW64';
-    await extractAll(path.join(RESPACK_PATH, res.name), installPath, true);
+    const installPath = getMingwInstallPath();
+    logMain.info('[installGcc] using install path:', installPath);
+    await fs.ensureDir(installPath);
+    await extractAll(filePath, installPath, true);
+    // 移动到上一层
+    const mingwFilesPath = path.join(installPath, topDirName);
+    logMain.info('[installGcc] move mingw files:', mingwFilesPath, '->', installPath);
+    await fs.move(mingwFilesPath, installPath);
+    await fs.remove(mingwFilesPath);
     (await appendToWindowsUserPath(`${installPath}\\bin`)) && (await refreshWindowsPath());
     await getEnvironments(true);
   }
 }
 
-export async function installPython(force = false) {
-  if (!force && (await isEnvInstalled('python'))) {
+export async function installPython(options: { filename?: string; force?: boolean } = {}) {
+  if (!options.force && (await isEnvInstalled('python'))) {
     return;
   }
   if (isWindows) {
-    const res = await Respack.readResFromLocalManifestOrThrow('python');
-    await execFile('[installPython]', path.join(RESPACK_PATH, res.name));
+    if (!options.filename) {
+      throw Error('Python installer filename is required');
+    }
+    const filePath = path.join(RESOURCES_DOWNLOAD_PATH, options.filename);
+    await execFile('[installPython]', filePath);
     await refreshWindowsPath();
     await getEnvironments(true);
   }
 }
 
-export async function installCpplint(force = false) {
-  if (!force && (await isEnvInstalled('cpplint'))) {
+export async function installVSCode(options: { filename: string; force?: boolean }) {
+  if (!options.force && (await isEnvInstalled('vscode'))) {
     return;
   }
-  const py = await getEnvironment('python');
-  if (!py.installed) {
-    throw Error('No Python installed');
-  }
-  const res = await Respack.readResFromLocalManifestOrThrow('cpplint');
-  switch (res.format) {
-    case 'zip':
-      // 解压 cpplint 项目代码包
-      const filePath = path.join(RESPACK_PATH, res.name);
-      const installPath = path.join(RESPACK_TEMP_PATH, 'cpplint');
-      await extractAll(filePath, installPath);
-      // 安装 cpplint
-      // 是 Mac 且是 py2，或是 Windows 时，使用 sudo 安装
-      if (isMac && matchOne(/^(\d+)/, py.version) === '2') {
-        await sudoExec('[installCpplint]', `cd "${installPath}" && python setup.py install`);
-      } else if (isWindows) {
-        // https://github.com/jorangreef/sudo-prompt/issues/116
-        const { stdout, stderr } = await sudoExec(
-          '[installCpplint]',
-          `cd /d "${installPath}" && python setup.py install`,
-          {
-            env: { PATH: process.env.PATH || '' },
-          },
-        );
-        const pythonScriptPath = matchOne(
-          /^Installing cpplint.exe script to (.*)/m,
-          stdout || stderr || '',
-        );
-        if (pythonScriptPath) {
-          (await appendToWindowsUserPath(pythonScriptPath)) && (await refreshWindowsPath());
-        }
-      } else {
-        await spawn('[installCpplint]', 'python', ['setup.py', 'install'], {
-          cwd: installPath,
-        });
-      }
-      break;
-    default:
-      throw Error('Incompatible format');
-  }
-  await getEnvironments(true);
-}
-
-export async function installVSCode(force = false) {
-  if (!force && (await isEnvInstalled('vscode'))) {
-    return;
-  }
-  const res = await Respack.readResFromLocalManifestOrThrow('vscode');
+  const filePath = path.join(RESOURCES_DOWNLOAD_PATH, options.filename);
   if (isMac) {
-    switch (res.format) {
-      case 'zip':
-        // path.replace(/(\s+)/g, '\\$1')
-        const filePath = path.join(RESPACK_PATH, res.name);
+    switch (path.extname(filePath)) {
+      case '.zip':
         const installPath = path.join('/Applications');
         // ref: https://github.com/ZJONSSON/node-unzipper/issues/160
         // process.noAsar = true;
@@ -201,30 +173,60 @@ export async function installVSCode(force = false) {
     }
     await getEnvironments(true);
   } else if (isWindows) {
-    await execFile('[installVSCode]', path.join(RESPACK_PATH, res.name));
+    await execFile('[installVSCode]', filePath);
     await refreshWindowsPath();
     await getEnvironments(true);
   }
 }
 
-export async function installVsix(vsixId: SupportedVSIXId, force = false) {
-  if (!force && (await isVsixInstalled(vsixId))) {
+export async function installVsix(options: {
+  vsixId: SupportedVSIXId;
+  filename: string;
+  force?: boolean;
+  fetchEnvironments?: boolean;
+}) {
+  if (!options.force && (await isVsixesInstalled([options.vsixId]))) {
     return;
   }
   const vscode = await getEnvironment('vscode');
   if (!vscode.installed) {
     throw Error('No VS Code installed');
   }
-  const res = await Respack.readResFromLocalManifestOrThrow(`vsix/${vsixId}`);
-  const filePath = path.join(RESPACK_PATH, res.name);
+  const filePath = path.join(RESOURCES_DOWNLOAD_PATH, options.filename);
+  logMain.info('[installVsix] installing vsix:', options.vsixId, '<-', options.filename);
   await spawn('[installVsix]', `"${vscode.path || 'code'}"`, [
     '--install-extension',
     `"${filePath}"`,
   ]);
+  if (options.fetchEnvironments) {
+    await getEnvironments(true);
+  }
+}
+
+export async function installVsixes(options: {
+  vsixes: { vsixId: SupportedVSIXId; filename: string }[];
+  force?: boolean;
+}) {
+  if (!options.force && (await isVsixesInstalled(options.vsixes.map((vsix) => vsix.vsixId)))) {
+    return;
+  }
+  const vscode = await getEnvironment('vscode');
+  if (!vscode.installed) {
+    throw Error('No VS Code installed');
+  }
+  for (const vsix of options.vsixes) {
+    const { vsixId, filename } = vsix;
+    logMain.info('[installVsixes] installing vsix:', vsixId, '<-', filename);
+    const filePath = path.join(RESOURCES_DOWNLOAD_PATH, filename);
+    await spawn('[installVsix]', `"${vscode.path || 'code'}"`, [
+      '--install-extension',
+      `"${filePath}"`,
+    ]);
+  }
   await getEnvironments(true);
 }
 
-export async function installUserLib(force = false) {
+export async function installUserLib(options: { force?: boolean } = {}) {
   const srcPath = path.join(USERLIB_SRC_PATH);
   const targetPath = path.join(USERLIB_PATH);
   const iJsonPath = path.join(targetPath, 'i.json');
@@ -234,7 +236,7 @@ export async function installUserLib(force = false) {
     version = obj?.version;
   } catch (error) {}
   const currentVersion = app.getVersion();
-  if (!force && version === currentVersion) {
+  if (!options.force && version === currentVersion) {
     return;
   }
 
@@ -254,10 +256,11 @@ export async function installUserLib(force = false) {
   await fs.writeJson(iJsonPath, { version: currentVersion }, { spaces: 2 });
 }
 
-export async function installCppcheckFromSrc(
-  srcFileName: string,
-  options: { terminalId?: string; force?: boolean } = {},
-) {
+export async function installCppcheckFromSrc(options: {
+  srcFileName: string;
+  terminalId?: string;
+  force?: boolean;
+}) {
   if (!options.force && (await isEnvInstalled('cppcheck'))) {
     return;
   }
@@ -265,7 +268,7 @@ export async function installCppcheckFromSrc(
     throw Error('cppcheck installation is not supported on Windows');
   }
   await installUserLib();
-  const cppcheckSrcZipPath = path.join(RESOURCES_DOWNLOAD_PATH, srcFileName);
+  const cppcheckSrcZipPath = path.join(RESOURCES_DOWNLOAD_PATH, options.srcFileName);
   await extractAll(cppcheckSrcZipPath, RESOURCES_TEMP_PATH);
   const extractedPath = path.join(
     RESOURCES_TEMP_PATH,
@@ -286,10 +289,11 @@ export async function installCppcheckFromSrc(
   await getEnvironments(true);
 }
 
-export async function installCpplintV2FromSrc(
-  srcFileName: string,
-  options: { terminalId?: string; force?: boolean } = {},
-) {
+export async function installCpplintV2FromSrc(options: {
+  srcFileName: string;
+  terminalId?: string;
+  force?: boolean;
+}) {
   if (!options.force && (await isEnvInstalled('cpplint'))) {
     return;
   }
@@ -297,7 +301,7 @@ export async function installCpplintV2FromSrc(
     throw Error('cpplint v2 installation is not supported on Windows');
   }
   await installUserLib();
-  const cpplintSrcZipPath = path.join(RESOURCES_DOWNLOAD_PATH, srcFileName);
+  const cpplintSrcZipPath = path.join(RESOURCES_DOWNLOAD_PATH, options.srcFileName);
   await extractAll(cpplintSrcZipPath, RESOURCES_TEMP_PATH);
   const extractedPath = path.join(
     RESOURCES_TEMP_PATH,

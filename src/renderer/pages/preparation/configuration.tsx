@@ -735,7 +735,9 @@ class Configuration extends React.Component<Props, State> {
       type: 'env/initModuleConfigStatusByConfig',
       payload: {},
     });
-    router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
+
+    const nextRoute = getNextConfigurationModulePage(this.props.moduleConfigStatus);
+    router.push(nextRoute);
   };
 
   renderDownloadInfo = () => {
@@ -839,7 +841,7 @@ class Configuration extends React.Component<Props, State> {
                       >
                         <li>C/C++</li>
                         {sm.platform.isMac && <li>CodeLLDB</li>}
-                        <li>Python 扩展包（4 个扩展）</li>
+                        <li>Python（4 个扩展）</li>
                         <li>Code Runner</li>
                         <li>Code Spell Checker</li>
                         <li>Competitive Programming Helper</li>
@@ -900,7 +902,7 @@ class Configuration extends React.Component<Props, State> {
             </Row>
           </div>
 
-          <div className="content-block --mt-lg --fade-in-delay-1000">
+          <div className="content-block --pt-none --mt-lg --fade-in-delay-1000">
             {validating ? (
               <>
                 <p>正在校验资源…</p>
