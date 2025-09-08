@@ -18,6 +18,7 @@ import {
   getUserProfilesDirPath,
   getVscProfileDirConfig,
   setVscProfileDirConfig,
+  setVscProfileNameConfig,
 } from '@/utils/vsc';
 
 export async function isDirEmpty(dirPath: string) {
@@ -281,6 +282,7 @@ export async function injectMagic(options: {
 
   // 完成注入
   setVscProfileDirConfig(profileDir);
+  setVscProfileNameConfig(profileName);
   if (options.gccAlt) {
     appConf.set('gccAlternative', options.gccAlt);
   }

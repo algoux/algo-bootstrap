@@ -11,6 +11,14 @@ export function setVscProfileDirConfig(vscProfileDir: string) {
   appConf.set('vscProfileDir', vscProfileDir);
 }
 
+export function getVscProfileNameConfig() {
+  return appConf.get('vscProfileName');
+}
+
+export function setVscProfileNameConfig(vscProfileName: string) {
+  appConf.set('vscProfileName', vscProfileName);
+}
+
 export function getUserProfilesDirPath() {
   if (isWindows) {
     return path.join(os.homedir(), 'AppData/Roaming/Code/User/profiles');
