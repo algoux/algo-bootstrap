@@ -52,6 +52,10 @@ module.exports = {
           from: path.resolve(__dirname, '../src/main/utils/md5-worker.js'),
           to: 'utils/md5-worker.js',
         },
+        {
+          from: path.resolve(__dirname, '../src/main/services/magic-worker.js'),
+          to: 'services/magic-worker.js',
+        },
       ],
     }),
   ],

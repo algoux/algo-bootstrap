@@ -56,6 +56,7 @@ interface IEnvironments {
   cppcheck: ICheckEnvironmentResult;
   vscode: ICheckEnvironmentResult;
   vsix: Record<SupportedVSIXId, ICheckEnvironmentResult>;
+  vscodeProfile: ICheckEnvironmentResult;
 }
 
 interface IRespackManifestFile {

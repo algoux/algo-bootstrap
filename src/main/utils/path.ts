@@ -11,7 +11,10 @@ const paths = {
   resourcesDownload: '/ab-resources-dl',
   resourcesTemp: '/ab-resources-temp',
   userlibSrc: '/userlib',
+  magicWelcomeConfig: '/magic-welcome.json',
   tmpl: '/tmpl',
+  tmplMagic: '/tmpl/magic',
+  tmplProfile: '/tmpl/profile',
   tmplProject: '/tmpl/project',
 };
 
@@ -37,7 +40,10 @@ const pathMap: Record<PathKey, string> = {
   [PathKey.resourcesDownload]: path.join(app.getPath('userData'), paths.resourcesDownload),
   [PathKey.resourcesTemp]: path.join(os.tmpdir(), 'ab-resources-temp'),
   [PathKey.staticUserlibSrc]: path.join(__static, paths.userlibSrc),
+  [PathKey.staticMagicWelcomeConfig]: path.join(__static, paths.magicWelcomeConfig),
   [PathKey.staticTmpl]: path.join(__static, paths.tmpl),
+  [PathKey.staticTmplMagic]: path.join(__static, paths.tmplMagic),
+  [PathKey.staticTmplProfile]: path.join(__static, paths.tmplProfile),
   [PathKey.staticTmplProject]: path.join(__static, paths.tmplProject),
 };
 

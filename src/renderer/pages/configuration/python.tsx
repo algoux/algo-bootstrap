@@ -111,7 +111,7 @@ class PythonConfigurator extends React.Component<Props, State> {
       props.moduleConfigStatus[EnvComponentModule.python] === EnvComponentModuleConfigStatus.DONE
     ) {
       return (
-        <div>
+        <div className="--full-height">
           <div className="container --slide-left">
             <div className="content-block --pb-xl">
               <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
@@ -135,15 +135,14 @@ class PythonConfigurator extends React.Component<Props, State> {
     }
 
     return (
-      <div>
+      <div className="--full-height">
         <div className="container --slide-left">
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
             <p className="color-secondary">{formatMessage({ id: 'env.installer.tips' })}</p>
             <div className="article">
-              <h3 className="section-header">1. 勾选「Add Python to PATH」并点击「Install Now」</h3>
-              <p className="color-secondary">* 你看到的界面可能与指引存在些许差异。</p>
+              <h3 className="section-header">1. 勾选「Add python.exe to PATH」并点击「Install Now」</h3>
               <p>
                 <img src={windowsStep_1} />
               </p>
@@ -151,12 +150,11 @@ class PythonConfigurator extends React.Component<Props, State> {
               <p>
                 <img src={windowsStep_2} />
               </p>
-              <h3 className="section-header">3. 安装完成时，点击「Disable path length limit」</h3>
-              <p>如果没有找到此按钮，你可以跳过这个步骤。</p>
+              <h3 className="section-header">3. 点击「Close」关闭安装器</h3>
+              <p className="color-secondary">* 如果按钮「Disable path length limit」存在，请在关闭安装器前先点击它。</p>
               <p>
                 <img src={windowsStep_3} />
               </p>
-              <p>安装完成后，点击「Close」关闭安装器。</p>
             </div>
           </div>
         </div>
@@ -179,7 +177,7 @@ class PythonConfigurator extends React.Component<Props, State> {
   renderMac = () => {
     const state = this.state;
     return (
-      <div>
+      <div className="--full-height">
         <div className="container --slide-left">
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>

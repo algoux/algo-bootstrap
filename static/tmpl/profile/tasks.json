@@ -1,0 +1,38 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "AC Build (gcc)",
+      "command": "<%- gcc.command %>",
+      "args": ["-g", "${file}", "-std=c11", "-Wall", "-Wextra", "-o", "${workspaceFolder}/.exe"]
+    },
+    {
+      "type": "shell",
+      "label": "AC Build (g++)",
+      "command": "<%- gpp.command %>",
+      "args": ["-g", "${file}", "-std=c++20", "-Wall", "-Wextra", "-o", "${workspaceFolder}/.exe"]
+    },
+    {
+      "label": "AC Build (clang)",
+      "type": "shell",
+      "command": "clang",
+      "args": ["-g", "${file}", "-std=c11", "-Wall", "-Wextra", "-o", "${workspaceFolder}/.exe"]
+    },
+    {
+      "label": "AC Build (clang++)",
+      "type": "shell",
+      "command": "clang++",
+      "args": [
+        "${file}",
+        "-std=c++11",
+        "-stdlib=libc++",
+        "-o",
+        "${workspaceFolder}/.exe",
+        "--debug"
+      ]
+    }
+  ]
+}

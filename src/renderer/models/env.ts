@@ -188,7 +188,12 @@ export default {
     *installVsix(
       {
         payload: { vsixId, filename, force = false, fetchEnvironments = false },
-      }: DvaAction<{ vsixId: SupportedVSIXId; filename: string; force?: boolean; fetchEnvironments?: boolean }>,
+      }: DvaAction<{
+        vsixId: SupportedVSIXId;
+        filename: string;
+        force?: boolean;
+        fetchEnvironments?: boolean;
+      }>,
       { call, put }: DvaSagaEffect,
     ) {
       yield call(sm.envInstaller.installVsix, { vsixId, filename, force, fetchEnvironments });
@@ -232,6 +237,23 @@ export default {
         type: 'getEnvironments',
         payload: {},
       })) as IEnvironments;
+    },
+    *injectMagic(
+      {
+        payload: { vsixIds, gccAlt },
+      }: DvaAction<{
+        vsixIds: SupportedVSIXId[];
+        gccAlt?: { command: string; path: string; type: 'gcc' | 'clang' };
+      }>,
+      { call, put, take }: DvaSagaEffect,
+    ) {
+      const res: { hasScriptError: boolean } = yield call(sm.vsc.injectMagic, { vsixIds, gccAlt });
+      yield put({
+        type: 'getEnvironments',
+        payload: {},
+      });
+      yield take('getEnvironments/@@end')
+      return res;
     },
   },
 };

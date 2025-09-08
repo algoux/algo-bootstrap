@@ -99,18 +99,18 @@ class VSCodeConfigurator extends React.Component<Props, State> {
   renderWindows = () => {
     const props = this.props;
     return (
-      <div>
+      <div className="--full-height">
         <div className="container --slide-left">
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.vscode' })}</h1>
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
             <p className="color-secondary">{formatMessage({ id: 'env.installer.tips' })}</p>
             <div className="article">
-              <h3 className="section-header">1. 选择「我接受协议」并点击「下一步」</h3>
+              <h3 className="section-header">1. 选择「我同意此协议」并点击「下一步」直到选择附加任务步骤</h3>
               <p>
                 <img src={windowsStep_1} />
               </p>
-              <h3 className="section-header">2. 确保「其他」中的选项全部勾选并点击「下一步」</h3>
+              <h3 className="section-header">2. 在附加任务中，确保「其他」中的选项全部勾选并点击「下一步」</h3>
               <p>
                 <img src={windowsStep_2} />
               </p>
@@ -122,7 +122,7 @@ class VSCodeConfigurator extends React.Component<Props, State> {
               <p>
                 <img src={windowsStep_4} />
               </p>
-              <h3 className="section-header">5. 取消勾选「启动 Visual Studio Code」并点击完成</h3>
+              <h3 className="section-header">5. 取消勾选「运行 Visual Studio Code」并点击「完成」</h3>
               <p>
                 <img src={windowsStep_5} />
               </p>
@@ -148,7 +148,7 @@ class VSCodeConfigurator extends React.Component<Props, State> {
   renderMac = () => {
     const props = this.props;
     return (
-      <div>
+      <div className="--full-height">
         <div className="container --slide-left">
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.vscode' })}</h1>

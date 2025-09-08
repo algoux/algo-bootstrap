@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+import os from 'os';
 import checkDiskSpace from 'check-disk-space';
 import { logMain } from '@/utils/logger';
 import { isMac, isWindows } from '@/utils/platform';
@@ -8,6 +9,7 @@ import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
 import { VSIXIds } from 'common/configs/resources';
+import { getAppVscProfileDirPath } from '@/utils/vsc';
 
 const emptyEnvironments = genEmptyEnvironments();
 
@@ -47,6 +49,7 @@ export function genEmptyEnvironments(): IEnvironments {
     cpplint: genNotInstalled(),
     vscode: genNotInstalled(),
     vsix: genEmptyVSIXMap(),
+    vscodeProfile: genNotInstalled(),
   };
 }
 
@@ -247,22 +250,28 @@ export async function checkVSCode(): Promise<ICheckEnvironmentResult> {
   return genNotInstalled();
 }
 
+const VSCODE_EXT_DIR = path.join(os.homedir(), '.vscode', 'extensions');
+
 export async function checkVsix(
   codePath: string,
 ): Promise<Record<SupportedVSIXId, ICheckEnvironmentResult>> {
+  const extPaths = await fs.readdir(VSCODE_EXT_DIR).catch(() => []);
   try {
     const vsixMap = genEmptyVSIXMap();
     const { stdout, stderr } = await spawn('[checkVSIX]', `"${codePath}"`, [
       '--list-extensions',
       '--show-versions',
     ]);
-    VSIXIds.forEach((vsixId) => {
+    for (const vsixId of VSIXIds) {
       const reg = new RegExp(`^${vsixId}@([_.-\\w]+)$`, 'm');
       const ver = matchOne(reg, parseStringFromProcessOutput(stderr || stdout));
       if (ver) {
-        vsixMap[vsixId] = genInstalled(ver, null);
+        const extPath = extPaths.find((extPath) => extPath.startsWith(vsixId));
+        if (extPath) {
+          vsixMap[vsixId] = genInstalled(ver, path.join(VSCODE_EXT_DIR, extPath));
+        }
       }
-    });
+    }
     return vsixMap;
   } catch (e) {}
   return genEmptyVSIXMap();
@@ -293,6 +302,7 @@ export async function getEnvironments(force = false) {
     cpplint,
     vscode,
     vsix: vscode.installed && vscode.path ? await checkVsix(vscode.path) : genEmptyVSIXMap(),
+    vscodeProfile: await checkVSCodeUserProfile(),
   };
   logMain.info('[getEnvironments]', JSON.stringify(environmentResult, null, 2));
   environmentsCache = environmentResult;
@@ -369,4 +379,19 @@ export function checkRemainingDiskSpace(checkPath?: string) {
     return checkDiskSpace(checkPath || 'C:');
   }
   return checkDiskSpace(checkPath || '/');
+}
+
+export async function checkVSCodeUserProfile() {
+  const profileDirPath = getAppVscProfileDirPath();
+  if (!profileDirPath) {
+    return genNotInstalled();
+  }
+  try {
+    if (!(await fs.stat(profileDirPath)).isDirectory()) {
+      return genNotInstalled();
+    }
+    return genInstalled('', profileDirPath);
+  } catch (e: any) {
+    return genNotInstalled();
+  }
 }

@@ -7,6 +7,7 @@ import * as vsc from './services/vsc';
 import * as resources from './services/resources';
 import track from './utils/track';
 import { getEnvComponents } from 'common/configs/env';
+import { appConf } from './utils/store';
 
 const _modules = {
   req,
@@ -20,6 +21,7 @@ const _modules = {
   vsc,
   track,
   resources,
+  appConf,
 };
 
 export default _modules;

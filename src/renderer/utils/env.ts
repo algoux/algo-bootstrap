@@ -1,6 +1,6 @@
 import sm from '@/utils/modules';
 import pages from '@/configs/pages';
-import { EnvIds, ResourceId, VSIXIdMap } from 'common/configs/resources';
+import { ResourceId, VSIXIdMap } from 'common/configs/resources';
 import {
   EnvComponentAction,
   EnvComponentOptions,
@@ -10,7 +10,7 @@ import {
 import { EnvComponent } from 'common/configs/env';
 
 export function isEnvInstalled(environments: IEnvironments, envId: SupportedEnvId) {
-  return environments[envId].installed;
+  return !!environments[envId]?.installed;
 }
 
 export function isVsixInstalled(environments: IEnvironments, vsixId: SupportedVSIXId) {

@@ -1,0 +1,15 @@
+{
+  "files.eol": "\n",
+  "files.exclude": {
+    ".vscode": true,
+    "welcome": true
+  },
+  "files.readonlyInclude": {
+    ".vscode": true,
+    "welcome": true
+  },
+  "workbench.activityBar.location": "hidden",
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "extensions.ignoreRecommendations": true,
+  "cSpell.enabled": false
+}

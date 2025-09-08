@@ -11,7 +11,7 @@ import sudo from 'sudo-prompt';
 import * as path from 'path';
 import { isMac } from './platform';
 
-const SHELL_TIMEOUT = 20 * 1000;
+const SHELL_TIMEOUT = 30 * 1000;
 
 const commonSpawnOptions = {
   encoding: 'utf8',
@@ -53,7 +53,7 @@ export function spawn(
   args: string[] = [],
   extraOptions: SpawnOptions = {},
 ) {
-  logProcess.info(type, '[spawn.start]', cmd, args.join(' '));
+  logProcess.info(type, '[spawn.start]', cmd, args.join(' '), extraOptions);
   const __start = Date.now();
   return _spawn(cmd, args, {
     ...commonSpawnOptions,

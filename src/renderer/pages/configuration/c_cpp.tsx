@@ -196,8 +196,8 @@ class C_CppConfigurator extends React.Component<Props, State> {
     const props = this.props;
     const state = this.state;
     return (
-      <div>
-        <div className="container --slide-leftl">
+      <div className="--full-height">
+        <div className="container --slide-left">
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
             <p>正在应用和配置 {formatMessage({ id: 'env.gcc' })}，这可能需要花费一些时间。</p>

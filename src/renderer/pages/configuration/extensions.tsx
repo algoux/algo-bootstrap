@@ -377,7 +377,7 @@ class ExtensionsConfigurator extends React.Component<Props, State> {
     const props = this.props;
     const { terminalIdCppcheck, terminalIdCpplint, cppcheckStataus, cpplintStataus } = this.state;
     return (
-      <div>
+      <div className="--full-height">
         <div className="container --slide-left">
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装{formatMessage({ id: 'env.extensions' })}</h1>

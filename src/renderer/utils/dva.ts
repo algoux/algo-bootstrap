@@ -8,7 +8,7 @@ import {
   Options,
 } from 'react-redux';
 import { connect as _connect } from 'dva';
-import { CallEffectFactory, CallEffect, Put, AllEffect } from 'redux-saga/effects';
+import { CallEffectFactory, CallEffect, Put, AllEffect, TakeEffect } from 'redux-saga/effects';
 import { DispatchProps } from '@/typings/props';
 
 export interface HackedConnect extends Connect {
@@ -88,4 +88,5 @@ export interface DvaSagaEffect {
   put: Put;
   select: <S>(selector: (state: IState) => S) => S;
   all: (effects: any[]) => AllEffect;
+  take: (pattern: string) => TakeEffect;
 }

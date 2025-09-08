@@ -1,0 +1,79 @@
+{
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "files.autoGuessEncoding": true,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.exclude": {
+    ".algo-bootstrap": true
+  },
+  "cSpell.allowCompoundWords": true,
+  "C_Cpp.default.compilerPath": "<%- gcc.command === 'gcc' ? '${default}' : gcc.path %>",
+  "C_Cpp.default.cStandard": "c11",
+  "C_Cpp.default.cppStandard": "c++20",
+  "C_Cpp.suggestSnippets": false,
+  "C_Cpp.formatting": "clangFormat",
+  "C_Cpp.clang_format_fallbackStyle": "Google",
+  "C_Cpp.clang_format_style": "{ BasedOnStyle: Google, AccessModifierOffset: -1, AlignAfterOpenBracket: Align, AlignOperands: true, AlignTrailingComments: true, AllowShortBlocksOnASingleLine: false, AllowShortCaseLabelsOnASingleLine: false, AllowShortFunctionsOnASingleLine: None, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, AlwaysBreakBeforeMultilineStrings: false, AlwaysBreakTemplateDeclarations: Yes, BinPackArguments: true, BinPackParameters: true, BreakBeforeBraces: Attach, BreakBeforeTernaryOperators: true, BreakStringLiterals: true, ColumnLimit: 120, CompactNamespaces: false, IncludeBlocks: Preserve, IndentCaseLabels: false, IndentWidth: 4, KeepEmptyLinesAtTheStartOfBlocks: false, MaxEmptyLinesToKeep: 1, NamespaceIndentation: None, PointerAlignment: Right, ReflowComments: true, SortIncludes: true, SpaceAfterCStyleCast: false, SpaceBeforeAssignmentOperators: true, SpaceBeforeParens: ControlStatements, SpacesBeforeTrailingComments: 1, Standard: Auto, TabWidth: 4, UseTab: Never }",
+  "code-runner.clearPreviousOutput": true,
+  "code-runner.saveFileBeforeRun": true,
+  "code-runner.runInTerminal": true,
+  "code-runner.ignoreSelection": true,
+  "code-runner.executorMap": {
+    "c": "cd $dir && <%- gcc.command %> -std=c11 -Wall -Wextra -O2 $fileName -o ./.exe && ./.exe",
+    "cpp": "cd $dir && <%- gpp.command %> -std=c++20 -Wall -Wextra -O2 $fileName -o ./.exe && ./.exe"
+  },
+  "cph.language.c.Command": "<%- gcc.command %>",
+  "cph.language.c.Args": "-std=c11 -Wall -Wextra -O2",
+  "cph.language.cpp.Command": "<%- gpp.command %>",
+  "cph.language.cpp.Args": "-std=c++20 -Wall -Wextra -O2",
+  "cpp-check-lint.cppcheck.--std_c=": "c11",
+  "cpp-check-lint.cppcheck.--std_c++=": "c++20",
+  "cpp-check-lint.cpplint.--filter=": "-build/include_order,-build/namespaces,-build/include_what_you_use,-legal/copyright,-readability/casting,-readability/multiline_string,-readability/namespace,-runtime/arrays,-runtime/explicit,-runtime/int,-runtime/printf,-runtime/references,-runtime/string,-whitespace/blank_line,-whitespace/comments,-whitespace/empty_loop_body,-whitespace/line_length,-whitespace/end_of_line",
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug C++",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/.exe",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "windows": {
+          "MIMode": "gdb",
+          // "miDebuggerPath": "your-gdb-path",
+          "externalConsole": false,
+          "setupCommands": [
+            {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+            }
+          ],
+          "preLaunchTask": "AC Build (g++)"
+        },
+        "osx": {
+          "type": "lldb",
+          "preLaunchTask": "AC Build (clang++)"
+        },
+        "linux": {
+          "MIMode": "gdb",
+          // "miDebuggerPath": "your-gdb-path",
+          "externalConsole": false,
+          "setupCommands": [
+            {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+            }
+          ],
+          "preLaunchTask": "AC Build (g++)"
+        }
+      }
+    ]
+  },
+  "algo-bootstrap.version": "<%- appVersion %>"
+}

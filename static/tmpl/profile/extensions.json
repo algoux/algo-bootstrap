@@ -1,0 +1,248 @@
+<%
+  const list = [
+    {
+      "identifier": {
+        "id": "divyanshuagrawal.competitive-programming-helper",
+        "uuid": "28579c42-9973-4b79-9a1e-76431ea4bc1f"
+      },
+      "version": vsix['divyanshuagrawal.competitive-programming-helper'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['divyanshuagrawal.competitive-programming-helper'].relativePath,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['divyanshuagrawal.competitive-programming-helper'].path,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix",
+        "id": "28579c42-9973-4b79-9a1e-76431ea4bc1f",
+        "publisherDisplayName": "Divyanshu Agrawal",
+        "publisherId": "75852e6b-d787-4a70-a33d-4c7fe2015359",
+        "isPreReleaseVersion": false
+      }
+    },
+    {
+      "identifier": {
+        "id": "editorconfig.editorconfig",
+        "uuid": "f60a60a6-95ba-42d4-b41c-3d24c1b89588"
+      },
+      "version": vsix['editorconfig.editorconfig'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['editorconfig.editorconfig'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['editorconfig.editorconfig'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix",
+        "id": "f60a60a6-95ba-42d4-b41c-3d24c1b89588",
+        "publisherDisplayName": "EditorConfig",
+        "publisherId": "1ed869e4-8588-4af4-a51e-9c1c86b034b9",
+        "isPreReleaseVersion": false
+      }
+    },
+    {
+      "identifier": {
+        "id": "formulahendry.code-runner",
+        "uuid": "a6a0c5b2-d078-4bf5-a9ee-4e37054414b3"
+      },
+      "version": vsix['formulahendry.code-runner'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['formulahendry.code-runner'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['formulahendry.code-runner'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix",
+        "id": "a6a0c5b2-d078-4bf5-a9ee-4e37054414b3",
+        "publisherDisplayName": "Jun Han",
+        "publisherId": "38bbe3f0-5204-4170-845e-c2f966d979b8",
+        "isPreReleaseVersion": false
+      }
+    },
+    {
+      "identifier": {
+        "id": "ms-python.vscode-python-envs"
+      },
+      "version": vsix['ms-python.vscode-python-envs'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['ms-python.vscode-python-envs'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['ms-python.vscode-python-envs'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    },
+    {
+      "identifier": {
+        "id": "ms-python.vscode-pylance"
+      },
+      "version": vsix['ms-python.vscode-pylance'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['ms-python.vscode-pylance'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['ms-python.vscode-pylance'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    },
+    {
+      "identifier": {
+        "id": "ms-python.python",
+        "uuid": "f1f59ae4-9318-4f3c-a9b5-81b2eaa5f8a5"
+      },
+      "version": vsix['ms-python.python'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['ms-python.python'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['ms-python.python'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix",
+        "id": "f1f59ae4-9318-4f3c-a9b5-81b2eaa5f8a5",
+        "publisherDisplayName": "Microsoft",
+        "publisherId": "998b010b-e2af-44a5-a6cd-0b5fd3b9b6f8",
+        "isPreReleaseVersion": false,
+        "hasPreReleaseVersion": false,
+        "preRelease": false
+      }
+    },
+    {
+      "identifier": {
+        "id": "ms-python.debugpy"
+      },
+      "version": vsix['ms-python.debugpy'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['ms-python.debugpy'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['ms-python.debugpy'].relativePath,
+      "metadata": {
+        "isApplicationScoped": false,
+        "isMachineScoped": false,
+        "isBuiltin": false,
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    },
+    {
+      "identifier": {
+        "id": "ms-vscode.cpptools"
+      },
+      "version": vsix['ms-vscode.cpptools'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['ms-vscode.cpptools'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['ms-vscode.cpptools'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    },
+    {
+      "identifier": {
+        "id": "streetsidesoftware.code-spell-checker"
+      },
+      "version": vsix['streetsidesoftware.code-spell-checker'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['streetsidesoftware.code-spell-checker'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['streetsidesoftware.code-spell-checker'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    },
+    {
+      "identifier": {
+        "id": "usernamehw.errorlens"
+      },
+      "version": vsix['usernamehw.errorlens'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['usernamehw.errorlens'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['usernamehw.errorlens'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    },
+  ];
+  if (vsix['vadimcn.vscode-lldb']) {
+    list.push({
+      "identifier": {
+        "id": "vadimcn.vscode-lldb",
+        "uuid": "bee31e34-a44b-4a76-9ec2-e9fd1439a0f6"
+      },
+      "version": vsix['vadimcn.vscode-lldb'].version,
+      "location": {
+        "$mid": 1,
+        "path": vsix['vadimcn.vscode-lldb'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['vadimcn.vscode-lldb'].relativePath,
+      "metadata": {
+        "isApplicationScoped": false,
+        "isMachineScoped": false,
+        "isBuiltin": false,
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix",
+        "id": "bee31e34-a44b-4a76-9ec2-e9fd1439a0f6",
+        "publisherDisplayName": "Vadim Chugunov",
+        "publisherId": "3b05d186-6311-4caa-99b5-09032a9d3cf5",
+        "isPreReleaseVersion": false,
+        "hasPreReleaseVersion": false
+      }
+    });
+  }
+  if (vsix['qiumingge.cpp-check-lint']) {
+    list.push({
+      "identifier": {
+        "id": "qiumingge.cpp-check-lint"
+      },
+      "version": vsix['qiumingge.cpp-check-lint'].version,
+      "location": {
+        "$mid": 1,
+        "fsPath": vsix['qiumingge.cpp-check-lint'].path,
+        "external": `file://${vsix['qiumingge.cpp-check-lint'].path}`,
+        "path": vsix['qiumingge.cpp-check-lint'].path,
+        "scheme": "file"
+      },
+      "relativeLocation": vsix['qiumingge.cpp-check-lint'].relativePath,
+      "metadata": {
+        "installedTimestamp": vsixApproximateInstalledTimestamp,
+        "pinned": true,
+        "source": "vsix"
+      }
+    });
+  }
+%><%- JSON.stringify(list, null, 2) %>

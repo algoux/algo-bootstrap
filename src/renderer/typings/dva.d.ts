@@ -82,6 +82,7 @@ type EffectKeys =
   | 'env/installVsix'
   | 'env/installCppcheck'
   | 'env/installCpplint'
+  | 'env/injectMagic'
   | 'projects/addProject'
   | 'projects/deleteProject'
   | 'resources/getResourceIndexItem'
