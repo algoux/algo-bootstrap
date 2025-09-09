@@ -8,6 +8,7 @@ import { DispatchProps } from '@/typings/props';
 import { isAllInstalled } from '@/utils/env';
 import sm from '@/utils/modules';
 import { logRenderer } from '@/utils/logger';
+import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 
 export interface IIndexProps {}
 
@@ -21,9 +22,6 @@ class Index extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    // TODO 可用硬盘空间检测
-    // router.push(pages.test);
-    // return;
     const _envStart = performance.now();
     const environments = await this.props.dispatch({
       type: 'env/getEnvironments',
@@ -32,11 +30,25 @@ class Index extends React.Component<Props, State> {
     const _envEnd = performance.now();
     logRenderer.info(`environments fetched in ${_envEnd - _envStart}ms.`);
 
-    // TODO
-    // if (isAllInstalled(environments)) {
-    //   router.push(pages.board);
-    //   return;
-    // }
+
+    const completionState = sm.appConf.get('completionState')
+    if (completionState) {
+      this.props.dispatch({
+        type: 'env/setModuleConfigStatus',
+        payload: {
+          moduleConfigStatus: {
+            [EnvComponentModule.c_cpp]: EnvComponentModuleConfigStatus.DONE,
+            [EnvComponentModule.python]: EnvComponentModuleConfigStatus.DONE,
+            [EnvComponentModule.vscode]: EnvComponentModuleConfigStatus.DONE,
+            [EnvComponentModule.extensions]: EnvComponentModuleConfigStatus.DONE,
+            [EnvComponentModule.magic]: EnvComponentModuleConfigStatus.DONE,
+          },
+        },
+      });
+      router.push(pages.board);
+      return;
+    }
+
     const envComponents = sm.envComponents;
     const _riStart = performance.now();
     const resourceIds = Object.values(envComponents).flatMap((c) => c.resources);

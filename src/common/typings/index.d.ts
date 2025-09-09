@@ -48,6 +48,10 @@ type ICheckEnvironmentResultMetaPython = {
   isPython3: boolean;
 };
 
+type ICheckEnvironmentResultMetaVscodeProfile = {
+  profileName: string;
+};
+
 interface IEnvironments {
   gcc: ICheckEnvironmentResult<ICheckEnvironmentResultMetaGcc>;
   gdb: ICheckEnvironmentResult;
@@ -56,7 +60,7 @@ interface IEnvironments {
   cppcheck: ICheckEnvironmentResult;
   vscode: ICheckEnvironmentResult;
   vsix: Record<SupportedVSIXId, ICheckEnvironmentResult>;
-  vscodeProfile: ICheckEnvironmentResult;
+  vscodeProfile: ICheckEnvironmentResult<ICheckEnvironmentResultMetaVscodeProfile>;
 }
 
 interface IRespackManifestFile {

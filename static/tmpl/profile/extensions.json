@@ -8,10 +8,10 @@
       "version": vsix['divyanshuagrawal.competitive-programming-helper'].version,
       "location": {
         "$mid": 1,
-        "path": vsix['divyanshuagrawal.competitive-programming-helper'].relativePath,
+        "path": vsix['divyanshuagrawal.competitive-programming-helper'].path,
         "scheme": "file"
       },
-      "relativeLocation": vsix['divyanshuagrawal.competitive-programming-helper'].path,
+      "relativeLocation": vsix['divyanshuagrawal.competitive-programming-helper'].relativePath,
       "metadata": {
         "installedTimestamp": vsixApproximateInstalledTimestamp,
         "pinned": true,

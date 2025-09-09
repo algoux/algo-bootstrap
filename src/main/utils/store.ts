@@ -6,9 +6,10 @@ export const appConf = new Store<IAppConf>({
   serialize: (value) => JSON.stringify(value, null, 2),
   defaults: {
     uid: '',
-    gccAlternative: undefined,
+    completionState: undefined,
     vscProfileDir: undefined,
     vscProfileName: undefined,
+    gccAlternative: undefined,
     initTemplate: {},
   },
 });

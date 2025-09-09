@@ -1,7 +1,11 @@
 interface IAppConf {
   uid: string;
-  gccAlternative?: { command: string; path: string; type: 'gcc' | 'clang' };
+  completionState?: {
+    timestamp: number; // ms timestamp,
+    version: string;
+  };
   vscProfileDir?: string;
   vscProfileName?: string;
+  gccAlternative?: { command: string; path: string; type: 'gcc' | 'clang' };
   initTemplate: Record</** lang */ string, /** content */ string>;
 }

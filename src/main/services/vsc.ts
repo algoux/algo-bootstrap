@@ -17,6 +17,7 @@ import { watchTopLevelDirCreation } from '@/utils/fs';
 import {
   getUserProfilesDirPath,
   getVscProfileDirConfig,
+  getVscProfileNameConfig,
   setVscProfileDirConfig,
   setVscProfileNameConfig,
 } from '@/utils/vsc';
@@ -36,56 +37,25 @@ function fmt(str: string | undefined | null, defaultValue = '') {
   return es.substring(1, es.length - 1);
 }
 
-async function genTmplData() {
-  const environments = await getEnvironments();
-  if (!environments.gcc.installed) {
-    throw Error('gcc not installed');
-  }
-  if (!environments.cpplint.installed) {
-    throw Error('cpplint not installed');
-  }
-  const data = {
-    appVersion: app.getVersion(),
-    gccPath: {
-      [Platform.win32]: fmt(
-        isWindows ? environments.gcc.path : undefined,
-        `${getMingwInstallPath()}\\bin\\g++.exe`,
-      ),
-      [Platform.darwin]: fmt(isMac ? environments.gcc.path : undefined, '/usr/bin/gcc'),
-      // [Platform.linux]: fmt(isLinux ? environments.gcc.path : undefined, '/usr/bin/gcc'),
-    },
-    gdbPath: {
-      [Platform.win32]: fmt(
-        isWindows ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined,
-        `${getMingwInstallPath()}\\bin\\gdb.exe`,
-      ),
-      // [Platform.linux]: fmt(isLinux ? (environments.gdb as ICheckEnvironmentResultInstalled).path : undefined, '/usr/bin/gdb'),
-    },
-    cpplintPath: fmt(environments.cpplint.path, ''),
-  };
-  logMain.info('[genTmplData]', data);
-  return data;
-}
-
 export async function genProjectFiles(projectPath: string) {
   logMain.info('[genProjectFiles]', projectPath);
   // TODO 递归遍历目录文件拷贝
   // 读取模板文件列表
   const tmplProjectPath = getPath(PathKey.staticTmplProject);
-  const tmplProjectVscodePath = path.join(tmplProjectPath, '.vscode');
-  const dirFiles = await fs.readdir(tmplProjectVscodePath);
+  const dirFiles = await fs.readdir(tmplProjectPath);
   const files = dirFiles.filter(
-    (f) => f !== '.DS_Store' && fs.statSync(path.join(tmplProjectVscodePath, f)).isFile(),
+    (f) => f !== '.DS_Store' && fs.statSync(path.join(tmplProjectPath, f)).isFile(),
   );
-  logMain.info('[genProjectFiles] files:', files);
   // 向项目目录写入文件
-  const data = await genTmplData();
-  const targetVscodePath = path.join(projectPath, '.vscode');
-  await fs.ensureDir(targetVscodePath);
+  const data = {
+    appVersion: app.getVersion(),
+  };
+  await fs.ensureDir(projectPath);
   for (const file of files) {
-    const filePath = path.join(tmplProjectVscodePath, file);
-    const targetFilePath = path.join(targetVscodePath, file);
+    const filePath = path.join(tmplProjectPath, file);
+    const targetFilePath = path.join(projectPath, file);
     const tmpl = (await fs.readFile(filePath)).toString();
+    logMain.info(`[genProjectFiles] writing file ${targetFilePath}`);
     await fs.writeFile(targetFilePath, ejs.render(tmpl, data));
   }
 }
@@ -95,7 +65,11 @@ export async function openProject(projectPath: string) {
   if (!vscode.installed) {
     throw Error('VS Code not installed');
   }
-  await spawn('[openProject]', `"${vscode.path}"`, [`"${projectPath}"`]);
+  const profileName = getVscProfileNameConfig();
+  await spawn('[openProject]', `"${vscode.path}"`, [
+    `"${projectPath}"`,
+    profileName ? `--profile "${profileName}"` : '',
+  ]);
 }
 
 export async function validateVscProfileDirConfig() {
@@ -299,6 +273,14 @@ export async function injectMagic(options: {
     logMain.error(`[magic] failed to execute magic script at stage ${scriptStage}:`, e);
     scriptError = e;
   }
+
+  fs.remove(magicDir);
+
+  // 完成
+  appConf.set('completionState', {
+    timestamp: Date.now(),
+    version: app.getVersion(),
+  });
 
   return {
     hasScriptError: !!scriptError,

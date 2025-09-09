@@ -9,7 +9,7 @@ import { spawn } from '@/utils/child-process';
 import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
 import { VSIXIds } from 'common/configs/resources';
-import { getAppVscProfileDirPath } from '@/utils/vsc';
+import { getAppVscProfileDirPath, getVscProfileNameConfig } from '@/utils/vsc';
 
 const emptyEnvironments = genEmptyEnvironments();
 
@@ -390,7 +390,12 @@ export async function checkVSCodeUserProfile() {
     if (!(await fs.stat(profileDirPath)).isDirectory()) {
       return genNotInstalled();
     }
-    return genInstalled('', profileDirPath);
+    const settingsJSON = await fs
+      .readJSON(path.join(profileDirPath, 'settings.json'))
+      .catch(() => ({}));
+    return genInstalled(settingsJSON?.algoBootstrap?.version || '', profileDirPath, {
+      profileName: getVscProfileNameConfig(),
+    });
   } catch (e: any) {
     return genNotInstalled();
   }
