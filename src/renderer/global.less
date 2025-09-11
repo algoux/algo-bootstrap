@@ -42,12 +42,15 @@ p:last-of-type {
     --extra-title-bar-height: 28px;
   }
 
+  &.platform-win {
+    border-top: @divider-border;
+  }
+
   &.ant-layout-has-sider {
     height: 100%;
     background-color: transparent !important;
 
     .sidebar.ant-layout-sider {
-      background-color: transparent !important;
       user-select: none;
       -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);

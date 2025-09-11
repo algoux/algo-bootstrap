@@ -75,7 +75,7 @@ class C_CppConfigurator extends React.Component<Props, State> {
   getMingwTotalSize = async () => {
     const { path: resourcePath } = this.props.resourceIndex[ResourceId.c_cpp];
     const resourceFilename = path.basename(resourcePath);
-    const size = await sm.envInstaller.getMingwTotalSize(resourceFilename);
+    const size = await sm.envInstaller.getMingwTotalSize(resourceFilename).catch(() => 0);
     this.setState({
       mingwTotalSize: size,
     });
@@ -102,13 +102,12 @@ class C_CppConfigurator extends React.Component<Props, State> {
     let environments: IEnvironments | undefined;
     try {
       this._startAt = Date.now();
-      if (sm.platform.isWindows) {
-        await this.getMingwTotalSize();
-        await this.pollMingwUncompressedSize();
-      }
+      await Promise.all([this.getMingwTotalSize(), this.pollMingwUncompressedSize()]);
       environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installGcc',
-        payload: {},
+        payload: {
+          filename: path.basename(this.props.resourceIndex[ResourceId.c_cpp].path),
+        },
       });
       sm.track.timing('install', 'gcc', Date.now() - this._startAt);
     } catch (e) {
@@ -186,7 +185,7 @@ class C_CppConfigurator extends React.Component<Props, State> {
 
   renderMingwSize = () => {
     const state = this.state;
-    const uncompressed = formatFileSize(state.mingwUncompressedSize);
+    const uncompressed = formatFileSize(state.mingwUncompressedSize || 0);
     const total = formatFileSize(state.mingwTotalSize);
     const percent = formatPercentage(state.mingwUncompressedSize, state.mingwTotalSize);
     return `${uncompressed} / ${total} (${percent})`;
@@ -201,7 +200,7 @@ class C_CppConfigurator extends React.Component<Props, State> {
           <div className="content-block --pb-xl">
             <h1 className="top-title">安装 {formatMessage({ id: 'env.gcc' })}</h1>
             <p>正在应用和配置 {formatMessage({ id: 'env.gcc' })}，这可能需要花费一些时间。</p>
-            <p className="color-secondary">* 这个过程将不会消耗你的数据流量。</p>
+            <p className="color-secondary">* 这个过程不会消耗你的数据流量。</p>
             <Progress
               percent={(state.mingwUncompressedSize / state.mingwTotalSize) * 100}
               status="active"

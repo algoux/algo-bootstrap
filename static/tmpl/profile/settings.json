@@ -8,7 +8,7 @@
     ".algo-bootstrap*": true
   },
   "cSpell.allowCompoundWords": true,
-  "C_Cpp.default.compilerPath": "<%- gcc.command === 'gcc' ? '${default}' : gcc.path %>",
+  "C_Cpp.default.compilerPath": "<%- gcc.path %>",
   "C_Cpp.default.cStandard": "c11",
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.suggestSnippets": false,
@@ -76,6 +76,7 @@
     ]
   },
   "algo-bootstrap": {
-    "version": "<%- appVersion %>"
+    "version": "<%- appVersion %>",
+    "profileName": "<%- profileName %>"
   }
 }

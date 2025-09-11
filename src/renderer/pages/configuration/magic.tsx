@@ -76,10 +76,11 @@ class MagicConfigurator extends React.Component<Props, State> {
           gccAlt: this.props.envConfig.c_cpp.options?.useGccAlt,
         },
       });
+      logRenderer.info('[startInject] res:', res);
       this.complete();
     } catch (e) {
       logRenderer.error(`[startInject]`, e);
-      msg.error('开始注入失败');
+      msg.error('注入失败');
       await this.props.dispatch({
         type: 'env/setModuleConfigStatusItem',
         payload: {

@@ -16,7 +16,9 @@ module.exports = merge.smart(baseConfig, {
       '@': path.resolve(__dirname, '../src/main'),
       common: path.resolve(__dirname, '../src/common'),
       // '@aws-sdk/client-s3': path.resolve(__dirname, '../src/main/utils/empty-module.js'),
+      'check-disk-space': path.resolve(__dirname, '../node_modules/check-disk-space/dist/check-disk-space.cjs'),
     },
+    mainFields: ['main', 'module'],
   },
   externals: {
     fs: 'commonjs fs',
@@ -29,6 +31,7 @@ module.exports = merge.smart(baseConfig, {
     buffer: 'commonjs buffer',
     crypto: 'commonjs crypto',
     events: 'commonjs events',
+    os: 'commonjs os',
     'node:fs': 'commonjs fs',
     'node:fs/promises': 'commonjs fs/promises',
     'node:path': 'commonjs path',
@@ -39,6 +42,7 @@ module.exports = merge.smart(baseConfig, {
     'node:buffer': 'commonjs buffer',
     'node:crypto': 'commonjs crypto',
     'node:events': 'commonjs events',
+    'node:os': 'commonjs os',
   },
   module: {
     // rules: [{
@@ -77,16 +81,24 @@ module.exports = merge.smart(baseConfig, {
           },
         },
       },
+      {
+        test: /\.node$/,
+        use: 'node-loader',
+      },
     ],
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      __static: JSON.stringify(path.join(__dirname, '../static')),
-    }),
+    // new webpack.DefinePlugin({
+    //   'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    //   // __static: JSON.stringify(path.join(__dirname, '../static')),
+    // }),
     new webpack.IgnorePlugin({ resourceRegExp: /^@aws-sdk\/client-s3$/ }),
     new CopyWebpackPlugin({
       patterns: [
+        {
+          from: path.resolve(__dirname, '../src/main/preload.js'),
+          to: 'preload.js',
+        },
         {
           from: path.resolve(__dirname, '../src/main/utils/md5-worker.js'),
           to: 'utils/md5-worker.js',

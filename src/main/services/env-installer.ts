@@ -75,7 +75,12 @@ export async function installXCodeCLT() {
 }
 
 export async function getMingwTotalSize(filename: string): Promise<number> {
-  return getUncompressedSize(path.join(RESOURCES_DOWNLOAD_PATH, filename));
+  try {
+    return await getUncompressedSize(path.join(RESOURCES_DOWNLOAD_PATH, filename));
+  } catch (e) {
+    logMain.error('[getMingwTotalSize.error]', filename, e);
+    throw e;
+  }
 }
 
 export async function getMingwUncompressedSize(): Promise<number> {
@@ -124,17 +129,33 @@ export async function installGcc(options: { filename?: string; force?: boolean }
     if (!topDirName) {
       throw Error('mingw64 zip should have top dir');
     }
-    // 解压 MinGW64
-    const installPath = getMingwInstallPath();
-    logMain.info('[installGcc] using install path:', installPath);
-    await fs.ensureDir(installPath);
-    await extractAll(filePath, installPath, true);
-    // 移动到上一层
-    const mingwFilesPath = path.join(installPath, topDirName);
-    logMain.info('[installGcc] move mingw files:', mingwFilesPath, '->', installPath);
-    await fs.move(mingwFilesPath, installPath);
-    await fs.remove(mingwFilesPath);
-    (await appendToWindowsUserPath(`${installPath}\\bin`)) && (await refreshWindowsPath());
+    try {
+      // 解压 MinGW64
+      const installPath = getMingwInstallPath();
+      logMain.info('[installGcc] using install path:', installPath);
+      await fs.ensureDir(installPath);
+      await extractAll(filePath, installPath, true);
+      // 移动到上一层
+      const mingwFilesPath = path.join(installPath, topDirName);
+      logMain.info('[installGcc] move mingw files:', mingwFilesPath, '->', installPath);
+      // await fs.move(mingwFilesPath, installPath, { overwrite: true });
+      const files = await fs.readdir(mingwFilesPath);
+      for (const file of files) {
+        logMain.info(
+          '[installGcc] move mingw top-level file/dir:',
+          path.join(mingwFilesPath, file),
+          '->',
+          path.join(installPath, file),
+        );
+        await fs.move(path.join(mingwFilesPath, file), path.join(installPath, file));
+      }
+      await fs.remove(mingwFilesPath);
+      logMain.info('[installGcc] append PATH:', `${installPath}\\bin`);
+      (await appendToWindowsUserPath(`${installPath}\\bin`)) && (await refreshWindowsPath());
+    } catch (e) {
+      logMain.error('[installGcc] error:', e);
+      throw e;
+    }
     await getEnvironments(true);
   }
 }

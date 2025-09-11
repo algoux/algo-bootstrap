@@ -6,7 +6,6 @@ import { RouteProps, DispatchProps } from '@/typings/props';
 import pages from '@/configs/pages';
 import { Link } from 'react-router-dom';
 import { formatMessage } from 'umi-plugin-locale';
-import { VSIXIds } from 'common/configs/resources';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 
 interface IRootLayoutProps {}

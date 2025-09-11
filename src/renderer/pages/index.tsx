@@ -32,6 +32,7 @@ class Index extends React.Component<Props, State> {
 
 
     const completionState = sm.appConf.get('completionState')
+    logRenderer.info('completionState', completionState);
     if (completionState) {
       this.props.dispatch({
         type: 'env/setModuleConfigStatus',

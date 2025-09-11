@@ -22,7 +22,7 @@ import { PathKey } from 'common/configs/paths';
 import { ElectronDownloadManager } from 'electron-dl-manager';
 import { IPCDownloadItemStatus } from 'common/typings/ipc';
 
-logMain.info('[app.start]');
+logMain.info('[app.start]', process.env.NODE_ENV);
 logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
 // if (module.hot) {
 //   module.hot.accept();
@@ -40,7 +40,7 @@ global.modules = _modules;
 
 let downloadTaskIdNum = 1;
 
-console.log('nativeTheme', {
+logMain.info('[nativeTheme]', {
   shouldUseDarkColors: nativeTheme.shouldUseDarkColors,
   themeSource: nativeTheme.themeSource,
 });
@@ -49,8 +49,20 @@ nativeTheme.themeSource = 'light';
 
 let mainWindow: Electron.BrowserWindow | null = null;
 global.getMainWindow = () => mainWindow;
+global.getMainProcessDirectory = () => __dirname;
 
-// console.log(path.join(__dirname, './preload.js'));
+logMain.info('[path]', {
+  cwd: process.cwd(),
+  __dirname: path.join(__dirname),
+  __static: path.join(__static),
+  'process.resourcesPath': process.resourcesPath,
+  'global.getMainProcessDirectory()': global.getMainProcessDirectory(),
+  'app.getPath("exe")': app.getPath('exe'),
+  'app.getPath("userData")': app.getPath('userData'),
+  'app.getPath("temp")': app.getPath('temp'),
+  'app.getPath("appData")': app.getPath('appData'),
+  'app.getPath("home")': app.getPath('home'),
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({

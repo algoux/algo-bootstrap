@@ -75,6 +75,22 @@ class Configuration extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const config = this.getInitConfig(props);
+    this.state = {
+      downloadTaskId: 0,
+      downloading: false,
+      receivedSize: 0,
+      totalSize: 0,
+      speed: 0,
+      config,
+      usingResourceIds: [],
+      resourceStatusMap: {},
+      estimatedDownloadSize: 0,
+      validating: false,
+    };
+  }
+
+  getInitConfig(props?: Props) {
     const c_cppConfig = this.getC_CppConfig(props);
     const pythonConfig = this.getPythonConfig(props);
     const vscodeConfig = this.getVscodeConfig(props);
@@ -82,43 +98,31 @@ class Configuration extends React.Component<Props, State> {
     const codeStyleExtensionsConfig = this.getCodeStyleExtensionsConfig(props);
     const languagePackagesConfig = this.getLanguagePackagesConfig(props);
 
-    this.state = {
-      downloadTaskId: 0,
-      downloading: false,
-      receivedSize: 0,
-      totalSize: 0,
-      speed: 0,
-      // @ts-ignore
-      config: {
-        [EnvComponent.c_cpp]: {
-          ...c_cppConfig,
-          selectedOption: c_cppConfig.defaultOption,
-        },
-        [EnvComponent.python]: {
-          ...pythonConfig,
-          selectedOption: pythonConfig.defaultOption,
-        },
-        [EnvComponent.vscode]: {
-          ...vscodeConfig,
-          selectedOption: vscodeConfig.defaultOption,
-        },
-        [EnvComponent.basicExtensions]: {
-          ...basicExtensionsConfig,
-          selectedOption: basicExtensionsConfig.defaultOption,
-        },
-        [EnvComponent.codeStyleExtensions]: {
-          ...codeStyleExtensionsConfig,
-          selectedOption: codeStyleExtensionsConfig.defaultOption,
-        },
-        [EnvComponent.languagePackages]: {
-          ...languagePackagesConfig,
-          selectedOption: languagePackagesConfig.defaultOption,
-        },
+    return {
+      [EnvComponent.c_cpp]: {
+        ...c_cppConfig,
+        selectedOption: c_cppConfig.defaultOption,
       },
-      usingResourceIds: [],
-      resourceStatusMap: {},
-      estimatedDownloadSize: 0,
-      validating: false,
+      [EnvComponent.python]: {
+        ...pythonConfig,
+        selectedOption: pythonConfig.defaultOption,
+      },
+      [EnvComponent.vscode]: {
+        ...vscodeConfig,
+        selectedOption: vscodeConfig.defaultOption,
+      },
+      [EnvComponent.basicExtensions]: {
+        ...basicExtensionsConfig,
+        selectedOption: basicExtensionsConfig.defaultOption,
+      },
+      [EnvComponent.codeStyleExtensions]: {
+        ...codeStyleExtensionsConfig,
+        selectedOption: codeStyleExtensionsConfig.defaultOption,
+      },
+      [EnvComponent.languagePackages]: {
+        ...languagePackagesConfig,
+        selectedOption: languagePackagesConfig.defaultOption,
+      },
     };
   }
 
@@ -607,6 +611,36 @@ class Configuration extends React.Component<Props, State> {
     await this.checkResourcesStatus();
   };
 
+  reloadResourceIndex = async () => {
+    const envComponents = sm.envComponents;
+    const _riStart = performance.now();
+    const resourceIds = Object.values(envComponents).flatMap((c) => c.resources);
+    logRenderer.info('fetching resource indexes:', resourceIds);
+    const { successful, failed } = await this.props.dispatch({
+      type: 'resources/getResourceIndexItems',
+      payload: {
+        resourceIds,
+      },
+    });
+    const _riEnd = performance.now();
+    logRenderer.info(
+      `resource indexes fetched in ${_riEnd - _riStart}ms. successful:`,
+      successful,
+      'failed:',
+      failed,
+    );
+    const config = this.getInitConfig();
+    logRenderer.info('[Configuration] reload initial config:', config);
+    this.setState(
+      {
+        config,
+      },
+      () => {
+        this.syncConfig();
+      },
+    );
+  };
+
   checkResourcesStatus = async () => {
     const { resourceIndex } = this.props;
     const { usingResourceIds } = this.state;
@@ -754,7 +788,9 @@ class Configuration extends React.Component<Props, State> {
   };
 
   render() {
-    const { receivedSize, totalSize, config, validating } = this.state;
+    const { resourceIndex } = this.props;
+    const { receivedSize, totalSize, config, validating, usingResourceIds, resourceStatusMap } =
+      this.state;
     const downloading = this.state.downloading;
     const colProps = {
       className: '--mt-sm --mb-sm',
@@ -771,6 +807,7 @@ class Configuration extends React.Component<Props, State> {
       (resourceId) => this.state.resourceStatusMap[resourceId] === ResourceStatus.READY,
     );
     const isAllResourcesReady = readyResourceIds.length === this.state.usingResourceIds.length;
+    const hasResourceIndexError = usingResourceIds.some((resourceId) => !resourceIndex[resourceId]);
 
     return (
       <div>
@@ -903,7 +940,11 @@ class Configuration extends React.Component<Props, State> {
           </div>
 
           <div className="content-block --pt-none --mt-lg --fade-in-delay-1000">
-            {validating ? (
+            {hasResourceIndexError ? (
+              <>
+                <p className="color-red">资源索引获取失败，请重新加载资源。</p>
+              </>
+            ) : validating ? (
               <>
                 <p>正在校验资源…</p>
               </>
@@ -937,26 +978,44 @@ class Configuration extends React.Component<Props, State> {
         <ActionBar
           info={null}
           actions={
-            toDownloadResourceIds.length > 0
+            hasResourceIndexError
               ? [
+                  {
+                    key: 'reloadResourceIndex',
+                    type: 'default',
+                    text: '重新加载资源',
+                    loading: this.props.fetchResourceIndexLoading,
+                    disabled: this.props.fetchResourceIndexLoading,
+                    onClick: this.reloadResourceIndex,
+                  },
                   {
                     key: 'downloadResources',
                     type: 'primary',
                     text: '下载所选组件',
-                    loading: downloading,
-                    onClick: this.downloadResources,
+                    loading: false,
+                    disabled: true,
                   },
                 ]
-              : [
-                  {
-                    key: 'startConfigure',
-                    type: 'primary',
-                    text: '开始配置',
-                    highlight: true,
-                    disabled: downloading || validating,
-                    onClick: this.startConfigure,
-                  },
-                ]
+              : toDownloadResourceIds.length > 0
+                ? [
+                    {
+                      key: 'downloadResources',
+                      type: 'primary',
+                      text: '下载所选组件',
+                      loading: downloading,
+                      onClick: this.downloadResources,
+                    },
+                  ]
+                : [
+                    {
+                      key: 'startConfigure',
+                      type: 'primary',
+                      text: '开始配置',
+                      highlight: true,
+                      disabled: downloading || validating,
+                      onClick: this.startConfigure,
+                    },
+                  ]
           }
           delay={1000}
         />
@@ -970,6 +1029,7 @@ function mapStateToProps(state: IState) {
     environments: state.env.environments,
     resourceIndex: state.resources.resourceIndex as ResourceIndexItem<ResourceId>,
     moduleConfigStatus: state.env.moduleConfigStatus,
+    fetchResourceIndexLoading: !!state.loading.effects['resources/getResourceIndexItems'],
   };
 }
 

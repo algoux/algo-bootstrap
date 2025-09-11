@@ -27,7 +27,7 @@
       "command": "clang++",
       "args": [
         "${file}",
-        "-std=c++11",
+        "-std=c++20",
         "-stdlib=libc++",
         "-o",
         "${workspaceFolder}/.exe",

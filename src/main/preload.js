@@ -1,5 +1,4 @@
 const { contextBridge, ipcRenderer } = require('electron');
-require('@electron/remote/main').initialize();
 
 // 暴露 Node.js API 到渲染进程
 window.process = process;

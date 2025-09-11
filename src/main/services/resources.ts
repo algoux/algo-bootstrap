@@ -11,7 +11,7 @@ export async function getRemoteResourceIndexItem(
   resourceId: ResourceId,
 ): Promise<ResourceIndexItem> {
   const res = (await req.get(
-    path.join(api.res.base, resourcesIndexPathMap[resourceId]),
+    api.res.base + resourcesIndexPathMap[resourceId],
   )) as ResourceIndexItem;
   return res;
 }
@@ -50,6 +50,10 @@ export async function checkValidResourceDownloadCache(
     `"${process.execPath}" "${workerScriptPath}"`,
     checkMd5Resources.map((r) => `"${r.filename}"`),
     {
+      env: {
+        ...process.env,
+        ELECTRON_RUN_AS_NODE: '1',
+      },
       cwd: getPath(PathKey.resourcesDownload),
     },
   );

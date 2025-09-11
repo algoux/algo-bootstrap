@@ -179,8 +179,12 @@ export async function injectMagic(options: {
     spawn(
       '[magic]',
       `"${process.execPath}" "${workerScriptPath}"`,
-      [magicConfigPath, welcomeFilePath, `${baseSpeed}`, `${stage}`],
+      [`"${magicConfigPath}"`, `"${welcomeFilePath}"`, `${baseSpeed}`, `${stage}`],
       {
+        env: {
+          ...process.env,
+          ELECTRON_RUN_AS_NODE: '1',
+        },
         timeout: 0,
       },
     );
@@ -189,10 +193,9 @@ export async function injectMagic(options: {
   // 拷贝预置配置
   logMain.info(`[magic] copy profile ${getPath(PathKey.staticTmplProfile)} to ${profileDirPath}`);
   const tmplDirPath = getPath(PathKey.staticTmplProfile);
-  await fs.copy(tmplDirPath, profileDirPath);
+  const tmplRenderFiles = ['extensions.json', 'settings.json', 'tasks.json'];
 
   // 生成预置配置的渲染数据
-  const tmplRenderFiles = ['extensions.json', 'settings.json', 'tasks.json'];
   const { gcc: gccEnv, vsix: vsixEnv } = await getEnvironments();
   if (!gccEnv.installed) {
     throw Error('gcc not installed');
@@ -232,12 +235,14 @@ export async function injectMagic(options: {
 
   const data: {
     appVersion: string;
+    profileName: string;
     vsixApproximateInstalledTimestamp: number;
     vsix: Record<string, { version: string; path: string; relativePath: string }>;
     gcc: { command: string; path: string };
     gpp: { command: string; path: string };
   } = {
     appVersion: app.getVersion(),
+    profileName,
     vsixApproximateInstalledTimestamp,
     vsix,
     gcc: { command: options.gccAlt?.command || 'gcc', path: options.gccAlt?.path || gccEnv.path },
@@ -245,13 +250,18 @@ export async function injectMagic(options: {
   };
   logMain.info(`[magic] tmpl render data:`, data);
 
-  // 渲染预置配置
-  for (const file of tmplRenderFiles) {
+  // 拷贝预置配置到 profile 目录
+  const profileDirTmplFiles = await fs.readdir(tmplDirPath);
+  for (const file of profileDirTmplFiles) {
     const filePath = path.join(tmplDirPath, file);
     const targetFilePath = path.join(profileDirPath, file);
-    const tmpl = (await fs.readFile(filePath)).toString();
-    logMain.info(`[magic] writing rendered file ${targetFilePath}`);
-    await fs.writeFile(targetFilePath, ejs.render(tmpl, data));
+    if (tmplRenderFiles.includes(file)) {
+      const tmpl = (await fs.readFile(filePath)).toString();
+      logMain.info(`[magic] writing rendered file ${targetFilePath}`);
+      await fs.writeFile(targetFilePath, ejs.render(tmpl, data));
+    } else {
+      await fs.copy(filePath, targetFilePath);
+    }
   }
 
   // 完成注入
@@ -274,7 +284,9 @@ export async function injectMagic(options: {
     scriptError = e;
   }
 
-  fs.remove(magicDir);
+  setTimeout(() => {
+    fs.remove(magicDir).catch(() => {});
+  }, 20 * 1000);
 
   // 完成
   appConf.set('completionState', {

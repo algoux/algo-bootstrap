@@ -13,6 +13,8 @@ import { isEnvInstalled, getNextConfigurationModulePage } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { windowProgress } from '@/utils/native';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
+import path from 'path';
+import { ResourceId } from 'common/configs/resources';
 
 export interface IPythonConfigurator {}
 
@@ -59,7 +61,9 @@ class PythonConfigurator extends React.Component<Props, State> {
       windowProgress.start();
       const environments = await this.props.dispatch<any, Promise<IEnvironments>>({
         type: 'env/installPython',
-        payload: {},
+        payload: {
+          filename: path.basename(this.props.resourceIndex[ResourceId.python].path),
+        },
       });
       windowProgress.end();
       sm.track.timing('install', 'python', Date.now() - _startAt);
@@ -215,6 +219,7 @@ function mapStateToProps(state: IState) {
   return {
     environments: state.env.environments,
     loading: !!state.loading.effects['env/installPython'],
+    resourceIndex: state.resources.resourceIndex,
     moduleConfigStatus: state.env.moduleConfigStatus,
   };
 }
