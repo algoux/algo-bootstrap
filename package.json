@@ -11,8 +11,12 @@
   "private": true,
   "build": {
     "productName": "Algo Bootstrap",
+    "appId": "org.algoux.algo-bootstrap",
     "mac": {
-      "category": "public.app-category.developer-tools"
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg"
+      ]
     },
     "dmg": {
       "icon": "build/dmg.icns"
@@ -25,12 +29,15 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "directories": {
       "output": "release"
     },
-    "appId": "org.algoux.algo-bootstrap",
     "asar": true
   },
   "scripts": {
@@ -50,6 +57,10 @@
     "pack:dir": "electron-builder --dir",
     "pack:mac": "electron-builder --mac",
     "pack:win": "electron-builder --win",
+    "pack:mac-x64": "electron-builder --mac --x64",
+    "pack:mac-arm64": "electron-builder --mac --arm64",
+    "pack:win-x64": "electron-builder --win --x64",
+    "pack:win-arm64": "electron-builder --win --arm64",
     "pack": "electron-builder -mw",
     "dist": "electron-builder",
     "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\"",

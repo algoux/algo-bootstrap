@@ -7,7 +7,7 @@ import ExternalLink from '@/components/ExternalLink';
 import sm from '@/utils/modules';
 import c_cppIcon from '@/assets/icons/c_cpp.png';
 import pythonIcon from '@/assets/icons/python.svg';
-import cpplintIcon from '@/assets/icons/lint.svg';
+import lintIcon from '@/assets/icons/lint.svg';
 import vscodeIcon from '@/assets/icons/vscode.svg';
 import vscodeExtensionIcon from '@/assets/icons/vscode-extension.svg';
 import languageIcon from '@/assets/icons/language.svg';
@@ -892,7 +892,7 @@ class Configuration extends React.Component<Props, State> {
               <Col {...colProps}>
                 <EnvCard
                   name={formatMessage({ id: 'env.codeStyle' })}
-                  icon={cpplintIcon}
+                  icon={lintIcon}
                   optional
                   installed={config[EnvComponent.codeStyleExtensions].installed}
                   version={config[EnvComponent.codeStyleExtensions].version}
