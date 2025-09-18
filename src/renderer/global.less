@@ -288,6 +288,36 @@ p:last-of-type {
   }
 }
 
+.env-label {
+  display: flex;
+  align-items: center;
+
+  .env-label-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .env-label-info {
+    padding-left: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .env-label-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 20px;
+    }
+
+    .env-label-version {
+      color: @color-secondary;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+}
+
 .list-hover-action {
   .ant-list-item-action {
     visibility: hidden;
@@ -295,6 +325,46 @@ p:last-of-type {
 
   &:hover .ant-list-item-action {
     visibility: visible;
+  }
+}
+
+.board-action-card {
+  margin-bottom: 12px;
+
+  &:hover {
+    border-color: @color-primary;
+  }
+
+  .ant-card-body {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+
+    .board-action-card-icon {
+      margin-right: 12px;
+      height: 30px;
+
+      svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    .board-action-card-content {
+      display: flex;
+      flex-direction: column;
+
+      .board-action-card-title {
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .board-action-card-desc {
+        color: @color-secondary;
+        font-size: 12px;
+        line-height: 20px;
+      }
+    }
   }
 }
 

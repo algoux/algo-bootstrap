@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from '@/utils/dva';
-import { List, Icon, Row, Col } from 'antd';
+import { List, Icon, Row, Col, Card } from 'antd';
 import ExternalLink from '@/components/ExternalLink';
 import sm from '@/utils/modules';
 import { dialog, getCurrentWindow } from '@electron/remote';
@@ -9,16 +9,27 @@ import msg from '@/utils/msg';
 import { DispatchProps } from '@/typings/props';
 import PageAnimation from '@/components/PageAnimation';
 import * as path from 'path';
+import EnvLabel from '@/components/EnvLabel';
+import CodeTemplateModal from '@/components/CodeTemplateModal';
+import c_cppIcon from '@/assets/icons/c_cpp.png';
+import pythonIcon from '@/assets/icons/python.svg';
+import vscodeIcon from '@/assets/icons/vscode.svg';
+import { formatMessage } from 'umi-plugin-locale';
 
 export interface IBoardProps {}
 
-interface State {}
+interface State {
+  codeTemplateModalVisible: boolean;
+}
 
 type Props = IBoardProps & ReturnType<typeof mapStateToProps> & DispatchProps;
 
 class Board extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    this.state = {
+      codeTemplateModalVisible: false,
+    };
   }
 
   componentDidMount() {
@@ -121,6 +132,50 @@ class Board extends React.Component<Props, State> {
     }
   };
 
+  openCodeTemplateModal = () => {
+    this.setState({
+      codeTemplateModalVisible: true,
+    });
+  };
+
+  closeCodeTemplateModal = () => {
+    this.setState({
+      codeTemplateModalVisible: false,
+    });
+  };
+
+  renderEnvPanel = () => {
+    const { environments } = this.props;
+
+    return (
+      <div className="--pb-xl">
+        <Row gutter={8}>
+          <Col span={8}>
+            <EnvLabel
+              name="C/C++"
+              icon={c_cppIcon}
+              version={`${(environments.gcc as ICheckEnvironmentResultInstalled).version} (${(environments.gcc as ICheckEnvironmentResultInstalled<ICheckEnvironmentResultMetaGcc>).meta?.type})`}
+            />
+          </Col>
+          <Col span={8}>
+            <EnvLabel
+              name="Python"
+              icon={pythonIcon}
+              version={(environments.python as ICheckEnvironmentResultInstalled).version}
+            />
+          </Col>
+          <Col span={8}>
+            <EnvLabel
+              name="VS Code"
+              icon={vscodeIcon}
+              version={(environments.vscode as ICheckEnvironmentResultInstalled).version}
+            />
+          </Col>
+        </Row>
+      </div>
+    );
+  };
+
   render() {
     const { projects } = this.props;
     const colProps = {
@@ -134,6 +189,7 @@ class Board extends React.Component<Props, State> {
         <div className="container no-action-bar">
           <div className="content-block --pb-xl">
             <h1 className="top-title">开始使用</h1>
+            {this.renderEnvPanel()}
             <h2 className="secondary-title">项目</h2>
             <p className="--mb-xs">
               <a onClick={this.newProject}>新建或初始化旧项目...</a>
@@ -166,42 +222,52 @@ class Board extends React.Component<Props, State> {
             <h2 className="secondary-title">帮助</h2>
             <p className="--mb-xs">
               <ExternalLink href="https://ab.algoux.org/docs/getting_started/">
-                VS Code 使用指南
+                {formatMessage({ id: 'app.name' })} 使用指南
               </ExternalLink>
             </p>
-            <h2 className="secondary-title">探索</h2>
-            {/* <Row gutter={8}>
-            <Col {...colProps}><ExternalLink href="https://acm.sdut.edu.cn/">SDUT OJ</ExternalLink></Col>
-            <Col {...colProps}><ExternalLink href="https://codeforces.com/">Codeforces</ExternalLink></Col>
-            <Col {...colProps}><ExternalLink href="https://www.hackerrank.com/">HackerRank</ExternalLink></Col>
-            <Col {...colProps}><ExternalLink href="http://acm.hdu.edu.cn/">HDOJ</ExternalLink></Col>
-          </Row> */}
-            <p className="--mb-xs">
-              <ExternalLink href="https://acm.sdut.edu.cn/">SDUT OJ</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="https://codeforces.com/">Codeforces</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="https://onlinejudge.org/">UVa</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="https://hackerrank.com/">HackerRank</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="http://acm.hdu.edu.cn/">HDOJ</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="http://poj.org/">POJ</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="https://nanti.jisuanke.com/">计蒜客</ExternalLink>
-            </p>
-            <p className="--mb-xs">
-              <ExternalLink href="https://ac.nowcoder.com/">牛客竞赛</ExternalLink>
-            </p>
+
+            <h2 className="secondary-title">更多功能</h2>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Card hoverable className="board-action-card" onClick={this.openCodeTemplateModal}>
+                  <div className="board-action-card-icon">
+                    <Icon type="unordered-list" />
+                  </div>
+                  <div className="board-action-card-content">
+                    <div className="board-action-card-title">设置代码初始化模板</div>
+                    <div className="board-action-card-desc">自定义代码片段（ac）</div>
+                  </div>
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card hoverable className="board-action-card">
+                  <div className="board-action-card-icon">
+                    <Icon type="code" />
+                  </div>
+                  <div className="board-action-card-content">
+                    <div className="board-action-card-title">添加快捷命令</div>
+                    <div className="board-action-card-desc">安装 abc 命令行工具</div>
+                  </div>
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card hoverable className="board-action-card">
+                  <div className="board-action-card-icon">
+                    <Icon type="sync" />
+                  </div>
+                  <div className="board-action-card-content">
+                    <div className="board-action-card-title">重新开始配置</div>
+                    <div className="board-action-card-desc">重置配置状态并回溯</div>
+                  </div>
+                </Card>
+              </Col>
+            </Row>
           </div>
         </div>
+        <CodeTemplateModal
+          visible={this.state.codeTemplateModalVisible}
+          onClose={this.closeCodeTemplateModal}
+        />
       </PageAnimation>
     );
   }
@@ -209,6 +275,7 @@ class Board extends React.Component<Props, State> {
 
 function mapStateToProps(state: IState) {
   return {
+    environments: state.env.environments,
     projects: state.projects.list,
   };
 }

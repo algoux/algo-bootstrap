@@ -358,6 +358,9 @@ if (!gotTheLock) {
   });
 
   app.on('ready', async () => {
+    // 设置应用语言为简体中文
+    app.commandLine.appendSwitch('lang', 'zh-CN');
+
     // 初始化 remote 模块
     initialize();
 

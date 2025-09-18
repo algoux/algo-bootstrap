@@ -6,10 +6,7 @@ import { app } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 import { logMain } from '@/utils/logger';
 import { getEnvironments, getEnvironment } from './env-checker';
-import { isWindows, isMac } from '@/utils/platform';
-import { Platform } from 'common/configs/platform';
 import { spawn } from '@/utils/child-process';
-import { getMingwInstallPath } from './env-installer';
 import { getPath } from '@/utils/path';
 import { PathKey } from 'common/configs/paths';
 import { appConf } from '@/utils/store';
@@ -21,6 +18,7 @@ import {
   setVscProfileDirConfig,
   setVscProfileNameConfig,
 } from '@/utils/vsc';
+import { parse, modify, applyEdits } from 'jsonc-parser';
 
 export async function isDirEmpty(dirPath: string) {
   const dirFiles = await fs.readdir(dirPath);
@@ -270,6 +268,28 @@ export async function injectMagic(options: {
   if (options.gccAlt) {
     appConf.set('gccAlternative', options.gccAlt);
   }
+  const findSnippetTemplateItemByLang = async (lang: string) => {
+    const snippetContent = await fs.readFile(
+      path.join(profileDirPath, `snippets`, `${lang}.json`),
+      { encoding: 'utf-8' },
+    );
+    const { str } = findSnippetTemplateItem(snippetContent, 'ac');
+    return str;
+  };
+  try {
+    const cInitTemplate = await findSnippetTemplateItemByLang('c');
+    const cppInitTemplate = await findSnippetTemplateItemByLang('cpp');
+    logMain.info('[magic] set init template config:', {
+      c: `str(${cInitTemplate.length})`,
+      cpp: `str(${cppInitTemplate.length})`,
+    });
+    appConf.set('initTemplate', {
+      c: cInitTemplate,
+      cpp: cppInitTemplate,
+    });
+  } catch (e) {
+    logMain.error('[magic] failed to set init template config:', e);
+  }
   await getEnvironments(true);
   logMain.info('[magic] magic injection completed, waiting for magic script to complete');
 
@@ -297,4 +317,73 @@ export async function injectMagic(options: {
   return {
     hasScriptError: !!scriptError,
   };
+}
+
+function findSnippetTemplateItem(content: string, prefix: string) {
+  const snippet = parse(content);
+  let snippetKey: string;
+  for (const [key, value] of Object.entries(snippet)) {
+    // @ts-ignore
+    const p = value.prefix;
+    if (p === prefix || (Array.isArray(p) && p.includes(prefix))) {
+      snippetKey = key;
+      break;
+    }
+  }
+  if (!snippetKey) {
+    throw Error('Existing init template snippet not found');
+  }
+  return {
+    snippetKey,
+    snippetValue: snippet[snippetKey],
+    str: snippet[snippetKey].body.join('\n') as string,
+  };
+}
+
+export async function getProfileLangSnippetContent(lang: string) {
+  const profileDir = getVscProfileDirConfig();
+  if (!profileDir) {
+    throw Error('Profile dir not set');
+  }
+  const profileDirPath = path.join(getUserProfilesDirPath(), profileDir);
+  const snippetPath = path.join(profileDirPath, `snippets`, `${lang}.json`);
+  const snippetContent = await fs.readFile(snippetPath, { encoding: 'utf-8' });
+  return snippetContent;
+}
+
+export async function patchProfileLangSnippet(lang: string, prefix: string, body: string[]) {
+  const snippetContent = await getProfileLangSnippetContent(lang);
+  const { snippetKey } = findSnippetTemplateItem(snippetContent, prefix);
+  const profileDirPath = path.join(getUserProfilesDirPath(), getVscProfileDirConfig());
+  const snippetPath = path.join(profileDirPath, `snippets`, `${lang}.json`);
+  const b = [...body];
+  if (b.length === 0) {
+    throw Error('Template is empty');
+  }
+  if (b[b.length - 1].trim()) {
+    b.push('');
+  }
+  const edits = modify(snippetContent, [snippetKey, 'body'], b, {
+    formattingOptions: { insertSpaces: true, tabSize: 2 },
+  });
+
+  const newSnippetContent = applyEdits(snippetContent, edits);
+  logMain.info(`[patchProfileLangSnippet] writing new snippet to ${snippetPath}`);
+  await fs.writeFile(snippetPath, newSnippetContent);
+}
+
+export async function getInitTemplateConfig(lang: string) {
+  return appConf.get('initTemplate')[lang];
+}
+
+export async function updateInitTemplateConfig(lang: string, template: string) {
+  await patchProfileLangSnippet(lang, 'ac', template.split('\n'));
+  appConf.set('initTemplate', {
+    ...appConf.get('initTemplate'),
+    [lang]: template.trim(),
+  });
+}
+
+export function resetCompletionState() {
+  appConf.set('completionState', undefined);
 }

@@ -1,6 +1,7 @@
 // const nodeExternals = require('webpack-node-externals');
 import slash from 'slash';
 import * as path from 'path';
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 export default {
   history: 'hash',
@@ -51,6 +52,54 @@ export default {
       fs: false,
       path: false,
     };
+
+    // 添加 Monaco Editor Webpack Plugin
+    config.plugin('monaco-editor').use(MonacoWebpackPlugin, [{
+      languages: ['c', 'cpp'],
+      features: ['coreCommands', 'find'],
+      publicPath: './'
+    }]);
+
+    // 处理 Monaco Editor 通过 include-loader 加载的文件 - 优先级更高
+    config.module
+      .rule('monaco-include')
+      .enforce('pre')
+      .test(/\.m?js$/)
+      .include
+      .add(/node_modules\/monaco-editor\/esm\/vs\/editor\/editor\.api\.js/)
+      .end()
+      .use('babel-loader')
+      .loader('babel-loader')
+      .options({
+        presets: [
+          ['@babel/preset-env', {
+            targets: {
+              browsers: ['last 2 versions', 'ie >= 11']
+            },
+            modules: 'commonjs'
+          }]
+        ]
+      });
+
+    // 处理 Monaco Editor 的 ES 模块 - 更精确的配置
+    config.module
+      .rule('monaco-js')
+      .test(/\.m?js$/)
+      .include
+      .add(/node_modules\/monaco-editor\/esm/)
+      .end()
+      .use('babel-loader')
+      .loader('babel-loader')
+      .options({
+        presets: [
+          ['@babel/preset-env', {
+            targets: {
+              browsers: ['last 2 versions', 'ie >= 11']
+            },
+            modules: 'commonjs'
+          }]
+        ]
+      });
 
     // 配置ts-loader忽略类型检查错误
     config.module
