@@ -5,7 +5,10 @@ import ActionBar from '@/components/ActionBar';
 import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
-import { getRequiredResourceIdsByEnvComponentKey } from '@/utils/env';
+import {
+  getNextConfigurationModulePage,
+  getRequiredResourceIdsByEnvComponentKey,
+} from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import sm from '@/utils/modules';
 import { windowProgress } from '@/utils/native';
@@ -277,7 +280,7 @@ class ExtensionsConfigurator extends React.Component<Props, State> {
         status: EnvComponentModuleConfigStatus.DONE,
       },
     });
-    router.push(pages.configurationModule.magic);
+    router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
   };
 
   renderStatusIcon = (status: ItemConfigStatus) => {

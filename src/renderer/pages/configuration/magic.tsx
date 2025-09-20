@@ -8,7 +8,7 @@ import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import windowsStep_1 from '@/assets/guides/magic/magic-win32-light-step-1.png';
 import macStep_1 from '@/assets/guides/magic/magic-darwin-light-step-1.png';
-import { isEnvInstalled, needInstallEnvComponent } from '@/utils/env';
+import { getNextConfigurationModulePage, isEnvInstalled, needInstallEnvComponent } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { getCurrentWindow } from '@electron/remote';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
@@ -115,7 +115,7 @@ class MagicConfigurator extends React.Component<Props, State> {
           status: EnvComponentModuleConfigStatus.DONE,
         },
       });
-      router.push(pages.board);
+      router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
     } else {
       msg.error('未检测到注入完成，请重试');
     }

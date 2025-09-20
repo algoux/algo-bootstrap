@@ -12,7 +12,7 @@ import vscodeIcon from '@/assets/icons/vscode.svg';
 import vscodeExtensionIcon from '@/assets/icons/vscode-extension.svg';
 import languageIcon from '@/assets/icons/language.svg';
 import EnvCard from '@/components/EnvCard';
-import { getNextConfigurationModulePage, getRequiredResourceIdsByEnvConfig } from '@/utils/env';
+import { getNextConfigurationModuleItem, getRequiredResourceIdsByEnvConfig } from '@/utils/env';
 import { logRenderer } from '@/utils/logger';
 import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
@@ -29,6 +29,7 @@ import { EnvComponentAction, IEnvComponentUIOption } from '@/typings/env';
 import { cloneDeep } from 'lodash';
 import api from 'common/configs/apis';
 import { IIpcDownloadRequest } from 'common/typings/ipc';
+import pages from '@/configs/pages';
 
 enum ResourceStatus {
   PENDING = 'PENDING',
@@ -770,8 +771,13 @@ class Configuration extends React.Component<Props, State> {
       payload: {},
     });
 
-    const nextRoute = getNextConfigurationModulePage(this.props.moduleConfigStatus);
-    router.push(nextRoute);
+    const next = getNextConfigurationModuleItem(this.props.moduleConfigStatus);
+    if (next) {
+      router.push(pages.configurationModule[next]);
+    } else {
+      sm.appService.setCompletionState();
+      router.push(pages.board);
+    }
   };
 
   renderDownloadInfo = () => {

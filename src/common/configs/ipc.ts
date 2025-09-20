@@ -1,5 +1,4 @@
 enum IPCKeys {
-  getResPack = 'getResPack',
   download = 'download',
   downloadProgress = 'downloadProgress',
   downloadTotalProgress = 'downloadTotalProgress',
@@ -10,6 +9,8 @@ enum IPCKeys {
   terminalConnect = 'terminalConnect',
   terminalOutput = 'terminalOutput',
   terminalClosed = 'terminalClosed',
+  // Reset config
+  showResetConfigDialog = 'showResetConfigDialog',
 }
 
 export default IPCKeys;

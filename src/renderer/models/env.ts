@@ -81,6 +81,15 @@ export default {
     ) {
       state.moduleConfigStatus[module] = status;
     },
+    resetAllModuleConfigStatus(state: CurrentState, { payload: {} }: DvaAction<{}>) {
+      state.moduleConfigStatus = {
+        [EnvComponentModule.c_cpp]: EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.python]: EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.vscode]: EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.extensions]: EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.magic]: EnvComponentModuleConfigStatus.PENDING,
+      };
+    },
   },
   effects: {
     *getEnvironments(
@@ -104,6 +113,7 @@ export default {
       { payload }: DvaAction<{}>,
       { call, put, select }: DvaSagaEffect,
     ) {
+      const env: IEnvironments = yield select((state: IState) => state.env.environments);
       const config: EnvComponentConfig = yield select((state: IState) => state.env.config);
       const cppConfig = config[EnvComponent.c_cpp];
       const pythonConfig = config[EnvComponent.python];
@@ -137,7 +147,9 @@ export default {
           !needProcess(languagePackagesConfig.action)
             ? EnvComponentModuleConfigStatus.DONE
             : EnvComponentModuleConfigStatus.PENDING,
-        [EnvComponentModule.magic]: EnvComponentModuleConfigStatus.PENDING,
+        [EnvComponentModule.magic]: env.vscodeProfile.installed
+          ? EnvComponentModuleConfigStatus.DONE
+          : EnvComponentModuleConfigStatus.PENDING,
       };
 
       yield put({
@@ -252,7 +264,7 @@ export default {
         type: 'getEnvironments',
         payload: {},
       });
-      yield take('getEnvironments/@@end')
+      yield take('getEnvironments/@@end');
       return res;
     },
   },

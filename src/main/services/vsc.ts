@@ -19,6 +19,7 @@ import {
   setVscProfileNameConfig,
 } from '@/utils/vsc';
 import { parse, modify, applyEdits } from 'jsonc-parser';
+import * as appService from './app';
 
 export async function isDirEmpty(dirPath: string) {
   const dirFiles = await fs.readdir(dirPath);
@@ -309,10 +310,7 @@ export async function injectMagic(options: {
   }, 20 * 1000);
 
   // 完成
-  appConf.set('completionState', {
-    timestamp: Date.now(),
-    version: app.getVersion(),
-  });
+  appService.setCompletionState();
 
   return {
     hasScriptError: !!scriptError,
@@ -384,6 +382,20 @@ export async function updateInitTemplateConfig(lang: string, template: string) {
   });
 }
 
-export function resetCompletionState() {
-  appConf.set('completionState', undefined);
+export function resetVscProfileConfig() {
+  logMain.info('[resetVscProfileConfig] reset vsc profile config, before:', {
+    vscProfileDir: getVscProfileDirConfig(),
+    vscProfileName: getVscProfileNameConfig(),
+  });
+  appConf.delete('vscProfileDir');
+  appConf.delete('vscProfileName');
+  appConf.set('initTemplate', {});
+}
+
+export async function resetConfiguration(options: { reuseVscProfile?: boolean } = {}) {
+  if (!options.reuseVscProfile) {
+    resetVscProfileConfig();
+  }
+  appConf.delete('gccAlternative');
+  appService.resetCompletionState();
 }

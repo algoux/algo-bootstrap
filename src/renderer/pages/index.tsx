@@ -25,13 +25,14 @@ class Index extends React.Component<Props, State> {
     const _envStart = performance.now();
     const environments = await this.props.dispatch({
       type: 'env/getEnvironments',
-      payload: {},
+      payload: {
+        force: true,
+      },
     });
     const _envEnd = performance.now();
     logRenderer.info(`environments fetched in ${_envEnd - _envStart}ms.`);
 
-
-    const completionState = sm.appConf.get('completionState')
+    const completionState = sm.appService.getCompletionState();
     logRenderer.info('completionState', completionState);
     if (completionState) {
       this.props.dispatch({

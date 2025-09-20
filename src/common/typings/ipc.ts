@@ -108,3 +108,11 @@ export interface IIpcTerminalClosedInput {
 }
 
 export type IIpcTerminalClosedOutput = void;
+
+// showResetConfigDialog
+export type IIpcShowResetConfigDialogInput = void;
+
+export type IIpcShowResetConfigDialogOutput = {
+  confirmed: boolean;
+  reuseVscProfile: boolean;
+};

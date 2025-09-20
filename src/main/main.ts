@@ -5,7 +5,7 @@ import * as url from 'url';
 import { ipcMain as ipc } from 'electron-better-ipc';
 import IPCKeys from 'common/configs/ipc';
 import _modules from '@/modules';
-import { checkRemainingDiskSpace, getEnvironments } from '@/services/env-checker';
+import { checkRemainingDiskSpace } from '@/services/env-checker';
 import { logMain, log } from '@/utils/logger';
 import { currentPlatformArch, isMac, isPlatformArchIsSupported } from '@/utils/platform';
 import constants from 'common/configs/constants';
@@ -420,15 +420,6 @@ app.on('quit', () => {
   logMain.info('[app.quit]');
 });
 
-ipc.answerRenderer(IPCKeys.getResPack, async (param) => {
-  // const ret = await global.modules.req.get<{ apis: string[], help: string }>('https://acm.sdut.edu.cn/onlinejudge2/index.php/API_ng');
-  // console.log('in main ret', ret);
-  // return param + ' haha' + ret.data!.help;
-  // console.log('modules', global.modules);
-  // logMain.info('app.getLocale()', app.getLocale());
-  return getEnvironments(true);
-});
-
 const dlManager = new ElectronDownloadManager();
 
 ipc.answerRenderer(IPCKeys.download, async (options, bw) => {
@@ -607,6 +598,40 @@ ipc.answerRenderer(IPCKeys.download, async (options, bw) => {
     downloadTaskId: curDownloadTaskId,
     downloadIds,
   };
+});
+
+ipc.answerRenderer(IPCKeys.showResetConfigDialog, async (_, bw) => {
+  const options: Electron.MessageBoxOptions = {
+    type: 'warning' as const,
+    buttons: ['确认', '取消'],
+    defaultId: 1,
+    cancelId: 1,
+    message: '开始重新配置',
+    detail: '这将重置状态并返回准备阶段。',
+    checkboxLabel: '复用 VS Code 配置和代码模板',
+    checkboxChecked: false,
+  };
+
+  const window = bw || mainWindow;
+  if (!window) {
+    throw new Error('No window available for dialog');
+  }
+
+  try {
+    const result = await dialog.showMessageBox(window, options);
+    logMain.info('[resetConfigDialog]', {
+      response: result.response,
+      checkboxChecked: result.checkboxChecked,
+    });
+
+    return {
+      confirmed: result.response === 0,
+      reuseVscProfile: result.checkboxChecked,
+    };
+  } catch (error) {
+    logMain.error('[resetConfigDialog]', error);
+    throw error;
+  }
 });
 
 async function checkUpdate(auto = false) {

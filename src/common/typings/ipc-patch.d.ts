@@ -19,16 +19,14 @@ import {
   IIpcTerminalOutputOutput,
   IIpcTerminalClosedInput,
   IIpcTerminalClosedOutput,
+  IIpcShowResetConfigDialogInput,
+  IIpcShowResetConfigDialogOutput,
 } from './ipc';
 
 type IPCKeys = typeof import('common/configs/ipc').default;
 
 declare module 'electron-better-ipc' {
   export interface MainProcessIpc extends IpcMain {
-    answerRenderer(
-      channel: IPCKeys['getResPack'],
-      cb: (data: string, bw: Electron.BrowserWindow) => Promise<IEnvironments>,
-    ): () => void;
     answerRenderer(
       channel: IPCKeys['download'],
       cb: (data: IIpcDownloadInput, bw: Electron.BrowserWindow) => Promise<IIpcDownloadOutput>,
@@ -39,6 +37,13 @@ declare module 'electron-better-ipc' {
         data: IIpcTerminalConnectInput,
         bw: Electron.BrowserWindow,
       ) => Promise<IIpcTerminalConnectOutput>,
+    ): () => void;
+    answerRenderer(
+      channel: IPCKeys['showResetConfigDialog'],
+      cb: (
+        data: IIpcShowResetConfigDialogInput,
+        bw: Electron.BrowserWindow,
+      ) => Promise<IIpcShowResetConfigDialogOutput>,
     ): () => void;
 
     callRenderer(
@@ -79,12 +84,15 @@ declare module 'electron-better-ipc' {
   }
 
   export interface RendererProcessIpc extends IpcRenderer {
-    callMain(channel: IPCKeys['getResPack'], data: string): Promise<IEnvironments>;
     callMain(channel: IPCKeys['download'], data: IIpcDownloadInput): Promise<IIpcDownloadOutput>;
     callMain(
       channel: IPCKeys['terminalConnect'],
       data: IIpcTerminalConnectInput,
     ): Promise<IIpcTerminalConnectOutput>;
+    callMain(
+      channel: IPCKeys['showResetConfigDialog'],
+      data: IIpcShowResetConfigDialogInput,
+    ): Promise<IIpcShowResetConfigDialogOutput>;
 
     answerMain(
       channel: IPCKeys['downloadProgress'],

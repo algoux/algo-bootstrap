@@ -15,6 +15,10 @@ import c_cppIcon from '@/assets/icons/c_cpp.png';
 import pythonIcon from '@/assets/icons/python.svg';
 import vscodeIcon from '@/assets/icons/vscode.svg';
 import { formatMessage } from 'umi-plugin-locale';
+import { ipcRenderer as ipc } from 'electron-better-ipc';
+import IPCKeys from 'common/configs/ipc';
+import pages from '@/configs/pages';
+import router from 'umi/router';
 
 export interface IBoardProps {}
 
@@ -144,11 +148,28 @@ class Board extends React.Component<Props, State> {
     });
   };
 
+  resetConfig = async () => {
+    try {
+      const result = await ipc.callMain(IPCKeys.showResetConfigDialog);
+      if (result.confirmed) {
+        await sm.vsc.resetConfiguration({ reuseVscProfile: result.reuseVscProfile });
+        this.props.dispatch({
+          type: 'env/resetAllModuleConfigStatus',
+          payload: {},
+        });
+        router.push(pages.index);
+      }
+    } catch (error) {
+      logRenderer.error('[resetConfig]', error);
+      msg.error('重置失败');
+    }
+  };
+
   renderEnvPanel = () => {
     const { environments } = this.props;
 
     return (
-      <div className="--pb-xl">
+      <div className="--pb-md">
         <Row gutter={8}>
           <Col span={8}>
             <EnvLabel
@@ -188,7 +209,9 @@ class Board extends React.Component<Props, State> {
       <PageAnimation>
         <div className="container no-action-bar">
           <div className="content-block --pb-xl">
-            <h1 className="top-title">开始使用</h1>
+            <h1 className="top-title" style={{ marginBottom: '20px' }}>
+              Enjoy Coding.
+            </h1>
             {this.renderEnvPanel()}
             <h2 className="secondary-title">项目</h2>
             <p className="--mb-xs">
@@ -251,13 +274,13 @@ class Board extends React.Component<Props, State> {
                 </Card>
               </Col>
               <Col span={12}>
-                <Card hoverable className="board-action-card">
+                <Card hoverable className="board-action-card" onClick={this.resetConfig}>
                   <div className="board-action-card-icon">
                     <Icon type="sync" />
                   </div>
                   <div className="board-action-card-content">
-                    <div className="board-action-card-title">重新开始配置</div>
-                    <div className="board-action-card-desc">重置配置状态并回溯</div>
+                    <div className="board-action-card-title">重新配置</div>
+                    <div className="board-action-card-desc">修改组件清单并再次配置</div>
                   </div>
                 </Card>
               </Col>
