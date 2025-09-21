@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -38,7 +38,30 @@
     "directories": {
       "output": "release"
     },
-    "asar": true
+    "asar": true,
+    "extraResources": [
+      {
+        "from": "dist/bin/abc",
+        "to": "app/bin/abc",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "dist/bin/abc.bat",
+        "to": "app/bin/abc.bat",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "dist/bin/abc.js",
+        "to": "app/bin/abc.js",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   },
   "scripts": {
     "postinstall": "electron-rebuild",
@@ -53,7 +76,8 @@
     "build:renderer-analyze": "cross-env ANALYZE=1 NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi build",
     "build:main-dev": "cross-env NODE_ENV=development webpack --config ./build/webpack.main.dev.config.js",
     "build:main-prod": "cross-env NODE_ENV=production webpack --config ./build/webpack.main.prod.config.js",
-    "build": "npm run build:renderer && npm run build:main",
+    "build:cli": "node scripts/build-cli.js",
+    "build": "npm run build:renderer && npm run build:main && npm run build:cli",
     "pack:dir": "electron-builder --dir",
     "pack:mac": "electron-builder --mac",
     "pack:win": "electron-builder --win",
@@ -76,13 +100,14 @@
     "axios": "^0.30.0",
     "check-disk-space": "^3.4.0",
     "chokidar": "^4.0.3",
+    "commander": "^14.0.1",
     "compare-versions": "^6.1.1",
     "conf": "^13.1.0",
     "ejs": "^3.1.10",
     "electron-better-ipc": "^2.0.1",
     "electron-dl": "^4.0.0",
     "electron-dl-manager": "^4.2.0",
-    "electron-log": "^5.4.2",
+    "electron-log": "^5.4.3",
     "electron-store": "^8.2.0",
     "filesize": "^11.0.2",
     "fs-extra": "^9.1.0",

@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from '@/utils/dva';
-import { List, Icon, Row, Col, Card } from 'antd';
+import { List, Icon, Row, Col, Card, Spin } from 'antd';
 import ExternalLink from '@/components/ExternalLink';
 import sm from '@/utils/modules';
 import { dialog, getCurrentWindow } from '@electron/remote';
@@ -19,11 +19,13 @@ import { ipcRenderer as ipc } from 'electron-better-ipc';
 import IPCKeys from 'common/configs/ipc';
 import pages from '@/configs/pages';
 import router from 'umi/router';
+import Loading from '@/components/Loading';
 
 export interface IBoardProps {}
 
 interface State {
   codeTemplateModalVisible: boolean;
+  installBinLoading: boolean;
 }
 
 type Props = IBoardProps & ReturnType<typeof mapStateToProps> & DispatchProps;
@@ -33,6 +35,7 @@ class Board extends React.Component<Props, State> {
     super(props);
     this.state = {
       codeTemplateModalVisible: false,
+      installBinLoading: false,
     };
   }
 
@@ -146,6 +149,29 @@ class Board extends React.Component<Props, State> {
     this.setState({
       codeTemplateModalVisible: false,
     });
+  };
+
+  installBin = async () => {
+    if (this.state.installBinLoading) {
+      return;
+    }
+    this.setState({
+      installBinLoading: true,
+    });
+    try {
+      await sm.appService.installBin();
+      this.setState({
+        installBinLoading: false,
+      });
+      msg.success('添加完成', '你现在可以在终端里使用 abc 命令了');
+    } catch (e) {
+      logRenderer.error('[installBin]', e);
+      msg.error('添加失败');
+    } finally {
+      this.setState({
+        installBinLoading: false,
+      });
+    }
   };
 
   resetConfig = async () => {
@@ -263,12 +289,15 @@ class Board extends React.Component<Props, State> {
                 </Card>
               </Col>
               <Col span={12}>
-                <Card hoverable className="board-action-card">
+                <Card hoverable className="board-action-card" onClick={this.installBin}>
                   <div className="board-action-card-icon">
                     <Icon type="code" />
                   </div>
                   <div className="board-action-card-content">
-                    <div className="board-action-card-title">添加快捷命令</div>
+                    <div className="board-action-card-title">
+                      添加快捷命令
+                      {this.state.installBinLoading ? <Loading className="--ml-md" delay={500} /> : null}
+                    </div>
                     <div className="board-action-card-desc">安装 abc 命令行工具</div>
                   </div>
                 </Card>

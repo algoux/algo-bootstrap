@@ -98,3 +98,14 @@ export async function watchTopLevelDirCreation(
     };
   }
 }
+
+export async function ensureExecutable(filePath: string) {
+  if (process.platform === 'win32') {
+    return;
+  }
+  const stat = await fs.stat(filePath);
+  if (stat.isFile()) {
+    const newMode = stat.mode | 0o111;
+    stat.mode !== newMode && (await fs.chmod(filePath, newMode));
+  }
+}

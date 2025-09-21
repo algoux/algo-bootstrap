@@ -342,38 +342,6 @@ export async function isVsixesInstalled(vsixIds: SupportedVSIXId[]) {
 //   return installed;
 // }
 
-export async function getWindowsSystemPath() {
-  try {
-    const { stdout, stderr } = await spawn('[getWindowsSystemPath]', 'reg', [
-      'query',
-      `"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"`,
-      '/v',
-      'PATH',
-    ]);
-    return matchOne(
-      /PATH    REG_\S*SZ    ([\S ]+)/,
-      parseStringFromProcessOutput(stdout || stderr),
-    );
-  } catch (e) {}
-  return null;
-}
-
-export async function getWindowsUserPath() {
-  try {
-    const { stdout, stderr } = await spawn('[getWindowsUserPath]', 'reg', [
-      'query',
-      'HKEY_CURRENT_USER\\Environment',
-      '/v',
-      'PATH',
-    ]);
-    return matchOne(
-      /PATH    REG_\S*SZ    ([\S ]+)/,
-      parseStringFromProcessOutput(stdout || stderr),
-    );
-  } catch (e) {}
-  return null;
-}
-
 export function checkRemainingDiskSpace(checkPath?: string) {
   if (isWindows) {
     return checkDiskSpace(checkPath || 'C:');

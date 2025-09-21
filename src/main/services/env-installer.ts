@@ -3,70 +3,22 @@ import os from 'os';
 import path from 'path';
 import { isMac, isWindows } from '@/utils/platform';
 import { spawn, execFile } from '@/utils/child-process';
-import {
-  isEnvInstalled,
-  isVsixesInstalled,
-  getEnvironment,
-  getWindowsUserPath,
-  getWindowsSystemPath,
-  getEnvironments,
-} from './env-checker';
+import { isEnvInstalled, isVsixesInstalled, getEnvironment, getEnvironments } from './env-checker';
 import { extractAll, getTopDirName, getUncompressedSize } from '@/utils/extract';
 import { app } from 'electron';
-import { escapeRegExp } from 'common/utils/regexp';
 import { logMain } from '@/utils/logger';
 import getFolderSize from 'get-folder-size';
 import { TerminalManager } from '@/utils/terminal';
 import { v4 as uuidv4 } from 'uuid';
 import { getPath } from '@/utils/path';
 import { PathKey } from 'common/configs/paths';
+import { ensureExecutable } from '@/utils/fs';
+import { appendToWindowsUserPath, refreshWindowsPath } from '@/utils/bin';
 
 const RESOURCES_DOWNLOAD_PATH = getPath(PathKey.resourcesDownload);
 const RESOURCES_TEMP_PATH = getPath(PathKey.resourcesTemp);
 const USERLIB_SRC_PATH = getPath(PathKey.staticUserlibSrc);
 const USERLIB_PATH = path.join(os.homedir(), '.algo-bootstrap');
-
-export async function appendToWindowsUserPath(PATH: string) {
-  logMain.info('[appendToWindowsUserPath] PATH to append:', PATH);
-  const userPath = (await getWindowsUserPath()) ?? '%PATH%';
-  // TODO 防止重复添加 path。已添加则返回 false
-  await spawn('[appendToWindowsUserPath]', 'setx', [
-    'PATH',
-    `"${userPath}${!userPath || userPath.endsWith(';') ? '' : ';'}${PATH}"`,
-  ]);
-  return true;
-}
-
-export async function refreshWindowsPath() {
-  if (!isWindows) {
-    return;
-  }
-  const systemPath = await getWindowsSystemPath();
-  const userPath = await getWindowsUserPath();
-  if (systemPath === null || userPath === null) {
-    // 目前仅在 gcc、python、cpplint、vscode 安装完毕后用到刷新 PATH
-    // 而环境一旦安装成功，user PATH 一定不为空，且 system PATH 始终不为空
-    // 因此若有 system/user PATH 获取失败，要么是 reg 命令挂掉，要么是确实没有 PATH 这个环境变量。后者已经在上文分析，可排除
-    // 这种情况可认为是意外导致 reg 挂掉，为防止刷新环境错误，这里抛错且不更新 PATH
-    // TODO 考虑部分环境用户已配置在系统变量的情况
-    logMain.error('[refreshWindowsPath] system or user path is null');
-    throw Error('system or user path is null');
-  }
-  const newPath = [
-    ...systemPath.split(';').filter((p) => !!p),
-    ...userPath.split(';').filter((p) => !!p),
-  ].join(';');
-  // 将 PATH 中的变量替换为实际值
-  let parsedPath = newPath.replace(/%(\S)+?%/g, (match) => match.toUpperCase());
-  for (const key of Object.keys(process.env)) {
-    parsedPath = parsedPath.replace(
-      new RegExp(`%${escapeRegExp(key.toUpperCase())}%`, 'g'),
-      process.env[key]!,
-    );
-  }
-  logMain.info('[refreshWindowsPath]', parsedPath);
-  process.env.PATH = parsedPath;
-}
 
 export async function installXCodeCLT() {
   if (isMac) {
@@ -268,11 +220,7 @@ export async function installUserLib(options: { force?: boolean } = {}) {
   const binFiles = await fs.readdir(binPath);
   for (const file of binFiles) {
     const filePath = path.join(binPath, file);
-    const stat = await fs.stat(filePath);
-    if (stat.isFile()) {
-      const newMode = stat.mode | 0o111;
-      stat.mode !== newMode && (await fs.chmod(filePath, newMode));
-    }
+    await ensureExecutable(filePath);
   }
   await fs.writeJson(iJsonPath, { version: currentVersion }, { spaces: 2 });
 }

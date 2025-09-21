@@ -24,6 +24,7 @@ const pathMap: Record<PathKey, string | (() => string)> = {
   [PathKey.log]: path.dirname(log.transports.file.getFile().path),
   [PathKey.resourcesDownload]: path.join(app.getPath('userData'), paths.resourcesDownload),
   [PathKey.resourcesTemp]: path.join(os.tmpdir(), 'ab-resources-temp'),
+  [PathKey.bin]: path.join(process.resourcesPath, 'app', 'bin'),
   [PathKey.staticUserlibSrc]: path.join(__static, paths.userlibSrc),
   [PathKey.staticMagicWelcomeConfig]: path.join(__static, paths.magicWelcomeConfig),
   [PathKey.staticTmpl]: path.join(__static, paths.tmpl),

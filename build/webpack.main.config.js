@@ -43,6 +43,7 @@ module.exports = merge.smart(baseConfig, {
     'node:crypto': 'commonjs crypto',
     'node:events': 'commonjs events',
     'node:os': 'commonjs os',
+    'jsonc-parser': 'commonjs jsonc-parser',
   },
   module: {
     // rules: [{

@@ -384,7 +384,7 @@ export async function updateInitTemplateConfig(lang: string, template: string) {
 
 export function resetVscProfileConfig() {
   logMain.info('[resetVscProfileConfig] reset vsc profile config, before:', {
-    vscProfileDir: getVscProfileDirConfig(),
+    vscProfileDir: path.join(getUserProfilesDirPath(), getVscProfileDirConfig()),
     vscProfileName: getVscProfileNameConfig(),
   });
   appConf.delete('vscProfileDir');

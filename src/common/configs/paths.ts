@@ -3,6 +3,7 @@ export enum PathKey {
   log = 'log',
   resourcesDownload = 'resourcesDownload',
   resourcesTemp = 'resourcesTemp',
+  bin = 'bin',
   staticUserlibSrc = 'staticUserlibSrc',
   staticMagicWelcomeConfig = 'staticMagicWelcomeConfig',
   staticTmpl = 'staticTmpl',
