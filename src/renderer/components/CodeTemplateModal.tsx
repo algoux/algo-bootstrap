@@ -139,7 +139,7 @@ class CodeTemplateModal extends Component<CodeTemplateModalProps, CodeTemplateMo
         onCancel={this.handleClose}
         width={620}
         maskClosable={false}
-        style={{ left: 100, top: 100 }}
+        style={{ left: 100, top: sm.platform.isMac ? 100 : 40 }}
         footer={[
           <Button key="close" onClick={this.handleClose}>
             关闭

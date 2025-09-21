@@ -11,6 +11,15 @@ function success(message: string, detail?: string) {
   });
 }
 
+function warn(message: string, detail?: string) {
+  dialog.showMessageBox(getCurrentWindow(), {
+    buttons: [],
+    type: 'warning',
+    message,
+    detail,
+  });
+}
+
 function error(message: string, detail?: string) {
   dialog.showMessageBox(getCurrentWindow(), {
     buttons: [],
@@ -40,6 +49,7 @@ function confirm(message: string, detail?: string) {
 
 const msg = {
   success,
+  warn,
   error,
   confirm,
 };

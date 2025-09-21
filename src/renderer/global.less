@@ -318,13 +318,24 @@ p:last-of-type {
   }
 }
 
-.list-hover-action {
-  .ant-list-item-action {
-    visibility: hidden;
+.codespaces-list {
+  max-height: 60px;
+
+  .codespaces-list-item {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 20px;
+    height: 20px;
   }
 
-  &:hover .ant-list-item-action {
-    visibility: visible;
+  .codespaces-list-hover-action {
+    .ant-list-item-action {
+      visibility: hidden;
+    }
+
+    &:hover .ant-list-item-action {
+      visibility: visible;
+    }
   }
 }
 
@@ -336,7 +347,7 @@ p:last-of-type {
   }
 
   .ant-card-body {
-    padding: 12px 16px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
 

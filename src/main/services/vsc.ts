@@ -60,6 +60,9 @@ export async function genProjectFiles(projectPath: string) {
 }
 
 export async function openProject(projectPath: string) {
+  if (!(await fs.pathExists(projectPath))) {
+    return false;
+  }
   const vscode = await getEnvironment('vscode');
   if (!vscode.installed) {
     throw Error('VS Code not installed');
@@ -69,6 +72,7 @@ export async function openProject(projectPath: string) {
     `"${projectPath}"`,
     profileName ? `--profile "${profileName}"` : '',
   ]);
+  return true;
 }
 
 export async function validateVscProfileDirConfig() {

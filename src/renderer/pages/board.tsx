@@ -49,7 +49,7 @@ class Board extends React.Component<Props, State> {
   initializeProject = async () => {
     const res = await dialog.showOpenDialog(getCurrentWindow(), {
       properties: ['openDirectory', 'createDirectory'],
-      message: '选择一个文件夹作为项目目录，你也可以新建一个空文件夹',
+      message: '选择一个文件夹作为代码存放目录',
     });
     const projectPath = res.filePaths ? res.filePaths[0] : '';
     if (projectPath) {
@@ -64,7 +64,7 @@ class Board extends React.Component<Props, State> {
         let init = false;
         if (await sm.vsc.isDirEmpty(projectPath)) {
           init = true;
-        } else if (await msg.confirm('选定目录中已存在文件，仍要初始化这个项目？')) {
+        } else if (await msg.confirm('选定文件夹中已存在文件，仍要初始化并打开？')) {
           init = true;
         }
         if (init) {
@@ -77,7 +77,7 @@ class Board extends React.Component<Props, State> {
         return projectPath;
       } catch (e) {
         logRenderer.error('[initializeProject]', e);
-        msg.error('初始化项目失败');
+        msg.error('初始化文件夹失败');
       }
     }
     return null;
@@ -86,10 +86,20 @@ class Board extends React.Component<Props, State> {
   openTargetProject = async (projectPath: string) => {
     try {
       logRenderer.info('[openProject]', projectPath);
-      projectPath && (await sm.vsc.openProject(projectPath));
+      const pathOpened = await sm.vsc.openProject(projectPath);
+      if (!pathOpened) {
+        msg.warn('文件夹不存在', '已从列表中移除这个记录，因为它可能已被删除。');
+        this.props.dispatch({
+          type: 'projects/deleteProject',
+          payload: {
+            projectId: projectPath, // lazy work, cuz id == path
+          },
+        });
+        return;
+      }
     } catch (e) {
       logRenderer.info('[openProject]', e);
-      msg.error('打开项目失败');
+      msg.error('打开文件夹失败');
     }
   };
 
@@ -128,7 +138,7 @@ class Board extends React.Component<Props, State> {
   };
 
   deleteProject = async (projectId: string) => {
-    if (await msg.confirm('删除这个项目？', '这个操作仅将项目从列表中移除，不会删除文件')) {
+    if (await msg.confirm('删除这个文件夹？', '这个操作仅将其从列表中移除，不会删除文件夹内的文件')) {
       sm.track.event('use', 'deleteProject');
       this.props.dispatch({
         type: 'projects/deleteProject',
@@ -195,7 +205,7 @@ class Board extends React.Component<Props, State> {
     const { environments } = this.props;
 
     return (
-      <div className="--pb-md">
+      <div className="--pb-sm">
         <Row gutter={8}>
           <Col span={8}>
             <EnvLabel
@@ -235,26 +245,25 @@ class Board extends React.Component<Props, State> {
       <PageAnimation>
         <div className="container no-action-bar">
           <div className="content-block --pb-xl">
-            <h1 className="top-title" style={{ marginBottom: '20px' }}>
+            <h1 className="top-title" style={{ marginBottom: '16px' }}>
               Enjoy Coding.
             </h1>
             {this.renderEnvPanel()}
-            <h2 className="secondary-title">项目</h2>
+            <h2 className="secondary-title">码放处</h2>
             <p className="--mb-xs">
-              <a onClick={this.newProject}>新建或初始化旧项目...</a>
-            </p>
-            <p className="--mb-xs">
-              <a onClick={this.openProject}>打开项目...</a>
+              <a onClick={this.newProject}>新建或打开一个代码存放文件夹...</a>
             </p>
             <List
               size="small"
               split={false}
               locale={{ emptyText: '' }}
+              className="codespaces-list"
+              // @ts-ignore
+              style={{ overflowY: projects.length > 3 ? 'auto' : 'hidden' }}
               dataSource={[...projects].reverse()}
               renderItem={(project: IProject) => (
                 <List.Item
-                  className="list-hover-action"
-                  style={{ paddingTop: '2px', paddingBottom: '0' }}
+                  className="codespaces-list-item codespaces-list-hover-action"
                   actions={[
                     <a onClick={() => this.deleteProject(project.id)}>
                       <Icon type="delete" />
@@ -276,7 +285,7 @@ class Board extends React.Component<Props, State> {
             </p>
 
             <h2 className="secondary-title">更多功能</h2>
-            <Row gutter={16}>
+            <Row gutter={12}>
               <Col span={12}>
                 <Card hoverable className="board-action-card" onClick={this.openCodeTemplateModal}>
                   <div className="board-action-card-icon">
