@@ -38,7 +38,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
         shell: bash
         run: |
