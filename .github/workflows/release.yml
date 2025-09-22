@@ -46,7 +46,7 @@ jobs:
       - name: List build artifacts
         run: |
           echo "Build artifacts:"
-          if [[ "${{ matrix.os }}" == *"windows"* ]]; then
+          if echo "${{ matrix.os }}" | grep -q "windows"; then
             dir release\ /s 2>nul || echo "No release directory found"
             dir release\*.exe /s 2>nul || echo "No .exe files found"
             dir release\*.zip /s 2>nul || echo "No .zip files found"
