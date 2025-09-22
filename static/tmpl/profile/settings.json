@@ -1,5 +1,6 @@
 {
   "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "chat.disableAIFeatures": true,
   "files.autoGuessEncoding": true,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
