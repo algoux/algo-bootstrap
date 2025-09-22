@@ -103,6 +103,7 @@ class PythonConfigurator extends React.Component<Props, State> {
       });
       router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
     } else {
+      // TODO 允许跳过 python 安装，因为 Windows 可能有 WindowsApps 翔，无法找到正确的 python 安装路径
       msg.error('未检测到配置完成，请重试');
     }
   };

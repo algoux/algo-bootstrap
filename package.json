@@ -24,17 +24,13 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ]
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
-    },
-    "portable": {
-      "artifactName": "${productName} Portable ${version}-${arch}.${ext}"
     },
     "directories": {
       "output": "release"

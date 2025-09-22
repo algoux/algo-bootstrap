@@ -173,7 +173,7 @@ class Board extends React.Component<Props, State> {
       this.setState({
         installBinLoading: false,
       });
-      msg.success('添加完成', '你现在可以在终端里使用 abc 命令了');
+      msg.success('添加完成', '重启终端会话即可使用 abc 命令');
     } catch (e) {
       logRenderer.error('[installBin]', e);
       msg.error('添加失败');
