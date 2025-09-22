@@ -48,9 +48,9 @@ jobs:
         run: |
           echo "Build artifacts:"
           if echo "${{ matrix.os }}" | grep -qi "windows"; then
-            cmd.exe /c "if exist release (dir release /s) else (echo No release directory found)"
-            cmd.exe /c "if exist release\*.exe (dir release\*.exe /s) else (echo No .exe files found)"
-            cmd.exe /c "if exist release\*.zip (dir release\*.zip /s) else (echo No .zip files found)"
+            powershell -Command "if (-Not (Test-Path 'release')) { echo 'No release directory found' }"
+            powershell -Command "if (Test-Path 'release\\*.exe') { Get-ChildItem 'release\\*.exe' -Recurse } else { echo 'No .exe files found' }"
+            powershell -Command "if (Test-Path 'release\\*.zip') { Get-ChildItem 'release\\*.zip' -Recurse } else { echo 'No .zip files found' }"
           else
             ls -la release/ || echo "No release directory found"
             find release/ -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" \) || echo "No build artifacts found"
