@@ -44,16 +44,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: List build artifacts
+        shell: bash
         run: |
           echo "Build artifacts:"
-          echo "${{ matrix.os }}" | grep -q "windows" && (
-            dir release\ /s 2>nul || echo "No release directory found"
-            dir release\*.exe /s 2>nul || echo "No .exe files found"
-            dir release\*.zip /s 2>nul || echo "No .zip files found"
-          ) || (
+          if echo "${{ matrix.os }}" | grep -qi "windows"; then
+            cmd.exe /c "if exist release (dir release /s) else (echo No release directory found)"
+            cmd.exe /c "if exist release\*.exe (dir release\*.exe /s) else (echo No .exe files found)"
+            cmd.exe /c "if exist release\*.zip (dir release\*.zip /s) else (echo No .zip files found)"
+          else
             ls -la release/ || echo "No release directory found"
             find release/ -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" \) || echo "No build artifacts found"
-          )
+          fi
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
