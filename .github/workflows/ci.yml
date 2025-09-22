@@ -21,7 +21,7 @@ jobs:
           - os: windows-latest
             platform: win32
             arch: x64
-          - os: windows-2022
+          - os: windows-11-arm
             platform: win32
             arch: arm64
     steps:
