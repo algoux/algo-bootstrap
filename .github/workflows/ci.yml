@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-15-intel
             platform: darwin
             arch: x64
           - os: macos-latest
@@ -21,7 +21,7 @@ jobs:
           - os: windows-latest
             platform: win32
             arch: x64
-          - os: windows-latest
+          - os: windows-2022
             platform: win32
             arch: arm64
     steps:

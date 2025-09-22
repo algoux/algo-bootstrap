@@ -84,7 +84,13 @@ export default {
   define: {
     'process.env.NODE_ENV': process.env.NODE_ENV,
   },
-  extraBabelIncludes: [/monaco-editor/, /@xterm\/xterm/, /electron-log/],
+  extraBabelIncludes: [/monaco-editor/, /xterm/, /electron-log/],
+  extraBabelPlugins: [
+    '@babel/plugin-transform-optional-chaining',
+    '@babel/plugin-transform-nullish-coalescing-operator',
+    '@babel/plugin-transform-class-properties',
+    '@babel/plugin-transform-logical-assignment-operators',
+  ],
   externals(_context: any, request: any, callback: (error: any, result: any) => void) {
     const isDev = process.env.NODE_ENV === 'development';
     let isExternal: boolean | string = false;
