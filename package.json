@@ -85,8 +85,7 @@
     "pack:mac-arm64": "electron-builder --mac --arm64",
     "pack:win-x64": "electron-builder --win --x64",
     "pack:win-arm64": "electron-builder --win --arm64",
-    "pack": "electron-builder -mw",
-    "dist": "electron-builder",
+    "pack": "electron-builder",
     "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\"",
     "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'"
   },
