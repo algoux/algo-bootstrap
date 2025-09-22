@@ -1,5 +1,4 @@
 // const nodeExternals = require('webpack-node-externals');
-import slash from 'slash';
 import * as path from 'path';
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
@@ -78,6 +77,17 @@ export default {
             },
             modules: 'commonjs'
           }]
+        ],
+        plugins: [
+          '@babel/plugin-proposal-optional-chaining',
+          '@babel/plugin-proposal-nullish-coalescing-operator',
+          '@babel/plugin-proposal-class-properties',
+          '@babel/plugin-proposal-class-static-block',
+          '@babel/plugin-transform-class-properties',
+          '@babel/plugin-transform-class-static-block',
+          '@babel/plugin-transform-optional-chaining',
+          '@babel/plugin-transform-nullish-coalescing-operator',
+          '@babel/plugin-transform-logical-assignment-operators'
         ]
       });
 
@@ -98,6 +108,17 @@ export default {
             },
             modules: 'commonjs'
           }]
+        ],
+        plugins: [
+          '@babel/plugin-proposal-optional-chaining',
+          '@babel/plugin-proposal-nullish-coalescing-operator',
+          '@babel/plugin-proposal-class-properties',
+          '@babel/plugin-proposal-class-static-block',
+          '@babel/plugin-transform-class-properties',
+          '@babel/plugin-transform-class-static-block',
+          '@babel/plugin-transform-optional-chaining',
+          '@babel/plugin-transform-nullish-coalescing-operator',
+          '@babel/plugin-transform-logical-assignment-operators'
         ]
       });
 
@@ -127,6 +148,17 @@ export default {
             },
             modules: 'commonjs'
           }]
+        ],
+        plugins: [
+          '@babel/plugin-proposal-optional-chaining',
+          '@babel/plugin-proposal-nullish-coalescing-operator',
+          '@babel/plugin-proposal-class-properties',
+          '@babel/plugin-proposal-class-static-block',
+          '@babel/plugin-transform-class-properties',
+          '@babel/plugin-transform-class-static-block',
+          '@babel/plugin-transform-optional-chaining',
+          '@babel/plugin-transform-nullish-coalescing-operator',
+          '@babel/plugin-transform-logical-assignment-operators'
         ]
       });
 
@@ -145,7 +177,7 @@ export default {
     }
     const appDeps = Object.keys(require('../../package').dependencies);
     if (appDeps.includes(request)) {
-      const orininalPath = slash(path.join(__dirname, '../../node_modules', request));
+      const orininalPath = path.join(__dirname, '../../node_modules', request).replace(/\\/g, '/');
       const requireAbsolute = `require('${orininalPath}')`;
       isExternal = isDev ? requireAbsolute : `require('${request}')`;
     }
