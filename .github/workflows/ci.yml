@@ -32,6 +32,8 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+      - name: verbose
+        run: node -e "console.log(require('os').platform() + '-' + require('os').arch())"
       - name: Install dependencies
         run: npm ci
       - name: Build application
