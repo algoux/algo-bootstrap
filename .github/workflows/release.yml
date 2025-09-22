@@ -46,14 +46,14 @@ jobs:
       - name: List build artifacts
         run: |
           echo "Build artifacts:"
-          if echo "${{ matrix.os }}" | grep -q "windows"; then
+          echo "${{ matrix.os }}" | grep -q "windows" && (
             dir release\ /s 2>nul || echo "No release directory found"
             dir release\*.exe /s 2>nul || echo "No .exe files found"
             dir release\*.zip /s 2>nul || echo "No .zip files found"
-          else
+          ) || (
             ls -la release/ || echo "No release directory found"
             find release/ -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" \) || echo "No build artifacts found"
-          fi
+          )
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
