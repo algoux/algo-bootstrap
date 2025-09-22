@@ -21,7 +21,7 @@
     },
     "dmg": {
       "icon": "build/dmg.icns",
-      "archiveName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "win": {
       "target": [
