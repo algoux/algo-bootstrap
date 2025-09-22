@@ -273,7 +273,7 @@ class Board extends React.Component<Props, State> {
                   <a onClick={() => this.openTargetProject(project.path)}>
                     {path.basename(project.path)}
                   </a>
-                  <span className="--ml-md-lg --user-select-text">{project.path}</span>
+                  <span className="--ml-md-lg --user-select-text codespaces-list-item-path">{project.path}</span>
                 </List.Item>
               )}
             />

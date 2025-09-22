@@ -1,9 +1,22 @@
-import { spawn, IPty } from 'node-pty';
 import { EventEmitter } from 'events';
 import { logMain, logProcess } from './logger';
 import { ipcMain as ipc } from 'electron-better-ipc';
 import IPCKeys from 'common/configs/ipc';
 import util from 'util';
+import { isMac } from '@/utils/platform';
+
+let ptySpawn: any;
+if (isMac) {
+  try {
+    const nodePty = require('node-pty');
+    ptySpawn = nodePty.spawn;
+  } catch (error) {
+    logMain.warn('[terminal] node-pty not available, falling back to child_process', error);
+    ptySpawn = null;
+  }
+} else {
+  ptySpawn = null;
+}
 
 export interface TerminalOptions {
   id: string;
@@ -43,7 +56,8 @@ export type CommandExecOptions = {
 };
 
 export class CommandTerminal extends EventEmitter {
-  private pty?: IPty;
+  private pty?: any; // IPty from node-pty
+  private process?: any; // child_process.ChildProcess
   private execStartTime = 0;
   public outputHistory: TerminalOutput[] = [];
   public buf = '';
@@ -55,13 +69,30 @@ export class CommandTerminal extends EventEmitter {
   }
 
   exec(cmd: string, args: string[] = [], opt: CommandExecOptions = {}): Promise<ExecResult> {
-    if (this.pty || this.executed) {
+    if (this.pty || this.process || this.executed) {
       return Promise.reject(new Error('A command is already running or has been executed'));
     }
     this.executed = true;
     const env = { ...(process.env as NodeJS.ProcessEnv), ...(opt.env || {}) };
     this.execStartTime = Date.now();
-    this.pty = spawn(cmd, args, {
+
+    this.buf = '';
+    this.outputHistory = [];
+
+    if (ptySpawn) {
+      return this.execWithPty(cmd, args, opt, env);
+    } else {
+      return this.execWithChildProcess(cmd, args, opt, env);
+    }
+  }
+
+  private execWithPty(
+    cmd: string,
+    args: string[] = [],
+    opt: CommandExecOptions = {},
+    env: NodeJS.ProcessEnv,
+  ): Promise<ExecResult> {
+    this.pty = ptySpawn(cmd, args, {
       name: 'xterm-color',
       cols: opt.cols ?? 80,
       rows: opt.rows ?? 24,
@@ -69,9 +100,6 @@ export class CommandTerminal extends EventEmitter {
       env,
       encoding: (opt.encoding as any) ?? 'utf8',
     });
-
-    this.buf = '';
-    this.outputHistory = [];
 
     return new Promise<ExecResult>((resolve, reject) => {
       this.pty!.onData((d) => {
@@ -117,9 +145,129 @@ export class CommandTerminal extends EventEmitter {
     });
   }
 
+  private execWithChildProcess(
+    cmd: string,
+    args: string[] = [],
+    opt: CommandExecOptions = {},
+    env: NodeJS.ProcessEnv,
+  ): Promise<ExecResult> {
+    const { spawn: childSpawn } = require('child_process');
+
+    this.process = childSpawn(cmd, args, {
+      cwd: opt.cwd ?? process.cwd(),
+      env,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    return new Promise<ExecResult>((resolve, reject) => {
+      // 处理标准输出
+      this.process!.stdout?.on('data', (data: Buffer) => {
+        const d = data.toString();
+        this.buf += d;
+        const output: TerminalOutput = {
+          data: d,
+          timestamp: Date.now(),
+        };
+        this.outputHistory.push(output);
+        this.emit('data', output);
+      });
+
+      // 处理标准错误输出
+      this.process!.stderr?.on('data', (data: Buffer) => {
+        const d = data.toString();
+        this.buf += d;
+        const output: TerminalOutput = {
+          data: d,
+          timestamp: Date.now(),
+        };
+        this.outputHistory.push(output);
+        this.emit('data', output);
+      });
+
+      // 处理进程退出
+      this.process!.on('exit', (exitCode, signal) => {
+        const execDuration = Date.now() - this.execStartTime;
+        const signalNumber = signal
+          ? typeof signal === 'string'
+            ? parseInt(signal, 10)
+            : signal
+          : undefined;
+        const result: ExecResult = {
+          output: this.buf,
+          exitCode: exitCode || 0,
+          signal: signalNumber,
+        };
+        this.closed = true;
+        logProcess.info(
+          '[CommandTerminal]',
+          `[exec.done ${execDuration + 'ms'}]`,
+          cmd,
+          args.join(' '),
+          '\noutput:',
+          result.output,
+          '\nexitCode:',
+          result.exitCode,
+          '\nsignal:',
+          result.signal,
+        );
+        try {
+          this.process?.kill();
+        } catch {}
+        this.process = undefined;
+
+        if (exitCode === 0) {
+          resolve(result);
+          this.emit('closed', {
+            exitCode: exitCode || 0,
+            signal: signalNumber,
+            time: execDuration,
+          });
+        } else {
+          const err = new TerminalExecError({
+            output: this.buf,
+            exitCode: exitCode || 0,
+            signal: signalNumber,
+          });
+          reject(err);
+          this.emit('closed', {
+            exitCode: exitCode || 0,
+            signal: signalNumber,
+            error: err.message,
+            time: execDuration,
+          });
+        }
+      });
+
+      // 处理进程错误
+      this.process!.on('error', (error) => {
+        const execDuration = Date.now() - this.execStartTime;
+        const errorMessage = error.message;
+        this.buf += errorMessage;
+        const output: TerminalOutput = {
+          data: errorMessage,
+          timestamp: Date.now(),
+        };
+        this.outputHistory.push(output);
+        this.emit('data', output);
+
+        this.closed = true;
+        const err = new TerminalExecError({ output: this.buf, exitCode: 1, signal: undefined });
+        reject(err);
+        this.emit('closed', {
+          exitCode: 1,
+          signal: undefined,
+          error: err.message,
+          time: execDuration,
+        });
+      });
+    });
+  }
+
   public resize(cols: number, rows: number): void {
     if (this.pty) {
       this.pty.resize(cols, rows);
+    } else {
+      logMain.warn('[CommandTerminal] resize not supported with child_process.spawn');
     }
   }
 
@@ -127,6 +275,10 @@ export class CommandTerminal extends EventEmitter {
     if (this.pty) {
       this.pty.kill();
       this.pty = undefined;
+    }
+    if (this.process) {
+      this.process.kill();
+      this.process = undefined;
     }
   }
 

@@ -16,7 +16,10 @@ module.exports = merge.smart(baseConfig, {
       '@': path.resolve(__dirname, '../src/main'),
       common: path.resolve(__dirname, '../src/common'),
       // '@aws-sdk/client-s3': path.resolve(__dirname, '../src/main/utils/empty-module.js'),
-      'check-disk-space': path.resolve(__dirname, '../node_modules/check-disk-space/dist/check-disk-space.cjs'),
+      'check-disk-space': path.resolve(
+        __dirname,
+        '../node_modules/check-disk-space/dist/check-disk-space.cjs',
+      ),
     },
     mainFields: ['main', 'module'],
   },
@@ -44,6 +47,7 @@ module.exports = merge.smart(baseConfig, {
     'node:events': 'commonjs events',
     'node:os': 'commonjs os',
     'jsonc-parser': 'commonjs jsonc-parser',
+    'node-pty': 'commonjs node-pty',
   },
   module: {
     // rules: [{

@@ -64,7 +64,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "electron-rebuild",
+    "postinstall": "node -e \"if(process.platform === 'darwin') require('child_process').execSync('npm i --save-optional node-pty', {stdio: 'inherit'})\" && electron-rebuild",
     "start": "npm run build:main-dev && electron --enable-async-stack-traces ./dist/main/main.js",
     "start:renderer": "cross-env NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi dev",
     "start:main": "electron-webpack dev",
@@ -117,7 +117,6 @@
     "math-precision": "^1.0.5",
     "md5-file": "^5.0.0",
     "moment": "^2.30.1",
-    "node-pty": "^1.0.0",
     "p-queue": "^6.6.2",
     "p-retry": "^4.6.2",
     "promisify-child-process": "^4.1.2",
@@ -129,6 +128,9 @@
     "url-assembler": "^2.1.1",
     "useragent-generator": "^1.1.1-amkt-22079-finish.0",
     "uuid": "^11.1.0"
+  },
+  "optionalDependencies": {
+    "node-pty": "^0.10.1"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
