@@ -20,6 +20,7 @@ export interface IPythonConfigurator {}
 
 interface State {
   checkCompleteLoading: boolean;
+  showSkipButton: boolean;
 }
 
 type Props = IPythonConfigurator & ReturnType<typeof mapStateToProps> & DispatchProps;
@@ -27,6 +28,7 @@ type Props = IPythonConfigurator & ReturnType<typeof mapStateToProps> & Dispatch
 function genInitialState(): State {
   return {
     checkCompleteLoading: false,
+    showSkipButton: false,
   };
 }
 
@@ -72,8 +74,22 @@ class PythonConfigurator extends React.Component<Props, State> {
       windowProgress.end();
       logRenderer.error(`[installPython]`, e);
       msg.error('安装环境失败');
+      this.setState({
+        showSkipButton: true,
+      });
       sm.track.event('install', 'error', 'python', 1);
     }
+  };
+
+  skipInstall = async () => {
+    await this.props.dispatch({
+      type: 'env/setModuleConfigStatusItem',
+      payload: {
+        module: EnvComponentModule.python,
+        status: EnvComponentModuleConfigStatus.DONE,
+      },
+    });
+    router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
   };
 
   checkComplete = async () => {
@@ -103,8 +119,14 @@ class PythonConfigurator extends React.Component<Props, State> {
       });
       router.push(getNextConfigurationModulePage(this.props.moduleConfigStatus));
     } else {
-      // TODO 允许跳过 python 安装，因为 Windows 可能有 WindowsApps 翔，无法找到正确的 python 安装路径
-      msg.error('未检测到配置完成，请重试');
+      this.setState({
+        showSkipButton: true,
+      });
+      msg.error(
+        sm.platform.isWindows
+          ? '未检测到安装完成，这可能是由于 WindowsApps 环境变量作祟，请重试或跳过安装'
+          : '未检测到安装完成，请重试',
+      );
     }
   };
 
@@ -147,7 +169,9 @@ class PythonConfigurator extends React.Component<Props, State> {
             <p>{formatMessage({ id: 'env.installer.desc' })}</p>
             <p className="color-secondary">{formatMessage({ id: 'env.installer.tips' })}</p>
             <div className="article">
-              <h3 className="section-header">1. 勾选「Add python.exe to PATH」并点击「Install Now」</h3>
+              <h3 className="section-header">
+                1. 勾选「Add python.exe to PATH」并点击「Install Now」
+              </h3>
               <p>
                 <img src={windowsStep_1} />
               </p>
@@ -156,7 +180,9 @@ class PythonConfigurator extends React.Component<Props, State> {
                 <img src={windowsStep_2} />
               </p>
               <h3 className="section-header">3. 点击「Close」关闭安装器</h3>
-              <p className="color-secondary">* 如果按钮「Disable path length limit」存在，请在关闭安装器前先点击它。</p>
+              <p className="color-secondary">
+                * 如果按钮「Disable path length limit」存在，请在关闭安装器前先点击它。
+              </p>
               <p>
                 <img src={windowsStep_3} />
               </p>
@@ -165,6 +191,16 @@ class PythonConfigurator extends React.Component<Props, State> {
         </div>
         <ActionBar
           actions={[
+            ...(state.showSkipButton
+              ? [
+                  {
+                    key: 'skipInstall',
+                    type: 'default' as const,
+                    text: '跳过安装',
+                    onClick: this.skipInstall,
+                  },
+                ]
+              : []),
             {
               key: 'installPython',
               type: 'primary',
