@@ -45,7 +45,8 @@ jobs:
           if [ -d "node_modules" ]; then
             echo "node_modules exists"
           else
-            npm ci
+            npm cache clean --force
+            npm ci --force
           fi
       - name: Build application
         run: npm run build
@@ -53,12 +54,6 @@ jobs:
         run: npm run pack
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Adhoc codesign app (mac only)
-        if: matrix.platform == 'darwin'
-        run: |
-          APP_PATH=$(find release -name "*.app" -type d | head -1)
-          codesign --force --deep --sign - --options runtime "$APP_PATH"
-          codesign -dv "$APP_PATH"
       - name: List build artifacts
         shell: bash
         run: |

@@ -34,6 +34,7 @@
       "allowToChangeInstallationDirectory": true,
       "artifactName": "AlgoBootstrap-windows-${version}-${arch}.${ext}"
     },
+    "afterPack": "scripts/after-pack.js",
     "directories": {
       "output": "release"
     },
@@ -89,7 +90,9 @@
     "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'"
   },
   "keywords": [
+    "programming",
     "algorithm",
+    "auto-configure",
     "bootstrap",
     "algoux"
   ],
