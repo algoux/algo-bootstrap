@@ -217,22 +217,29 @@ export async function injectMagic(options: {
     }
   }
 
+  const purifyPath = (p: string) => {
+    if (typeof p !== 'string') {
+      return '';
+    }
+    return JSON.stringify(p).substring(1, JSON.stringify(p).length - 1);
+  };
+
   const formatGpp = (alt?: typeof options.gccAlt): { command: string; path: string } => {
     if (!alt) {
       return {
         command: 'g++',
-        path: gccEnv.path.replace('gcc', 'g++'),
+        path: purifyPath(gccEnv.path.replace('gcc', 'g++')),
       };
     }
     if (alt.type === 'clang') {
       return {
         command: alt.command.replace('clang', 'clang++'),
-        path: alt.path.replace('clang', 'clang++'),
+        path: purifyPath(alt.path.replace('clang', 'clang++')),
       };
     }
     return {
       command: alt.command.replace('gcc', 'g++'),
-      path: alt.path.replace('gcc', 'g++'),
+      path: purifyPath(alt.path.replace('gcc', 'g++')),
     };
   };
 
@@ -248,7 +255,10 @@ export async function injectMagic(options: {
     profileName,
     vsixApproximateInstalledTimestamp,
     vsix,
-    gcc: { command: options.gccAlt?.command || 'gcc', path: options.gccAlt?.path || gccEnv.path },
+    gcc: {
+      command: options.gccAlt?.command || 'gcc',
+      path: purifyPath(options.gccAlt?.path || gccEnv.path),
+    },
     gpp: formatGpp(options.gccAlt),
   };
   logMain.info(`[magic] tmpl render data:`, data);
