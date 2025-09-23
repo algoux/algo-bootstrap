@@ -8,11 +8,10 @@ import msg from '@/utils/msg';
 import { formatMessage } from 'umi-plugin-locale';
 import windowsStep_1 from '@/assets/guides/magic/magic-win32-light-step-1.png';
 import macStep_1 from '@/assets/guides/magic/magic-darwin-light-step-1.png';
-import { getNextConfigurationModulePage, isEnvInstalled, needInstallEnvComponent } from '@/utils/env';
+import { getNextConfigurationModulePage, isEnvInstalled, needUseEnvComponent } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
 import { getCurrentWindow } from '@electron/remote';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
-import pages from '@/configs/pages';
 import { EnvComponent } from 'common/configs/env';
 import { VSIXIdMap } from 'common/configs/resources';
 
@@ -61,7 +60,7 @@ class MagicConfigurator extends React.Component<Props, State> {
       const { envConfig } = this.props;
       const requiredResourceIds = [
         ...sm.envComponents[EnvComponent.basicExtensions].resources,
-        ...(needInstallEnvComponent(envConfig, EnvComponent.codeStyleExtensions)
+        ...(needUseEnvComponent(envConfig, EnvComponent.codeStyleExtensions)
           ? sm.envComponents[EnvComponent.codeStyleExtensions].resources
           : []),
       ];

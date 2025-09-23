@@ -85,6 +85,10 @@ export function needInstallEnvComponent(envConfig: EnvComponentConfig, envCompon
   ].includes(envConfig[envComponent].action);
 }
 
+export function needUseEnvComponent(envConfig: EnvComponentConfig, envComponent: EnvComponent) {
+  return envConfig[envComponent].action !== EnvComponentAction.DISABLE;
+}
+
 export function getRequiredResourceIdsByEnvComponentKey(
   envConfig: EnvComponentConfig,
   envComponent: EnvComponent,
