@@ -88,14 +88,14 @@ jobs:
       - name: Get tag information
         id: tag_info
         run: |
-          TAG_MESSAGE=$(git for-each-ref refs/tags/${{ github.ref_name }} --format='%(contents)' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' | sed -e '/./,$!d')
-          if [ -n "$TAG_MESSAGE" ]; then
-            echo "tag_message<<EOF" >> $GITHUB_OUTPUT
-            echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "tag_message=No description provided for this tag." >> $GITHUB_OUTPUT
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' "${GITHUB_REF#refs/tags/}")
+          if [ -z "$TAG_MESSAGE" ]; then
+            TAG_MESSAGE="No description provided for this tag."
           fi
+          echo "tag_message<<EOF" >> $GITHUB_OUTPUT
+          echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "TAG_MESSAGE: $TAG_MESSAGE"
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
