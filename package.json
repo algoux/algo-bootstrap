@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -12,15 +12,17 @@
   "build": {
     "productName": "Algo Bootstrap",
     "appId": "org.algoux.algo-bootstrap",
+    "copyright": "Copyright © 2019-2025 algoUX",
     "mac": {
       "category": "public.app-category.developer-tools",
+      "identity": null,
       "target": [
         "dmg"
       ]
     },
     "dmg": {
       "icon": "build/dmg.icns",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "AlgoBootstrap-mac-${version}-${arch}.${ext}"
     },
     "win": {
       "target": [
@@ -30,7 +32,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
+      "artifactName": "AlgoBootstrap-windows-${version}-${arch}.${ext}"
     },
     "directories": {
       "output": "release"

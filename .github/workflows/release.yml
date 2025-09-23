@@ -53,6 +53,12 @@ jobs:
         run: npm run pack
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Adhoc codesign app (mac only)
+        if: matrix.platform == 'darwin'
+        run: |
+          APP_PATH=$(find release -name "*.app" -type d | head -1)
+          codesign --force --deep --sign - --options runtime "$APP_PATH"
+          codesign -dv "$APP_PATH"
       - name: List build artifacts
         shell: bash
         run: |
@@ -87,7 +93,7 @@ jobs:
       - name: Get tag information
         id: tag_info
         run: |
-          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }})
+          TAG_MESSAGE=$(git for-each-ref refs/tags/${{ github.ref_name }} --format='%(contents)' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' | sed -e '/./,$!d')
           if [ -n "$TAG_MESSAGE" ]; then
             echo "tag_message<<EOF" >> $GITHUB_OUTPUT
             echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
@@ -103,7 +109,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
           files: |
@@ -112,8 +118,6 @@ jobs:
             artifacts/win32-x64-${{ github.ref_name }}/*
             artifacts/win32-arm64-${{ github.ref_name }}/*
           body: |
-            ## Algo Bootstrap v${{ github.ref_name }}
-
             ${{ steps.tag_info.outputs.tag_message }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
