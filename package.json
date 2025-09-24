@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -104,6 +104,7 @@
     "commander": "^14.0.1",
     "compare-versions": "^6.1.1",
     "conf": "^13.1.0",
+    "cos-nodejs-sdk-v5": "^2.15.4",
     "ejs": "^3.1.10",
     "electron-better-ipc": "^2.0.1",
     "electron-dl": "^4.0.0",
