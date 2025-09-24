@@ -11,5 +11,6 @@ export const appConf = new Store<IAppConf>({
     vscProfileName: undefined,
     gccAlternative: undefined,
     initTemplate: {},
+    projects: [],
   },
 });

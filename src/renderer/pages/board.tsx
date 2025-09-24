@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from '@/utils/dva';
-import { List, Icon, Row, Col, Card, Spin } from 'antd';
+import { List, Icon, Row, Col, Card } from 'antd';
 import ExternalLink from '@/components/ExternalLink';
 import sm from '@/utils/modules';
 import { dialog, getCurrentWindow } from '@electron/remote';
@@ -118,22 +118,16 @@ class Board extends React.Component<Props, State> {
     }
   };
 
-  openProject = async () => {
-    const res = await dialog.showOpenDialog(getCurrentWindow(), {
-      properties: ['openDirectory', 'createDirectory'],
-    });
-    const projectPath = res.filePaths ? res.filePaths[0] : '';
+  openProject = async (projectPath: string) => {
     if (projectPath) {
-      sm.track.event('use', 'openProject');
-      this.props.dispatch({
-        type: 'projects/addProject',
-        payload: {
-          id: projectPath,
-          path: projectPath,
-          createdAt: Date.now(),
-        },
+      await this.openTargetProject(projectPath).then(() => {
+        this.props.dispatch({
+          type: 'projects/accessProject',
+          payload: {
+            id: projectPath,
+          },
+        });
       });
-      await this.openTargetProject(projectPath);
     }
   };
 
@@ -266,6 +260,7 @@ class Board extends React.Component<Props, State> {
               // @ts-ignore
               style={{ overflowY: projects.length > 3 ? 'auto' : 'hidden' }}
               dataSource={[...projects].reverse()}
+              rowKey="id"
               renderItem={(project: IProject) => (
                 <List.Item
                   className="codespaces-list-item codespaces-list-hover-action"
@@ -275,7 +270,7 @@ class Board extends React.Component<Props, State> {
                     </a>,
                   ]}
                 >
-                  <a onClick={() => this.openTargetProject(project.path)}>
+                  <a onClick={() => this.openProject(project.path)}>
                     {path.basename(project.path)}
                   </a>
                   <span className="--ml-md-lg --user-select-text codespaces-list-item-path">

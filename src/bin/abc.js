@@ -114,7 +114,7 @@ program
   .option('-v, --verbose', 'show verbose output')
   .action(async (paths, options) => {
     verbose = options.verbose;
-    const config = readConfig();
+    let config = readConfig();
     const codePath = await findCodePath();
     const resolvedPaths = paths.map((p) => path.resolve(p));
     const dirs = [];
@@ -199,6 +199,29 @@ program
       console.error('Failed to open VS Code', e);
       process.exit(1);
     });
+
+    if (dirs.length > 0) {
+      config = readConfig();
+      const newProjects = [];
+      const projectMap = new Map();
+      for (const project of config.projects || []) {
+        if (!dirs.includes(project.id)) {
+          newProjects.push(project);
+        } else {
+          projectMap.set(project.id, project);
+        }
+      }
+      for (const dir of dirs) {
+        const project = projectMap.get(dir);
+        if (project) {
+          newProjects.push(project);
+        } else {
+          newProjects.push({ id: dir, path: dir, createdAt: Date.now() });
+        }
+      }
+      config.projects = newProjects;
+      fs.writeFileSync(getConfigPath(), JSON.stringify(config, null, 2));
+    }
   });
 
 program.parse(process.argv, { from: 'node' });

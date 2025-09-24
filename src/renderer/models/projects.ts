@@ -1,7 +1,5 @@
 import { DvaSagaEffect } from '@/utils/dva';
 import sm from '@/utils/modules';
-import localStorage from '@/utils/localStorage';
-import LsKeys from '@/configs/lsKeys';
 
 type CurrentState = IProjectsState;
 
@@ -15,13 +13,13 @@ export default {
   state: genInitialState(),
   reducers: {
     setProjects(state: CurrentState, { payload: { list } }: DvaAction<Pick<CurrentState, 'list'>>) {
-      localStorage.set(LsKeys.projects, list);
+      sm.appConf.set('projects', list);
       state.list = list;
     },
   },
   effects: {
     *getProjects({ payload: {} }: DvaAction<{}>, { call, put }: DvaSagaEffect) {
-      const list = localStorage.get<IProject[]>(LsKeys.projects) || [];
+      const list = sm.appConf.get('projects') || [];
       yield put({
         type: 'setProjects',
         payload: {
@@ -32,10 +30,7 @@ export default {
     },
     *addProject({ payload: project }: DvaAction<IProject>, { put, select }: DvaSagaEffect) {
       const list: IProject[] = yield select((state) => state.projects.list);
-      if (list.find((p) => p.id === project.id)) {
-        return;
-      }
-      const newList = [...list];
+      const newList = list.filter((p) => p.id !== project.id);
       newList.push(project);
       yield put({
         type: 'setProjects',
@@ -44,12 +39,29 @@ export default {
         },
       });
     },
+    *accessProject(
+      { payload: { id } }: DvaAction<{ id: IProject['id'] }>,
+      { put, select }: DvaSagaEffect,
+    ) {
+      const list: IProject[] = yield select((state) => state.projects.list);
+      const project = list.find((p) => p.id === id);
+      if (project) {
+        const newList = list.filter((p) => p.id !== id);
+        newList.push(project);
+        yield put({
+          type: 'setProjects',
+          payload: {
+            list: newList,
+          },
+        });
+      }
+    },
     *deleteProject(
       { payload: { projectId } }: DvaAction<{ projectId: IProject['id'] }>,
       { put, select }: DvaSagaEffect,
     ) {
       const list: IProject[] = yield select((state) => state.projects.list);
-      const newList = list.filter((project) => project.id !== projectId);
+      const newList = list.filter((p) => p.id !== projectId);
       yield put({
         type: 'setProjects',
         payload: {
