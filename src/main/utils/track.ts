@@ -4,14 +4,14 @@ import { appConf } from './store';
 import { logMain } from '@/utils/logger';
 import { app } from 'electron';
 import constants from 'common/configs/constants';
-import { genUA } from './ua';
+// import { genUA } from './ua';
 
 const uid = appConf.get('uid') || uuidv4();
 appConf.set('uid', uid);
 const options = {
-  headers: {
-    'user-agent': genUA(),
-  },
+  // headers: {
+  //   'user-agent': genUA(),
+  // },
 };
 logMain.info('[track.init] uid:', uid, 'options:', options);
 if (!process.env.GA_TC) {

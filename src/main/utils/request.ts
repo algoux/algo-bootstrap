@@ -3,6 +3,7 @@ import constants from 'common/configs/constants';
 // import api from 'common/configs/apis';
 import moment from 'moment';
 import { logMain } from '@/utils/logger';
+import { genUA } from './ua';
 
 let requestTaskId = 1;
 
@@ -89,6 +90,9 @@ function parseResponse(response: Response, forceType?: 'json' | 'text' | 'buffer
 function initGot(): Got {
   const gotInstance: Got = got.extend({
     // prefixUrl: api.base,
+    headers: {
+      'user-agent': genUA(),
+    },
     timeout: {
       request: constants.requestTimeout,
     },
