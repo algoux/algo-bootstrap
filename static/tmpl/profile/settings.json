@@ -6,7 +6,7 @@
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.exclude": {
-    ".algo-bootstrap*": true
+    "**/.algo-bootstrap*": true
   },
   "cSpell.allowCompoundWords": true,
   "C_Cpp.default.compilerPath": "<%- gcc.path %>",

@@ -138,7 +138,9 @@ class Board extends React.Component<Props, State> {
   };
 
   deleteProject = async (projectId: string) => {
-    if (await msg.confirm('删除这个文件夹？', '这个操作仅将其从列表中移除，不会删除文件夹内的文件')) {
+    if (
+      await msg.confirm('删除这个文件夹？', '这个操作仅将其从列表中移除，不会删除文件夹内的文件')
+    ) {
       sm.track.event('use', 'deleteProject');
       this.props.dispatch({
         type: 'projects/deleteProject',
@@ -211,6 +213,7 @@ class Board extends React.Component<Props, State> {
             <EnvLabel
               name="C/C++"
               icon={c_cppIcon}
+              installed={environments.gcc.installed}
               version={`${(environments.gcc as ICheckEnvironmentResultInstalled).version} (${(environments.gcc as ICheckEnvironmentResultInstalled<ICheckEnvironmentResultMetaGcc>).meta?.type})`}
             />
           </Col>
@@ -218,6 +221,7 @@ class Board extends React.Component<Props, State> {
             <EnvLabel
               name="Python"
               icon={pythonIcon}
+              installed={environments.python.installed}
               version={(environments.python as ICheckEnvironmentResultInstalled).version}
             />
           </Col>
@@ -225,6 +229,7 @@ class Board extends React.Component<Props, State> {
             <EnvLabel
               name="VS Code"
               icon={vscodeIcon}
+              installed={environments.vscode.installed}
               version={(environments.vscode as ICheckEnvironmentResultInstalled).version}
             />
           </Col>
@@ -273,7 +278,9 @@ class Board extends React.Component<Props, State> {
                   <a onClick={() => this.openTargetProject(project.path)}>
                     {path.basename(project.path)}
                   </a>
-                  <span className="--ml-md-lg --user-select-text codespaces-list-item-path">{project.path}</span>
+                  <span className="--ml-md-lg --user-select-text codespaces-list-item-path">
+                    {project.path}
+                  </span>
                 </List.Item>
               )}
             />
@@ -305,7 +312,9 @@ class Board extends React.Component<Props, State> {
                   <div className="board-action-card-content">
                     <div className="board-action-card-title">
                       添加快捷命令
-                      {this.state.installBinLoading ? <Loading className="--ml-md" delay={500} /> : null}
+                      {this.state.installBinLoading ? (
+                        <Loading className="--ml-md" delay={500} />
+                      ) : null}
                     </div>
                     <div className="board-action-card-desc">安装 abc 命令行工具</div>
                   </div>
