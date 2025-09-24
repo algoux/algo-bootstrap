@@ -8,8 +8,8 @@ const baseDir = path.join(__dirname, '../release');
 
 const REMOTE_PATH = (process.env.COS_BASE_PATH || 'algo-bootstrap/release/') + releaseVersion + '/';
 
-async function listFiles(dir, maxDepth = 0, filter, _depth = 0) {
-  if (maxDepth > 0 && _depth > maxDepth) {
+async function listFiles(dir, maxDepth = Infinity, filter, _depth = 0) {
+  if (_depth > 0 && _depth > maxDepth) {
     return [];
   }
   let files = await fs.readdir(dir, { withFileTypes: true });

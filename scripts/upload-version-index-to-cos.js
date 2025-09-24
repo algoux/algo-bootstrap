@@ -15,8 +15,8 @@ const CDN_URL_BASE =
   '/';
 const TZ = process.env.TZ || 'Asia/Shanghai';
 
-async function listFiles(dir, maxDepth = 0, filter, _depth = 0) {
-  if (maxDepth > 0 && _depth > maxDepth) {
+async function listFiles(dir, maxDepth = Infinity, filter, _depth = 0) {
+  if (_depth > 0 && _depth > maxDepth) {
     return [];
   }
   let files = await fs.readdir(dir, { withFileTypes: true });
@@ -52,7 +52,7 @@ async function main() {
     SecretId: process.env.COS_SECRET_ID,
     SecretKey: process.env.COS_SECRET_KEY,
   });
-  const files = await listFiles(baseDir, 0);
+  const files = await listFiles(baseDir);
   const filePlatformArchRegMap = {
     'win32-arm64': /arm64-.*\.exe$/,
     'win32-x64': /x64-.*\.exe$/,
@@ -84,7 +84,7 @@ async function main() {
       process.exit(1);
     }
     const md5 = await md5File(path.join(baseDir, file));
-    filePlatformArchMap[pa].url = `${CDN_URL_BASE}${file}`;
+    filePlatformArchMap[pa].url = `${CDN_URL_BASE}${path.basename(file)}`;
     filePlatformArchMap[pa].md5 = md5;
   }
 
