@@ -86,6 +86,7 @@
     "pack:win-x64": "electron-builder --publish=never --win --x64",
     "pack:win-arm64": "electron-builder --publish=never --win --arm64",
     "pack": "electron-builder --publish=never",
+    "ci:create-release": "npm i --no-save cos-nodejs-sdk-v5",
     "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\"",
     "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'"
   },

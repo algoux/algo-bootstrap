@@ -1,4 +1,4 @@
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const path = require('path');
 const md5File = require('md5-file');
 const COS = require('cos-nodejs-sdk-v5');
@@ -15,14 +15,17 @@ const CDN_URL_BASE =
   '/';
 const TZ = process.env.TZ || 'Asia/Shanghai';
 
-async function listFiles(dir, filter) {
+async function listFiles(dir, maxDepth = 0, filter, _depth = 0) {
+  if (maxDepth > 0 && _depth > maxDepth) {
+    return [];
+  }
   let files = await fs.readdir(dir, { withFileTypes: true });
   let fileNames = [];
 
   for (let file of files) {
     let fullPath = path.join(dir, file.name);
     if (file.isDirectory()) {
-      fileNames = fileNames.concat(await listFiles(fullPath));
+      fileNames = fileNames.concat(await listFiles(fullPath, maxDepth, filter, _depth + 1));
     } else {
       fileNames.push(path.relative(baseDir, fullPath));
     }
@@ -49,7 +52,7 @@ async function main() {
     SecretId: process.env.COS_SECRET_ID,
     SecretKey: process.env.COS_SECRET_KEY,
   });
-  const files = await listFiles(baseDir);
+  const files = await listFiles(baseDir, 0);
   const filePlatformArchRegMap = {
     'win32-arm64': /arm64-.*\.exe$/,
     'win32-x64': /x64-.*\.exe$/,

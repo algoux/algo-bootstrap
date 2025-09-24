@@ -1,4 +1,4 @@
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const path = require('path');
 const COS = require('cos-nodejs-sdk-v5');
 
@@ -8,14 +8,17 @@ const baseDir = path.join(__dirname, '../release');
 
 const REMOTE_PATH = (process.env.COS_BASE_PATH || 'algo-bootstrap/release/') + releaseVersion + '/';
 
-async function listFiles(dir, filter) {
+async function listFiles(dir, maxDepth = 0, filter, _depth = 0) {
+  if (maxDepth > 0 && _depth > maxDepth) {
+    return [];
+  }
   let files = await fs.readdir(dir, { withFileTypes: true });
   let fileNames = [];
 
   for (let file of files) {
     let fullPath = path.join(dir, file.name);
     if (file.isDirectory()) {
-      fileNames = fileNames.concat(await listFiles(fullPath));
+      fileNames = fileNames.concat(await listFiles(fullPath, maxDepth, filter, _depth + 1));
     } else {
       fileNames.push(path.relative(baseDir, fullPath));
     }
@@ -44,6 +47,7 @@ async function main() {
   });
   const files = await listFiles(
     baseDir,
+    0,
     (file) =>
       file.endsWith('.dmg') ||
       file.endsWith('.exe') ||
