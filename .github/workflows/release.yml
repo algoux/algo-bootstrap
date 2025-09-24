@@ -66,7 +66,7 @@ jobs:
             ls -la release/ || echo "No release directory found"
             find release/ -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" \) || echo "No build artifacts found"
           fi
-      - name: Upload artifacts
+      - name: Upload artifacts to GitHub
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-${{ github.ref_name }}
@@ -76,6 +76,14 @@ jobs:
             release/*.zip
             release/*.AppImage
           retention-days: 30
+      - name: Upload artifacts to COS
+        run: node scripts/upload-artifacts-to-cos.js ${{ github.ref_name }}
+        env:
+          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
+          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
+          COS_DOMAIN: ${{ secrets.COS_DOMAIN }}
+          COS_BUCKET: ${{ secrets.COS_BUCKET }}
+          COS_REGION: ${{ secrets.COS_REGION }}
   create-release:
     needs: build-artifacts
     runs-on: ubuntu-latest
@@ -101,6 +109,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
+      - name: List artifacts
+        run: ls -la artifacts/
+      - name: Upload version index to COS
+        run: node scripts/upload-version-index-to-cos.js ${{ github.ref_name }}
+        env:
+          COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
+          COS_SECRET_KEY: ${{ secrets.COS_SECRET_KEY }}
+          COS_DOMAIN: ${{ secrets.COS_DOMAIN }}
+          COS_BUCKET: ${{ secrets.COS_BUCKET }}
+          COS_REGION: ${{ secrets.COS_REGION }}
+          TZ: Asia/Shanghai
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
