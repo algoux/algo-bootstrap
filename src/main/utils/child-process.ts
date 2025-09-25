@@ -9,16 +9,19 @@ import { logProcess } from './logger';
 import constants from 'common/configs/constants';
 import sudo from 'sudo-prompt';
 import * as path from 'path';
-import { isMac } from './platform';
+import { isMac, isWindows } from './platform';
+import iconv from 'iconv-lite';
+import { purifyObject } from 'common/utils/format';
 
 const SHELL_TIMEOUT = 30 * 1000;
 
-const commonSpawnOptions = {
-  encoding: 'utf8',
+const commonSpawnOptions = purifyObject({
+  encoding: isWindows ? undefined : 'utf8',
+  maxBuffer: isWindows ? 1024 * 1024 * 10 : undefined,
   windowsHide: true,
   timeout: SHELL_TIMEOUT,
   shell: true,
-};
+});
 
 const commonExecFileOptions = {
   encoding: 'utf8',
@@ -47,6 +50,8 @@ export interface SudoExecResult {
   stderr: string | undefined;
 }
 
+const windowsEncoding = 'cp936'; // TODO hardcode temporarily
+
 export function spawn(
   type: string,
   cmd: string,
@@ -60,6 +65,10 @@ export function spawn(
     ...extraOptions,
   })
     .then((r) => {
+      if (isWindows) {
+        r.stdout = iconv.decode(r.stdout as Buffer, windowsEncoding);
+        r.stderr = iconv.decode(r.stderr as Buffer, windowsEncoding);
+      }
       logProcess.info(
         type,
         `[spawn.done ${Date.now() - __start + 'ms'}]`,
@@ -85,9 +94,9 @@ export function spawn(
         '\nsignal:',
         e.signal,
         '\nstdout:',
-        e.stdout,
+        e.stdout ? (isWindows ? iconv.decode(e.stdout as Buffer, windowsEncoding) : e.stdout) : '',
         '\nstderr:',
-        e.stderr,
+        e.stderr ? (isWindows ? iconv.decode(e.stderr as Buffer, windowsEncoding) : e.stderr) : '',
       );
       throw e;
     });

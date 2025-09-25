@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getPath } from '@/utils/path';
 import { PathKey } from 'common/configs/paths';
 import { ensureExecutable } from '@/utils/fs';
-import { appendToWindowsUserPath, refreshWindowsPath } from '@/utils/bin';
+import { appendToWindowsUserPath, refreshWindowsPath } from '@/utils/platform-windows';
 
 const RESOURCES_DOWNLOAD_PATH = getPath(PathKey.resourcesDownload);
 const RESOURCES_TEMP_PATH = getPath(PathKey.resourcesTemp);
@@ -58,7 +58,7 @@ export async function getMingwUncompressedSize(): Promise<number> {
 }
 
 export function getWindowsGlobalInstallPath() {
-  return 'C:\\algo-bootstrap';
+  return 'C:\\Algo Bootstrap';
 }
 
 export function getMingwInstallPath() {

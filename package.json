@@ -64,7 +64,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "node -e \"if(process.platform === 'darwin') require('child_process').execSync('npm i --save-optional node-pty', {stdio: 'inherit'})\" && electron-rebuild",
+    "postinstall": "node scripts/postinstall.js && electron-rebuild",
     "start": "npm run build:main-dev && electron --enable-async-stack-traces ./dist/main/main.js",
     "start:renderer": "cross-env NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi dev",
     "start:main": "electron-webpack dev",
@@ -116,6 +116,7 @@
     "fs-extra": "^9.1.0",
     "get-folder-size": "^5.0.0",
     "got": "^11.8.6",
+    "iconv-lite": "^0.7.0",
     "jsonc-parser": "^3.3.1",
     "lodash": "^4.17.21",
     "math-precision": "^1.0.5",
@@ -134,6 +135,7 @@
     "uuid": "^11.1.0"
   },
   "optionalDependencies": {
+    "native-reg": "^1.1.1",
     "node-pty": "^0.10.1"
   },
   "devDependencies": {

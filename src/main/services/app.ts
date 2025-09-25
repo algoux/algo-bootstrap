@@ -9,7 +9,7 @@ import { PathKey } from 'common/configs/paths';
 import { isMac, isWindows } from '@/utils/platform';
 import { spawn } from '@/utils/child-process';
 import { ensureExecutable } from '@/utils/fs';
-import { appendToWindowsUserPath, refreshWindowsPath } from '@/utils/bin';
+import { appendToWindowsUserPath, refreshWindowsPath } from '@/utils/platform-windows';
 
 export function getCompletionState(): { timestamp: number; version: string } | undefined {
   return appConf.get('completionState');
