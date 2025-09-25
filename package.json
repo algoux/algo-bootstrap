@@ -64,8 +64,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js && patch-package",
-    "postinstall:rebuild": "electron-rebuild",
+    "postinstall": "node scripts/postinstall.js && patch-package && electron-builder install-app-deps",
     "start": "npm run build:main-dev && electron --enable-async-stack-traces ./dist/main/main.js",
     "start:renderer": "cross-env NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi dev",
     "start:main": "electron-webpack dev",
@@ -149,7 +148,6 @@
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.27.1",
     "@babel/plugin-transform-optional-chaining": "^7.27.1",
     "@babel/preset-env": "^7.28.0",
-    "@electron/rebuild": "^3.7.2",
     "@types/classnames": "^2.3.4",
     "@types/ejs": "^3.1.5",
     "@types/fs-extra": "^9.0.13",
