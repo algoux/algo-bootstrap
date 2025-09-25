@@ -32,7 +32,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "AlgoBootstrap-windows-${arch-${version}.${ext}"
+      "artifactName": "AlgoBootstrap-windows-${arch}-${version}.${ext}"
     },
     "afterPack": "scripts/after-pack.js",
     "directories": {
@@ -182,6 +182,7 @@
     "moment-locales-webpack-plugin": "^1.2.0",
     "monaco-editor": "^0.50.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
+    "node-addon-api": "^8.5.0",
     "node-loader": "^1.0.2",
     "prettier": "^3.6.2",
     "react": "~16.8.6",
