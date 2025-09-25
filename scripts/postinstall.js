@@ -6,3 +6,4 @@ if (process.platform === 'darwin') {
 if (process.platform === 'win32') {
   cp.execSync('npm i --save-optional native-reg', { stdio: 'inherit' });
 }
+console.log('postinstall script exec completed');

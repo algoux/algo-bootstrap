@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "description": "A Bootstrap for algorithm beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -64,7 +64,8 @@
     ]
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js && electron-rebuild",
+    "postinstall": "node scripts/postinstall.js",
+    "postinstall:rebuild": "electron-rebuild",
     "start": "npm run build:main-dev && electron --enable-async-stack-traces ./dist/main/main.js",
     "start:renderer": "cross-env NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi dev",
     "start:main": "electron-webpack dev",
