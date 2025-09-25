@@ -32,7 +32,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "AlgoBootstrap-windows-${arch-${version}}.${ext}"
+      "artifactName": "AlgoBootstrap-windows-${arch-${version}.${ext}"
     },
     "afterPack": "scripts/after-pack.js",
     "directories": {
