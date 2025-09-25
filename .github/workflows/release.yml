@@ -23,7 +23,7 @@ jobs:
             platform: win32
             arch: x64
             artifact_name: win32-x64
-          - os: windows-11-arm
+          - os: windows-11-arm-large
             platform: win32
             arch: arm64
             artifact_name: win32-arm64
