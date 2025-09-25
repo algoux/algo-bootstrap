@@ -1,0 +1,14 @@
+diff --git a/node_modules/native-reg/binding.gyp b/node_modules/native-reg/binding.gyp
+index 64bd384..19cd561 100644
+--- a/node_modules/native-reg/binding.gyp
++++ b/node_modules/native-reg/binding.gyp
+@@ -8,6 +8,9 @@
+       "include_dirs": [
+         "<!@(node -p \"require('node-addon-api').include\")",
+       ],
++      "defines": [
++        "NAPI_CPP_EXCEPTIONS"
++      ],
+       "conditions": [
+         [
+           "OS==\"win\"",

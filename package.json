@@ -64,7 +64,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js",
+    "postinstall": "node scripts/postinstall.js && patch-package",
     "postinstall:rebuild": "electron-rebuild",
     "start": "npm run build:main-dev && electron --enable-async-stack-traces ./dist/main/main.js",
     "start:renderer": "cross-env NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi dev",
@@ -185,6 +185,7 @@
     "monaco-editor-webpack-plugin": "^7.1.0",
     "node-addon-api": "^8.5.0",
     "node-loader": "^1.0.2",
+    "patch-package": "^8.0.0",
     "prettier": "^3.6.2",
     "react": "~16.8.6",
     "react-dom": "~16.8.6",
