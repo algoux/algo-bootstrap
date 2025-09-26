@@ -191,7 +191,7 @@ export function appendToWindowsUserPath(PATH: string) {
   return true;
 }
 
-export async function refreshWindowsPath() {
+export function refreshWindowsPath() {
   if (!isWindows) {
     return;
   }

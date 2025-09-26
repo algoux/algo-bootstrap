@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { getPath } from '@/utils/path';
 import { PathKey } from 'common/configs/paths';
 import { ensureExecutable } from '@/utils/fs';
-import { appendToWindowsUserPath, refreshWindowsPath } from '@/utils/platform-windows';
 
 const RESOURCES_DOWNLOAD_PATH = getPath(PathKey.resourcesDownload);
 const RESOURCES_TEMP_PATH = getPath(PathKey.resourcesTemp);
@@ -103,7 +102,10 @@ export async function installGcc(options: { filename?: string; force?: boolean }
       }
       await fs.remove(mingwFilesPath);
       logMain.info('[installGcc] append PATH:', `${installPath}\\bin`);
-      (await appendToWindowsUserPath(`${installPath}\\bin`)) && (await refreshWindowsPath());
+      const { appendToWindowsUserPath, refreshWindowsPath } = await import(
+        '@/utils/platform-windows'
+      );
+      appendToWindowsUserPath(`${installPath}\\bin`) && refreshWindowsPath();
     } catch (e) {
       logMain.error('[installGcc] error:', e);
       throw e;
@@ -122,7 +124,8 @@ export async function installPython(options: { filename?: string; force?: boolea
     }
     const filePath = path.join(RESOURCES_DOWNLOAD_PATH, options.filename);
     await execFile('[installPython]', filePath);
-    await refreshWindowsPath();
+    const { refreshWindowsPath } = await import('@/utils/platform-windows');
+    refreshWindowsPath();
     await getEnvironments(true);
   }
 }
@@ -147,7 +150,8 @@ export async function installVSCode(options: { filename: string; force?: boolean
     await getEnvironments(true);
   } else if (isWindows) {
     await execFile('[installVSCode]', filePath);
-    await refreshWindowsPath();
+    const { refreshWindowsPath } = await import('@/utils/platform-windows');
+    refreshWindowsPath();
     await getEnvironments(true);
   }
 }

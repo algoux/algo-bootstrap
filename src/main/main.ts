@@ -7,12 +7,11 @@ import IPCKeys from 'common/configs/ipc';
 import _modules from '@/modules';
 import { checkRemainingDiskSpace } from '@/services/env-checker';
 import { logMain, log } from '@/utils/logger';
-import { currentPlatformArch, isMac, isPlatformArchIsSupported } from '@/utils/platform';
+import { currentPlatformArch, isMac, isPlatformArchIsSupported, isWindows } from '@/utils/platform';
 import constants from 'common/configs/constants';
 import req from '@/utils/request';
 import api from 'common/configs/apis';
 import { compare } from 'compare-versions';
-import { currentPlatform } from '@/utils/platform';
 import { filesize } from 'filesize';
 import fs from 'fs-extra';
 import track from './utils/track';
@@ -23,10 +22,45 @@ import { ElectronDownloadManager } from 'electron-dl-manager';
 import { IPCDownloadItemStatus } from 'common/typings/ipc';
 
 logMain.info('[app.start]', process.env.NODE_ENV);
-logMain.info('[app.info]', app.getVersion(), currentPlatform, process.versions);
+logMain.info('[app.info]', app.getVersion(), currentPlatformArch, {
+  versions: process.versions,
+});
+
 // if (module.hot) {
 //   module.hot.accept();
 // }
+
+// DEBUG TEMP
+if (isWindows) {
+  const nativeRegRoot = path.dirname(require.resolve('native-reg/package.json'));
+  logMain.info('native-reg root =', nativeRegRoot);
+
+  const buildRelease = path.join(nativeRegRoot, 'build', 'Release', 'reg.node');
+  const prebuildDir = path.join(nativeRegRoot, 'prebuilds', `${process.platform}-${process.arch}`);
+
+  logMain.info('Looking for:', buildRelease);
+  logMain.info('Exists?    ', fs.existsSync(buildRelease));
+  logMain.info(
+    'Prebuilds? ',
+    fs.existsSync(prebuildDir) ? fs.readdirSync(prebuildDir) : 'no prebuild dir',
+  );
+
+  try {
+    logMain.info('Trying direct require of build/Release/reg.node...');
+    const reg = require(buildRelease);
+    logMain.info('SUCCESS: Loaded reg.node directly!', reg);
+  } catch (err) {
+    console.error('FAILED direct require:', err);
+  }
+
+  try {
+    logMain.info("Trying normal require('native-reg')...");
+    const reg = require('native-reg');
+    logMain.info('SUCCESS: Loaded native-reg!', reg);
+  } catch (err) {
+    logMain.error('FAILED normal require:', err);
+  }
+}
 
 const PATH = process.env.PATH!;
 if (isMac && PATH.search('/usr/local/bin') === -1) {
@@ -120,7 +154,7 @@ function updateAppTheme() {
   const isDarkMode = nativeTheme.shouldUseDarkColors;
   const theme = isDarkMode ? 'dark' : 'light';
   track.event('app', 'setTheme', theme);
-  console.log('[updateAppTheme] theme:', theme);
+  logMain.info('[updateAppTheme] theme:', theme);
   // nativeTheme.themeSource = theme;
 }
 
