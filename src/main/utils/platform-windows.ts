@@ -40,12 +40,14 @@ export function getWindowsEnvMap(
 ): Record<string, string> {
   const env: Record<string, string> = {};
   const origKeyMap = new Map();
+  console.log('[getWindowsEnvMap] debug reg:', reg);
 
   if (pathInclude === 'system' || !pathInclude) {
     try {
       const sysKey = reg.openKey(reg.HKLM, SYSTEM_SUBKEY, reg.Access.READ);
       if (sysKey) {
         const names = reg.enumValueNames(sysKey);
+        console.log('[getWindowsEnvMap] system env value names:', names);
         for (const valueName of names) {
           // 使用 getValue 虽然能拿到自动展开的值，但可能出现末尾非法字符情况
           // const value = getWindowsEnv(reg.HKLM, SYSTEM_SUBKEY, valueName);
@@ -54,6 +56,7 @@ export function getWindowsEnvMap(
           const valueNameUpper = valueName.toUpperCase();
           origKeyMap.set(valueNameUpper, valueName);
         }
+        console.log('[getWindowsEnvMap] debug after system env obj:', env);
         reg.closeKey(sysKey);
       }
     } catch {}
@@ -64,6 +67,7 @@ export function getWindowsEnvMap(
       const userKey = reg.openKey(reg.HKCU, USER_SUBKEY, reg.Access.READ);
       if (userKey) {
         const names = reg.enumValueNames(userKey);
+        console.log('[getWindowsEnvMap] user env value names:', names);
         for (const valueName of names) {
           // const value = getWindowsEnv(reg.HKCU, USER_SUBKEY, valueName);
           const value = reg.queryValue(userKey, valueName);
@@ -82,10 +86,13 @@ export function getWindowsEnvMap(
             env[usingValueName] = _valueToString(value);
           }
         }
+        console.log('[getWindowsEnvMap] debug after user env obj:', env);
         reg.closeKey(userKey);
       }
     } catch {}
   }
+
+  console.log('[getWindowsEnvMap] debug merged env obj:', env);
 
   const envUpper = Object.fromEntries(
     Object.entries(env).map(([key, value]) => [key.toUpperCase(), value]),
@@ -114,6 +121,8 @@ export function getWindowsEnvMap(
     const k = origKeyMap.get(up) || up;
     finalEnv[k] = envUpper[up];
   }
+
+  console.log('[getWindowsEnvMap] debug final env obj:', finalEnv);
 
   return finalEnv;
 }
