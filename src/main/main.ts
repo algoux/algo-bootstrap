@@ -32,13 +32,16 @@ logMain.info('[app.info]', app.getVersion(), currentPlatformArch, {
 
 // DEBUG TEMP
 if (isWindows) {
+  console.log('require', require);
+  logMain.info('module.paths =', module.paths);
   let nativeRegPath = null;
   try {
     nativeRegPath = require.resolve('native-reg');
   } catch (e) {
     logMain.error('require.resolve(native-reg) error:', e);
   }
-  logMain.info('require.resolve(native-reg) =', nativeRegPath);
+  logMain.info('require.resolve(native-reg) =', nativeRegPath, typeof nativeRegPath);
+  logMain.info('require.resolve.paths(native-reg)', require.resolve.paths('native-reg'));
 
   let nativeRegPkgJsonPath = null;
   try {
@@ -46,9 +49,9 @@ if (isWindows) {
   } catch (e) {
     logMain.error('require.resolve(native-reg/package.json) error:', e);
   }
-  logMain.info('require.resolve(native-reg/package.json) =', nativeRegPkgJsonPath);
+  logMain.info('require.resolve(native-reg/package.json) =', nativeRegPkgJsonPath, typeof nativeRegPkgJsonPath);
 
-  const nativeRegRoot = nativeRegPkgJsonPath ? path.dirname(nativeRegPkgJsonPath) : null;
+  const nativeRegRoot = typeof nativeRegPkgJsonPath === 'string' ? path.dirname(nativeRegPkgJsonPath) : null;
   logMain.info('native-reg root =', nativeRegRoot);
 
   const buildRelease = nativeRegRoot
