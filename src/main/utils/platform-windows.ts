@@ -1,6 +1,6 @@
 import { logMain } from './logger';
 import { isWindows } from './platform';
-import reg from 'native-reg';
+import * as reg from 'native-reg';
 
 const USER_SUBKEY = 'Environment';
 const SYSTEM_SUBKEY = 'SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment';
