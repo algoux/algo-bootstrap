@@ -127,6 +127,7 @@ export function getWindowsUserPath(raw = false): string {
     const envMap = getWindowsEnvMap('user');
     const pathKey = Object.keys(envMap).find((key) => key.toUpperCase() === 'PATH');
     if (!pathKey) {
+      logMain.warn('[getWindowsUserPath] PATH key not found. envMap:', envMap);
       throw Error('PATH key not found');
     }
     res = envMap[pathKey];
@@ -144,6 +145,7 @@ export function getWindowsSystemPath(raw = false): string {
     const envMap = getWindowsEnvMap('system');
     const pathKey = Object.keys(envMap).find((key) => key.toUpperCase() === 'PATH');
     if (!pathKey) {
+      logMain.warn('[getWindowsUserPath] PATH key not found. envMap:', envMap);
       throw Error('PATH key not found');
     }
     res = envMap[pathKey];

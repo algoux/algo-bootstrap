@@ -110,19 +110,17 @@ class C_CppConfigurator extends React.Component<Props, State> {
         },
       });
       sm.track.timing('install', 'gcc', Date.now() - this._startAt);
+      this.complete(environments);
     } catch (e) {
       logRenderer.error(`[installGcc]`, e);
       msg.error('安装环境失败');
       sm.track.event('install', 'error', 'gcc', 1);
     } finally {
       clearTimeout(this._pollMingwSizeTimer!);
-      if (sm.platform.isWindows) {
-        getCurrentWindow().setProgressBar(-1);
-        this.setState({
-          mingwUncompressedSize: this.state.mingwTotalSize,
-        });
-      }
-      await this.complete(environments);
+      getCurrentWindow().setProgressBar(-1);
+      this.setState({
+        mingwUncompressedSize: this.state.mingwTotalSize,
+      });
     }
   };
 

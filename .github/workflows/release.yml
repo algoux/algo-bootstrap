@@ -110,7 +110,7 @@ jobs:
         with:
           path: ./artifacts
       - name: List artifacts
-        run: ls -la artifacts/
+        run: tree -a artifacts/
       - name: Install dependencies
         run: npm run ci:create-release
       - name: Upload version index to COS
