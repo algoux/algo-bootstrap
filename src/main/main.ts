@@ -7,7 +7,7 @@ import IPCKeys from 'common/configs/ipc';
 import _modules from '@/modules';
 import { checkRemainingDiskSpace } from '@/services/env-checker';
 import { logMain, log } from '@/utils/logger';
-import { currentPlatformArch, isMac, isPlatformArchIsSupported, isWindows } from '@/utils/platform';
+import { currentPlatformArch, isMac, isPlatformArchIsSupported } from '@/utils/platform';
 import constants from 'common/configs/constants';
 import req from '@/utils/request';
 import api from 'common/configs/apis';
@@ -29,68 +29,6 @@ logMain.info('[app.info]', app.getVersion(), currentPlatformArch, {
 // if (module.hot) {
 //   module.hot.accept();
 // }
-
-// DEBUG TEMP
-if (isWindows) {
-  console.log('require', require);
-  logMain.info('module.paths =', module.paths);
-  let nativeRegPath = null;
-  try {
-    nativeRegPath = require.resolve('native-reg');
-  } catch (e) {
-    logMain.error('require.resolve(native-reg) error:', e);
-  }
-  logMain.info('require.resolve(native-reg) =', nativeRegPath, typeof nativeRegPath);
-  logMain.info('require.resolve.paths(native-reg)', require.resolve.paths('native-reg'));
-
-  let nativeRegPkgJsonPath = null;
-  try {
-    nativeRegPkgJsonPath = require.resolve('native-reg/package.json');
-  } catch (e) {
-    logMain.error('require.resolve(native-reg/package.json) error:', e);
-  }
-  logMain.info('require.resolve(native-reg/package.json) =', nativeRegPkgJsonPath, typeof nativeRegPkgJsonPath);
-
-  const nativeRegRoot = typeof nativeRegPkgJsonPath === 'string' ? path.dirname(nativeRegPkgJsonPath) : null;
-  logMain.info('native-reg root =', nativeRegRoot);
-
-  const buildRelease = nativeRegRoot
-    ? path.join(nativeRegRoot, 'build', 'Release', 'reg.node')
-    : null;
-  const prebuildDir = nativeRegRoot
-    ? path.join(nativeRegRoot, 'prebuilds', `${process.platform}-${process.arch}`)
-    : null;
-
-  logMain.info('Looking for:', buildRelease);
-  logMain.info('Exists?    ', buildRelease ? fs.existsSync(buildRelease) : false);
-  logMain.info(
-    'Prebuilds? ',
-    prebuildDir
-      ? fs.existsSync(prebuildDir)
-        ? fs.readdirSync(prebuildDir)
-        : 'no prebuild dir'
-      : 'no prebuild dir',
-  );
-
-  if (buildRelease) {
-    try {
-      logMain.info('Trying direct require of build/Release/reg.node...');
-      const reg = require(buildRelease);
-      logMain.info('SUCCESS: Loaded reg.node directly!', reg);
-    } catch (err) {
-      console.error('FAILED direct require:', err);
-    }
-  }
-
-  try {
-    logMain.info("Trying normal require('native-reg')...");
-    const reg = require('native-reg');
-    logMain.info('SUCCESS: Loaded native-reg!', reg);
-  } catch (err) {
-    logMain.error('FAILED normal require:', err);
-  }
-}
-
 
 const PATH = process.env.PATH!;
 if (isMac && PATH.search('/usr/local/bin') === -1) {

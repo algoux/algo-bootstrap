@@ -48,6 +48,7 @@ module.exports = merge.smart(baseConfig, {
     'node:os': 'commonjs os',
     'jsonc-parser': 'commonjs jsonc-parser',
     'node-pty': 'commonjs node-pty',
+    'native-reg': 'commonjs native-reg',
   },
   module: {
     // rules: [{
