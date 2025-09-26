@@ -59,7 +59,9 @@ export function getWindowsEnvMap(
         console.log('[getWindowsEnvMap] debug after system env obj:', env);
         reg.closeKey(sysKey);
       }
-    } catch {}
+    } catch (e) {
+      logMain.error('[getWindowsEnvMap] error opening system key:', e);
+    }
   }
 
   if (pathInclude === 'user' || !pathInclude) {
@@ -89,7 +91,9 @@ export function getWindowsEnvMap(
         console.log('[getWindowsEnvMap] debug after user env obj:', env);
         reg.closeKey(userKey);
       }
-    } catch {}
+    } catch (e) {
+      logMain.error('[getWindowsEnvMap] error opening user key:', e);
+    }
   }
 
   console.log('[getWindowsEnvMap] debug merged env obj:', env);
