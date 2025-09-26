@@ -97,7 +97,7 @@ jobs:
         id: tag_info
         run: |
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          TAG_MESSAGE=$(git tag -l --format='%(contents:subject)' ${{ github.ref_name }})
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }})
           if [ -z "$TAG_MESSAGE" ]; then
             TAG_MESSAGE="No description provided for this release."
           fi
