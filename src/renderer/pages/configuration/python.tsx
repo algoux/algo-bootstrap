@@ -142,7 +142,7 @@ class PythonConfigurator extends React.Component<Props, State> {
           <div className="container --slide-left">
             <div className="content-block --pb-xl">
               <h1 className="top-title">安装 {formatMessage({ id: 'env.python' })}</h1>
-              <p>你已安装了Python，因此这只是一个仪式。请轻点「完成安装」。</p>
+              <p>你已安装了 Python，因此这只是一个仪式。请轻点「完成安装」。</p>
             </div>
           </div>
           <ActionBar
