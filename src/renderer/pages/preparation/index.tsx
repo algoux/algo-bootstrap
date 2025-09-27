@@ -19,7 +19,7 @@ class Preparation extends React.Component<Props, State> {
     return (
       <div>
         <div className="container --text-center --slide-left">
-          <h1 style={{ marginTop: '180px' }}>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
+          <h1 style={{ marginTop: 'calc(var(--extra-title-bar-height) + 180px)' }}>欢迎使用 {formatMessage({ id: 'app.name' })}</h1>
           {/* TODO 允许自定义向导名称，影响 renderer 和 sudo prompt */}
           <p style={{ marginTop: '30px' }}>
             接下来，<span>向导</span>将指引你完成安装和配置。
