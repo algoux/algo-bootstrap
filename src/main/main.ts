@@ -77,7 +77,8 @@ function createWindow() {
       contextIsolation: false,
       preload: path.join(__dirname, './preload.js'),
     },
-    title: `${constants.appName} v${app.getVersion()}`,
+    // title: `${constants.appName} v${app.getVersion()}`, // TODO revert
+    title: `${constants.appName}`,
     // show: false,
     ...(process.platform === 'darwin' && {
       vibrancy: 'sidebar',
@@ -254,7 +255,7 @@ const menuTemplate: MenuItem[] = [
           const options = {
             type: 'info' as const,
             message: '加入 QQ 群聊',
-            detail: '搜索群号码 445813999 以加入',
+            detail: '搜索群号码 445813999 以加入。',
           };
           focusedWindow && dialog.showMessageBox(focusedWindow || null, options);
         },

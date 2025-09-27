@@ -281,7 +281,7 @@ class Board extends React.Component<Props, State> {
             />
             <h2 className="secondary-title">帮助</h2>
             <p className="--mb-xs">
-              <ExternalLink href="https://ab.algoux.org/docs/getting_started/">
+              <ExternalLink href="https://docs.of.ab.algoux.cn/?utm_source=algo-bootstrap">
                 {formatMessage({ id: 'app.name' })} 使用指南
               </ExternalLink>
             </p>
