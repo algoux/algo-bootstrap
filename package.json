@@ -21,8 +21,10 @@
       ]
     },
     "dmg": {
+      "artifactName": "AlgoBootstrap-mac-${arch}-${version}.${ext}",
+      "title": "${productName} ${version}",
       "icon": "build/dmg.icns",
-      "artifactName": "AlgoBootstrap-mac-${arch}-${version}.${ext}"
+      "background": "build/dmg-background.tiff"
     },
     "win": {
       "target": [
