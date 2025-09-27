@@ -7,6 +7,7 @@ const releaseVersion = args[0];
 const baseDir = path.join(__dirname, '../release');
 
 const REMOTE_PATH = (process.env.COS_BASE_PATH || 'algo-bootstrap/release/') + releaseVersion + '/';
+const CDN_DOMAIN = 'https://cdn.algoux.cn/';
 
 async function listFiles(dir, maxDepth = Infinity, filter, _depth = 0) {
   if (_depth > 0 && _depth > maxDepth) {
@@ -63,6 +64,7 @@ async function main() {
       Key: remotePath,
       FilePath: path.join(baseDir, file),
     });
+    console.log(`Uploaded. CDN url: ${CDN_DOMAIN}${remotePath}`);
   }
 }
 
