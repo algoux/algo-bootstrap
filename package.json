@@ -12,7 +12,7 @@
   "build": {
     "productName": "Algo Bootstrap",
     "appId": "org.algoux.algo-bootstrap",
-    "copyright": "Copyright © 2019-2025 algoUX",
+    "copyright": "Copyright © 2019-present algoUX",
     "mac": {
       "category": "public.app-category.developer-tools",
       "identity": null,

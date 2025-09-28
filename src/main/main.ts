@@ -241,6 +241,14 @@ const menuTemplate: MenuItem[] = [
     label: '帮助', // 帮助
     role: 'help',
     submenu: [
+      !isMac
+        ? {
+            label: '关于',
+            click: () => {
+              app.showAboutPanel();
+            },
+          }
+        : undefined,
       {
         label: 'Algo Bootstrap 官方网站',
         click: () => {
@@ -260,7 +268,7 @@ const menuTemplate: MenuItem[] = [
           focusedWindow && dialog.showMessageBox(focusedWindow || null, options);
         },
       },
-    ],
+    ].filter(Boolean),
   },
 ];
 
@@ -363,6 +371,10 @@ if (!gotTheLock) {
   app.on('ready', async () => {
     // 设置应用语言为简体中文
     app.commandLine.appendSwitch('lang', 'zh-CN');
+
+    app.setAboutPanelOptions({
+      version: '',
+    });
 
     // 初始化 remote 模块
     initialize();
