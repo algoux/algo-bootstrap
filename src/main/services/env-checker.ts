@@ -181,6 +181,9 @@ export async function checkPython(): Promise<
 > {
   const PYTHON_REG = /^Python (.*)$/m;
   try {
+    if (isMac && !(await checkXCodeCLT())) {
+      return genNotInstalled();
+    }
     const { stdout, stderr } = await spawn('[checkPython]', 'python3', ['-V']);
     const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
     if (ver) {

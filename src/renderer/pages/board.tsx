@@ -20,6 +20,7 @@ import IPCKeys from 'common/configs/ipc';
 import pages from '@/configs/pages';
 import router from 'umi/router';
 import Loading from '@/components/Loading';
+import constants from 'common/configs/constants';
 
 export interface IBoardProps {}
 
@@ -281,8 +282,8 @@ class Board extends React.Component<Props, State> {
             />
             <h2 className="secondary-title">帮助</h2>
             <p className="--mb-xs">
-              <ExternalLink href="https://docs.of.ab.algoux.cn/?utm_source=algo-bootstrap">
-                {formatMessage({ id: 'app.name' })} 使用指南
+              <ExternalLink href={constants.docs}>
+                {formatMessage({ id: 'app.name' })} 使用文档
               </ExternalLink>
             </p>
 

@@ -132,56 +132,60 @@ nativeTheme.on('updated', () => updateAppTheme());
 type MenuItem = Electron.MenuItemConstructorOptions | Electron.MenuItem;
 
 const menuTemplate: MenuItem[] = [
-  {
-    label: '文件',
-    role: 'fileMenu',
-    submenu: [
-      {
-        label: '关闭窗口',
-        accelerator: 'CmdOrCtrl+W',
-        role: 'close',
-      },
-    ],
-  },
-  {
-    label: '编辑', // Edit
-    role: 'editMenu',
-    submenu: [
-      {
-        label: '撤销', // Undo
-        accelerator: 'CmdOrCtrl+Z',
-        role: 'undo',
-      },
-      {
-        label: '重做', // Redo
-        accelerator: 'Shift+CmdOrCtrl+Z',
-        role: 'redo',
-      },
-      {
-        type: 'separator',
-      },
-      {
-        label: '剪切', // Cut
-        accelerator: 'CmdOrCtrl+X',
-        role: 'cut',
-      },
-      {
-        label: isMac ? '拷贝' : '复制', // Copy
-        accelerator: 'CmdOrCtrl+C',
-        role: 'copy',
-      },
-      {
-        label: '粘贴', // Paste
-        accelerator: 'CmdOrCtrl+V',
-        role: 'paste',
-      },
-      {
-        label: '全选', // Select All
-        accelerator: 'CmdOrCtrl+A',
-        role: 'selectAll',
-      },
-    ],
-  },
+  isMac
+    ? {
+        label: '文件',
+        role: 'fileMenu',
+        submenu: [
+          {
+            label: '关闭窗口',
+            accelerator: 'CmdOrCtrl+W',
+            role: 'close',
+          },
+        ],
+      }
+    : undefined,
+  isMac
+    ? {
+        label: '编辑', // Edit
+        role: 'editMenu',
+        submenu: [
+          {
+            label: '撤销', // Undo
+            accelerator: 'CmdOrCtrl+Z',
+            role: 'undo',
+          },
+          {
+            label: '重做', // Redo
+            accelerator: 'Shift+CmdOrCtrl+Z',
+            role: 'redo',
+          },
+          {
+            type: 'separator',
+          },
+          {
+            label: '剪切', // Cut
+            accelerator: 'CmdOrCtrl+X',
+            role: 'cut',
+          },
+          {
+            label: isMac ? '拷贝' : '复制', // Copy
+            accelerator: 'CmdOrCtrl+C',
+            role: 'copy',
+          },
+          {
+            label: '粘贴', // Paste
+            accelerator: 'CmdOrCtrl+V',
+            role: 'paste',
+          },
+          {
+            label: '全选', // Select All
+            accelerator: 'CmdOrCtrl+A',
+            role: 'selectAll',
+          },
+        ],
+      }
+    : undefined,
   // {
   //   label: '显示', // View
   //   submenu: [{
@@ -226,17 +230,19 @@ const menuTemplate: MenuItem[] = [
       },
     ],
   },
-  {
-    label: '窗口', // Window
-    role: 'window',
-    submenu: [
-      {
-        label: '最小化', // Minimize
-        accelerator: 'CmdOrCtrl+M',
-        role: 'minimize',
-      },
-    ],
-  },
+  isMac
+    ? {
+        label: '窗口', // Window
+        role: 'window',
+        submenu: [
+          {
+            label: '最小化', // Minimize
+            accelerator: 'CmdOrCtrl+M',
+            role: 'minimize',
+          },
+        ],
+      }
+    : undefined,
   {
     label: '帮助', // 帮助
     role: 'help',
@@ -257,6 +263,13 @@ const menuTemplate: MenuItem[] = [
         },
       },
       {
+        label: '使用文档',
+        click: () => {
+          track.event('app', 'openDocs');
+          shell.openExternal(constants.docs);
+        },
+      },
+      {
         label: '加入 QQ 群聊',
         click: (_item, focusedWindow) => {
           track.event('app', 'openQQGroup');
@@ -268,9 +281,16 @@ const menuTemplate: MenuItem[] = [
           focusedWindow && dialog.showMessageBox(focusedWindow || null, options);
         },
       },
+      {
+        label: '探索 algoUX 产品家族',
+        click: () => {
+          track.event('app', 'openAlgoUX');
+          shell.openExternal(constants.algoUXHomePage);
+        },
+      },
     ].filter(Boolean),
   },
-];
+].filter(Boolean) as MenuItem[];
 
 function addUpdateMenuItems(items, position) {
   if (process.mas) {
