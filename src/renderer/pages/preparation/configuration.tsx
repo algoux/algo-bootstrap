@@ -399,14 +399,17 @@ class Configuration extends React.Component<Props, State> {
     if (needInstallVSIXIds.length > 0) {
       latestVersionItems.push(`${needInstallVSIXIds.length} 个扩展`);
     }
+    const partialInstalled =
+      needInstall &&
+      ((requiredResourcesIds.includes(ResourceId['deps.cppcheck']) && cppcheck.installed) ||
+        (requiredResourcesIds.includes(ResourceId['deps.cpplint']) && cpplint.installed) ||
+        installedVSIXIds.length > 0);
 
     return {
       enabled: true,
-      installed: (!needInstall
-        ? true
-        : needInstallCppcheck && needInstallCpplint && installedVSIXIds.length === 0
-          ? false
-          : 'partial') as boolean | 'partial',
+      installed: (!needInstall ? true : partialInstalled ? 'partial' : false) as
+        | boolean
+        | 'partial',
       version: versionItems.join(', ') || undefined,
       latestVersion: latestVersionItems.join('、') || undefined,
       options,
