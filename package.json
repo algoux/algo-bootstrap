@@ -2,12 +2,13 @@
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
   "version": "1.0.0-alpha.13",
-  "description": "A Bootstrap for algorithm beginners",
+  "description": "A Bootstrap for programming beginners",
   "main": "./dist/main/main.js",
   "author": {
-    "name": "bLue",
-    "url": "https://github.com/dreamerblue"
+    "name": "algoUX",
+    "url": "https://algoux.org/"
   },
+  "homepage": "https://ab.algoux.cn/",
   "private": true,
   "build": {
     "productName": "Algo Bootstrap",
@@ -23,7 +24,6 @@
     "dmg": {
       "artifactName": "AlgoBootstrap-mac-${arch}-${version}.${ext}",
       "title": "${productName} ${version}",
-      "icon": "build/dmg.icns",
       "background": "build/dmg-background.tiff"
     },
     "win": {

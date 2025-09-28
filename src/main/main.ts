@@ -350,7 +350,7 @@ if (process.platform === 'darwin') {
 
 if (process.platform === 'win32') {
   const helpMenu = menuTemplate[menuTemplate.length - 1].submenu;
-  addUpdateMenuItems(helpMenu, 0);
+  addUpdateMenuItems(helpMenu, 1);
 }
 
 // app start
@@ -373,7 +373,9 @@ if (!gotTheLock) {
     app.commandLine.appendSwitch('lang', 'zh-CN');
 
     app.setAboutPanelOptions({
+      applicationVersion: app.getVersion(),
       version: '',
+      copyright: 'Copyright © 2019-present algoUX',
     });
 
     // 初始化 remote 模块
