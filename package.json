@@ -89,8 +89,12 @@
     "pack:win-arm64": "electron-builder --publish=never --win --arm64",
     "pack": "electron-builder --publish=never",
     "ci:create-release": "npm i --no-save cos-nodejs-sdk-v5",
+    "ci:docs": "npm i --no-save vitepress vitepress-plugin-lightbox",
     "prettier": "prettier --list-different \"./**/*.{ts,tsx,js,jsx,less}\"",
-    "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'"
+    "line-count": "cloc src/ --exclude-dir=node_modules,.umi,.umi-production --fullpath --not-match-f='/(assets)/'",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [
     "programming",
@@ -180,6 +184,7 @@
     "electron-debug": "^4.1.0",
     "electron-webpack": "^2.8.2",
     "electron-webpack-ts": "^4.0.1",
+    "medium-zoom": "^1.1.0",
     "moment-locales-webpack-plugin": "^1.2.0",
     "monaco-editor": "^0.50.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
@@ -199,6 +204,8 @@
     "umi": "^2.9.0",
     "umi-plugin-react": "^1.8.0",
     "umi-types": "^0.3.0",
+    "vitepress": "^2.0.0-alpha.12",
+    "vitepress-plugin-lightbox": "^1.0.3",
     "webpack": "^4.47.0",
     "webpack-cli": "^3.3.12",
     "webpack-merge": "^4.2.2"
