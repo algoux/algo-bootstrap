@@ -26,7 +26,6 @@ abc new-dir
 abc /Users/Mutsumi/memory/CRYCHIC
 abc C:\\Users\\Mortis\\None
 
-
 # 场景：当前在 `cf/1000` 目录，为下一场比赛快速初始化新目录：
 abc ../1001
 
