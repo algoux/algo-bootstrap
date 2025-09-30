@@ -36,7 +36,7 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "调式 C/C++ 程序 (Algo Bootstrap)",
+        "name": "调试 C/C++ 程序 (Algo Bootstrap)",
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/.exe",
