@@ -77,8 +77,8 @@ function createWindow() {
       contextIsolation: false,
       preload: path.join(__dirname, './preload.js'),
     },
-    // title: `${constants.appName} v${app.getVersion()}`, // TODO revert
-    title: `${constants.appName}`,
+    title: `${constants.appName} v${app.getVersion()}`, // TODO revert
+    // title: `${constants.appName}`,
     // show: false,
     ...(process.platform === 'darwin' && {
       vibrancy: 'sidebar',
