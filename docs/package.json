@@ -1,0 +1,18 @@
+{
+  "name": "algo-bootstrap-docs",
+  "version": "1.0.0",
+  "private": true,
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^2.0.0-alpha.12",
+    "vitepress-plugin-lightbox": "^1.0.3"
+  }
+}
