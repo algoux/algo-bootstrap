@@ -8,6 +8,7 @@
   "files.exclude": {
     "**/.algo-bootstrap*": true
   },
+  "terminal.integrated.stickyScroll.enabled": false,
   "cSpell.allowCompoundWords": true,
   "C_Cpp.default.compilerPath": "<%- gcc.path %>",
   "C_Cpp.default.cStandard": "c11",

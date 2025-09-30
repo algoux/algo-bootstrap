@@ -134,7 +134,7 @@ class Board extends React.Component<Props, State> {
 
   deleteProject = async (projectId: string) => {
     if (
-      await msg.confirm('删除这个文件夹？', '这个操作仅将其从列表中移除，不会删除文件夹内的文件')
+      await msg.confirm('删除这个文件夹？', '这个操作仅将其从列表中移除，不会删除文件夹内的文件。')
     ) {
       sm.track.event('use', 'deleteProject');
       this.props.dispatch({
