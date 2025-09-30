@@ -4,6 +4,7 @@ import lightbox from 'vitepress-plugin-lightbox';
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Algo Bootstrap 使用文档',
+  description: '一个现代的编程环境配置器',
   lang: 'zh-CN',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
