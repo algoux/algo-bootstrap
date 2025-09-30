@@ -5,7 +5,6 @@ import lightbox from 'vitepress-plugin-lightbox';
 export default defineConfig({
   title: 'Algo Bootstrap 使用文档',
   lang: 'zh-CN',
-  publicPath: 'https://cdn.example.com/assets/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
