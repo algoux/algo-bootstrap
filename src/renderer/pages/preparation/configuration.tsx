@@ -30,6 +30,7 @@ import { cloneDeep } from 'lodash';
 import api from 'common/configs/apis';
 import { IIpcDownloadRequest } from 'common/typings/ipc';
 import pages from '@/configs/pages';
+import track from '@/utils/track';
 
 enum ResourceStatus {
   PENDING = 'PENDING',
@@ -497,7 +498,7 @@ class Configuration extends React.Component<Props, State> {
     ipc.answerMain(IPCKeys.downloadError, async (res) => {
       if (res.downloadTaskId === this.state.downloadTaskId) {
         logRenderer.error('[configuration] downloadError:', res);
-        sm.track.event('download', 'error');
+        track.event('download', 'error');
       }
     });
     ipc.answerMain(IPCKeys.downloadFinished, async (res) => {

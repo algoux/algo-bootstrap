@@ -17,6 +17,7 @@ import { windowProgress } from '@/utils/native';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 import path from 'path';
 import { ResourceId } from 'common/configs/resources';
+import track from '@/utils/track';
 
 export interface IVSCodeConfiguratorProps {}
 
@@ -75,13 +76,13 @@ class VSCodeConfigurator extends React.Component<Props, State> {
         },
       });
       windowProgress.end();
-      sm.track.timing('install', 'vscode', Date.now() - _startAt);
+      track.timing('installVscode', Date.now() - _startAt);
       await this.complete(environments);
     } catch (e) {
       windowProgress.end();
       logRenderer.error(`[installVSCode]`, e);
       msg.error('安装环境失败');
-      sm.track.event('install', 'error', 'vscode', 1);
+      track.event('install', 'error', 'vscode', 1);
     }
   };
 

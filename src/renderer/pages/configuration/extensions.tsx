@@ -10,7 +10,6 @@ import {
   getRequiredResourceIdsByEnvComponentKey,
 } from '@/utils/env';
 import { DispatchProps } from '@/typings/props';
-import sm from '@/utils/modules';
 import { windowProgress } from '@/utils/native';
 import { ResourceId, VSIXIdMap, VSIXIdMapReverse } from 'common/configs/resources';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
@@ -23,6 +22,7 @@ import Terminal from '@/components/Terminal';
 import Loading from '@/components/Loading';
 import { Icon } from 'antd';
 import { sleep } from 'common/utils/misc';
+import track from '@/utils/track';
 
 type ItemConfigStatus = 'pending' | 'processing' | 'done' | 'error';
 
@@ -188,14 +188,14 @@ class ExtensionsConfigurator extends React.Component<Props, State> {
       this.setState({
         installingVsixIndex: -1,
       });
-      sm.track.timing('install', 'vsix', Date.now() - _startAt);
+      track.timing('installVsix', Date.now() - _startAt);
       this.setState({
         vsixStataus: 'done',
       });
     } catch (e) {
       logRenderer.error(`[installAllVsixes] failed:`, e);
       msg.error('安装扩展失败，请安装 VSCode 最新版本后重试');
-      sm.track.event('install', 'error', 'vsix', 1);
+      track.event('install', 'error', 'vsix', 1);
       this.setState({
         vsixStataus: 'error',
       });

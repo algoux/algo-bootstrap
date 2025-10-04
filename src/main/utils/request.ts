@@ -3,7 +3,7 @@ import constants from 'common/configs/constants';
 // import api from 'common/configs/apis';
 import moment from 'moment';
 import { logMain } from '@/utils/logger';
-import { genUA } from './ua';
+import { app, session } from 'electron';
 
 let requestTaskId = 1;
 
@@ -88,10 +88,16 @@ function parseResponse(response: Response, forceType?: 'json' | 'text' | 'buffer
 }
 
 function initGot(): Got {
+  let ua = '';
+  try {
+    ua = session.defaultSession.getUserAgent();
+  } catch (e) {
+    ua = `AlgoBootstrap/${app.getVersion()}`;
+  }
   const gotInstance: Got = got.extend({
     // prefixUrl: api.base,
     headers: {
-      'user-agent': genUA(),
+      'user-agent': ua,
     },
     timeout: {
       request: constants.requestTimeout,

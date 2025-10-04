@@ -1,5 +1,5 @@
 import { History } from 'history';
-import sm from '@/utils/modules';
+import track from '@/utils/track';
 
 type CurrentState = IGlobalState;
 
@@ -14,7 +14,7 @@ export default {
   subscriptions: {
     setup({ dispatch, history }: { dispatch: Function; history: History }) {
       return history.listen((location) => {
-        sm.track.pageview(location.pathname);
+        track.pageview(location.pathname);
       });
     },
   },

@@ -1,4 +1,5 @@
 import { createLogger } from 'redux-logger';
+import track from './utils/track';
 
 let extraConfig = {};
 
@@ -17,3 +18,5 @@ export const dva = {
     ...extraConfig,
   },
 };
+
+track.init();

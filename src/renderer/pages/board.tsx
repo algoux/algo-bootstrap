@@ -21,6 +21,7 @@ import pages from '@/configs/pages';
 import router from 'umi/router';
 import Loading from '@/components/Loading';
 import constants from 'common/configs/constants';
+import track from '@/utils/track';
 
 export interface IBoardProps {}
 
@@ -70,7 +71,7 @@ class Board extends React.Component<Props, State> {
         }
         if (init) {
           logRenderer.info('[initializeProject]', projectPath);
-          sm.track.event('use', 'initProject');
+          track.event('use', 'initProject');
           await sm.vsc.genProjectFiles(projectPath);
         } else {
           return null;
@@ -136,7 +137,7 @@ class Board extends React.Component<Props, State> {
     if (
       await msg.confirm('删除这个文件夹？', '这个操作仅将其从列表中移除，不会删除文件夹内的文件。')
     ) {
-      sm.track.event('use', 'deleteProject');
+      track.event('use', 'deleteProject');
       this.props.dispatch({
         type: 'projects/deleteProject',
         payload: {

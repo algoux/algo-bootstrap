@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import { app, BrowserWindow, nativeTheme, Menu, shell, dialog } from 'electron';
+import { app, BrowserWindow, nativeTheme, Menu, shell, dialog, session } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import { ipcMain as ipc } from 'electron-better-ipc';
@@ -14,12 +14,13 @@ import api from 'common/configs/apis';
 import { compare } from 'compare-versions';
 import { filesize } from 'filesize';
 import fs from 'fs-extra';
-import track from './utils/track';
 import { initialize, enable } from '@electron/remote/main';
 import { getPath } from './utils/path';
 import { PathKey } from 'common/configs/paths';
 import { ElectronDownloadManager } from 'electron-dl-manager';
 import { IPCDownloadItemStatus } from 'common/typings/ipc';
+import { appConf } from './utils/store';
+import { v4 as uuidv4 } from 'uuid';
 
 logMain.info('[app.start]', process.env.NODE_ENV);
 logMain.info('[app.info]', app.getVersion(), currentPlatformArch, {
@@ -122,7 +123,6 @@ function createWindow() {
 function updateAppTheme() {
   const isDarkMode = nativeTheme.shouldUseDarkColors;
   const theme = isDarkMode ? 'dark' : 'light';
-  track.event('app', 'setTheme', theme);
   logMain.info('[updateAppTheme] theme:', theme);
   // nativeTheme.themeSource = theme;
 }
@@ -224,7 +224,7 @@ const menuTemplate: MenuItem[] = [
       {
         label: '打开日志目录',
         click: (_item, focusedWindow) => {
-          track.event('app', 'openLogDir');
+          // track.event('app', 'openLogDir');
           openLogDir();
         },
       },
@@ -258,21 +258,21 @@ const menuTemplate: MenuItem[] = [
       {
         label: 'Algo Bootstrap 官方网站',
         click: () => {
-          track.event('app', 'openSite');
+          // track.event('app', 'openSite');
           shell.openExternal(constants.site);
         },
       },
       {
         label: '使用文档',
         click: () => {
-          track.event('app', 'openDocs');
+          // track.event('app', 'openDocs');
           shell.openExternal(constants.docs);
         },
       },
       {
         label: '加入 QQ 群聊',
         click: (_item, focusedWindow) => {
-          track.event('app', 'openQQGroup');
+          // track.event('app', 'openQQGroup');
           const options = {
             type: 'info' as const,
             message: '加入 QQ 群聊',
@@ -284,7 +284,7 @@ const menuTemplate: MenuItem[] = [
       {
         label: '探索 algoUX 产品家族',
         click: () => {
-          track.event('app', 'openAlgoUX');
+          // track.event('app', 'openAlgoUX');
           shell.openExternal(constants.algoUXHomePage);
         },
       },
@@ -302,7 +302,7 @@ function addUpdateMenuItems(items, position) {
       label: '检查更新',
       key: 'checkForUpdate',
       click: () => {
-        track.event('app', 'checkUpdate');
+        // track.event('app', 'checkUpdate');
         checkUpdate();
       },
     },
@@ -397,6 +397,19 @@ if (!gotTheLock) {
       version: '',
       copyright: 'Copyright © 2019-present algoUX',
     });
+
+    let uid = appConf.get('uid');
+    if (!uid) {
+      uid = appConf.get('uid') || uuidv4();
+      appConf.set('uid', uid);
+    }
+
+    try {
+      const ua = session.defaultSession.getUserAgent() + ` AlgoBootstrap/${app.getVersion()}`;
+      session.defaultSession.setUserAgent(ua);
+    } catch (e) {
+      logMain.error('[setUserAgent] error:', e);
+    }
 
     // 初始化 remote 模块
     initialize();
@@ -729,4 +742,4 @@ async function openLogDir() {
   }
 }
 
-track.event('app', 'start', app.getVersion(), 1);
+// track.event('app', 'start', app.getVersion(), 1);

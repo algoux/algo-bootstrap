@@ -83,6 +83,7 @@ export default {
   },
   define: {
     'process.env.NODE_ENV': process.env.NODE_ENV,
+    'process.env.GA_TC': process.env.GA_TC,
   },
   extraBabelIncludes: [/monaco-editor/, /xterm/, /electron-log/],
   extraBabelPlugins: [
