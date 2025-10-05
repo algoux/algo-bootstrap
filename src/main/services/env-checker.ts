@@ -106,9 +106,15 @@ export async function checkXCodeCLT(): Promise<boolean> {
 
 export async function checkGcc(): Promise<ICheckEnvironmentResult<ICheckEnvironmentResultMetaGcc>> {
   const GCC_REG = /^gcc version (.*)$/m;
+  const GCC_REG_ZH = /^gcc 版本 (.*)$/m;
   const CLANG_REG = /clang version (.*)$/m;
+  const CLANG_REG_ZH = /clang 版本 (.*)$/m;
   const verMatcher = (ver: string) => {
-    const fullVer = matchOne(GCC_REG, ver) || matchOne(CLANG_REG, ver);
+    const fullVer =
+      matchOne(GCC_REG, ver) ||
+      matchOne(GCC_REG_ZH, ver) ||
+      matchOne(CLANG_REG, ver) ||
+      matchOne(CLANG_REG_ZH, ver);
     if (!fullVer) {
       return null;
     }
