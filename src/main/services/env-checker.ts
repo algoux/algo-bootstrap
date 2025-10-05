@@ -10,6 +10,7 @@ import { matchOne } from 'common/utils/regexp';
 import { parseStringFromProcessOutput } from 'common/utils/format';
 import { VSIXIds } from 'common/configs/resources';
 import { getAppVscProfileDirPath, getVscProfileNameConfig } from '@/utils/vsc';
+import { rearrangeWindowsPath } from '@/utils/platform-windows';
 
 const emptyEnvironments = genEmptyEnvironments();
 
@@ -199,6 +200,7 @@ export async function checkPython(): Promise<
       });
     }
   } catch (e) {}
+
   try {
     const { stdout, stderr } = await spawn('[checkPython]', 'python', ['-V']);
     const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
@@ -209,6 +211,19 @@ export async function checkPython(): Promise<
       });
     }
   } catch (e) {}
+
+  // 尝试将 WindowsApps 的假 python 挪到最后，重试一次
+  if (isWindows && rearrangeWindowsPath()) {
+    const { stdout, stderr } = await spawn('[checkPython]', 'python3', ['-V']);
+    const ver = matchOne(PYTHON_REG, parseStringFromProcessOutput(stderr || stdout));
+    if (ver) {
+      return genInstalled(ver, await findPath('python3'), {
+        command: 'python3',
+        isPython3: /3\.\d+\.\d+/.test(ver),
+      });
+    }
+  }
+
   return genNotInstalled();
 }
 

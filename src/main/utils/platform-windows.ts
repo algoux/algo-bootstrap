@@ -210,3 +210,19 @@ export function refreshWindowsPath() {
   process.env.PATH = newPath;
   logMain.info(`[refreshWindowsPath]`, newPath);
 }
+
+export function rearrangeWindowsPath() {
+  if (isWindows && process.env.PATH?.indexOf('\\WindowsApps') >= 0) {
+    const PATHS = process.env.PATH.split(';').filter(Boolean);
+    const windowsAppsPathItems = PATHS.filter((path) => path.indexOf('\\WindowsApps') >= 0);
+    const newPath = [
+      ...PATHS.filter((path) => path.indexOf('\\WindowsApps') === -1),
+      ...windowsAppsPathItems,
+    ].join(';');
+    logMain.info(`[rearrangeWindowsPath] new PATH:`, newPath);
+    process.env.PATH = newPath;
+    logMain.info(`[rearrangeWindowsPath] env.PATH after rearrange:`, process.env.PATH);
+    return newPath;
+  }
+  return null;
+}
