@@ -22,7 +22,7 @@ import Terminal from '@/components/Terminal';
 import Loading from '@/components/Loading';
 import { Icon } from 'antd';
 import { sleep } from 'common/utils/misc';
-import track from '@/utils/track';
+import sm from '@/utils/modules';
 
 type ItemConfigStatus = 'pending' | 'processing' | 'done' | 'error';
 
@@ -188,14 +188,14 @@ class ExtensionsConfigurator extends React.Component<Props, State> {
       this.setState({
         installingVsixIndex: -1,
       });
-      track.timing('installVsix', Date.now() - _startAt);
+      sm.track.timing('installVsix', Date.now() - _startAt);
       this.setState({
         vsixStataus: 'done',
       });
     } catch (e) {
       logRenderer.error(`[installAllVsixes] failed:`, e);
       msg.error('安装扩展失败，请安装 VSCode 最新版本后重试');
-      track.event('install', 'error', 'vsix', 1);
+      sm.track.event('install', 'error', 'vsix', 1);
       this.setState({
         vsixStataus: 'error',
       });

@@ -52,6 +52,7 @@ jobs:
         run: npm run build
         env:
           GA_TC: ${{ secrets.GA_TC }}
+          GA_MP: ${{ secrets.GA_MP }}
       - name: Build for ${{ matrix.platform }}-${{ matrix.arch }}
         run: npm run pack
         env:

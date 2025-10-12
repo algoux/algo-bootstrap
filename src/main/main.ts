@@ -19,8 +19,8 @@ import { getPath } from './utils/path';
 import { PathKey } from 'common/configs/paths';
 import { ElectronDownloadManager } from 'electron-dl-manager';
 import { IPCDownloadItemStatus } from 'common/typings/ipc';
-import { appConf } from './utils/store';
-import { v4 as uuidv4 } from 'uuid';
+import track from './utils/track';
+import { setupGracefulExit } from './utils/graceful-exit';
 
 logMain.info('[app.start]', process.env.NODE_ENV);
 logMain.info('[app.info]', app.getVersion(), currentPlatformArch, {
@@ -224,8 +224,29 @@ const menuTemplate: MenuItem[] = [
       {
         label: '打开日志目录',
         click: (_item, focusedWindow) => {
-          // track.event('app', 'openLogDir');
+          track.event('app', 'openLogDir');
           openLogDir();
+        },
+      },
+      {
+        label: '切换开发者工具',
+        accelerator: (() => {
+          if (process.platform === 'darwin') {
+            return 'Alt+Command+I';
+          } else {
+            return 'Ctrl+Shift+I';
+          }
+        })(),
+        click: (_item, _focusedWindow) => {
+          if (mainWindow) {
+            if (mainWindow.webContents.isDevToolsOpened()) {
+              mainWindow.webContents.closeDevTools();
+            } else {
+              mainWindow.webContents.openDevTools({
+                mode: 'detach',
+              });
+            }
+          }
         },
       },
     ],
@@ -258,21 +279,21 @@ const menuTemplate: MenuItem[] = [
       {
         label: 'Algo Bootstrap 官方网站',
         click: () => {
-          // track.event('app', 'openSite');
+          track.event('app', 'openSite');
           shell.openExternal(constants.site);
         },
       },
       {
         label: '使用文档',
         click: () => {
-          // track.event('app', 'openDocs');
+          track.event('app', 'openDocs');
           shell.openExternal(constants.docs);
         },
       },
       {
         label: '加入 QQ 群聊',
         click: (_item, focusedWindow) => {
-          // track.event('app', 'openQQGroup');
+          track.event('app', 'openQQGroup');
           const options = {
             type: 'info' as const,
             message: '加入 QQ 群聊',
@@ -284,7 +305,7 @@ const menuTemplate: MenuItem[] = [
       {
         label: '探索 algoUX 产品家族',
         click: () => {
-          // track.event('app', 'openAlgoUX');
+          track.event('app', 'openAlgoUX');
           shell.openExternal(constants.algoUXHomePage);
         },
       },
@@ -302,7 +323,7 @@ function addUpdateMenuItems(items, position) {
       label: '检查更新',
       key: 'checkForUpdate',
       click: () => {
-        // track.event('app', 'checkUpdate');
+        track.event('app', 'checkUpdate');
         checkUpdate();
       },
     },
@@ -398,18 +419,14 @@ if (!gotTheLock) {
       copyright: 'Copyright © 2019-present algoUX',
     });
 
-    let uid = appConf.get('uid');
-    if (!uid) {
-      uid = appConf.get('uid') || uuidv4();
-      appConf.set('uid', uid);
-    }
-
     try {
       const ua = session.defaultSession.getUserAgent() + ` AlgoBootstrap/${app.getVersion()}`;
       session.defaultSession.setUserAgent(ua);
     } catch (e) {
       logMain.error('[setUserAgent] error:', e);
     }
+
+    track.init();
 
     // 初始化 remote 模块
     initialize();
@@ -465,6 +482,12 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+async function cleanup() {
+  await track.beforeExit();
+}
+
+setupGracefulExit(cleanup);
 
 app.on('quit', () => {
   logMain.info('[app.quit]');
@@ -742,4 +765,8 @@ async function openLogDir() {
   }
 }
 
-// track.event('app', 'start', app.getVersion(), 1);
+track.event('app', 'start', app.getVersion(), 1);
+
+process.on('uncaughtException', (err) => {
+  logMain.error('[uncaughtException]', err);
+});

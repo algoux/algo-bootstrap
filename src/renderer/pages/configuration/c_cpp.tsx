@@ -18,7 +18,6 @@ import { ResourceId } from 'common/configs/resources';
 import path from 'path';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 import pages from '@/configs/pages';
-import track from '@/utils/track';
 
 export interface IC_CppConfiguratorProps {}
 
@@ -110,12 +109,12 @@ class C_CppConfigurator extends React.Component<Props, State> {
           filename: path.basename(this.props.resourceIndex[ResourceId.c_cpp].path),
         },
       });
-      track.timing('installCcc', Date.now() - this._startAt);
+      sm.track.timing('installCcc', Date.now() - this._startAt);
       this.complete(environments);
     } catch (e) {
       logRenderer.error(`[installGcc]`, e);
       msg.error('安装环境失败');
-      track.event('install', 'error', 'gcc', 1);
+      sm.track.event('install', 'error', 'gcc', 1);
     } finally {
       clearTimeout(this._pollMingwSizeTimer!);
       getCurrentWindow().setProgressBar(-1);

@@ -15,7 +15,6 @@ import { windowProgress } from '@/utils/native';
 import { EnvComponentModule, EnvComponentModuleConfigStatus } from '@/typings/env';
 import path from 'path';
 import { ResourceId } from 'common/configs/resources';
-import track from '@/utils/track';
 
 export interface IPythonConfigurator {}
 
@@ -69,7 +68,7 @@ class PythonConfigurator extends React.Component<Props, State> {
         },
       });
       windowProgress.end();
-      track.timing('installPython', Date.now() - _startAt);
+      sm.track.timing('installPython', Date.now() - _startAt);
       await this.complete(environments);
     } catch (e) {
       windowProgress.end();
@@ -78,7 +77,7 @@ class PythonConfigurator extends React.Component<Props, State> {
       this.setState({
         showSkipButton: true,
       });
-      track.event('install', 'error', 'python', 1);
+      sm.track.event('install', 'error', 'python', 1);
     }
   };
 
