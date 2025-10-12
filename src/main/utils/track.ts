@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import got from 'got';
 import { app, nativeTheme, screen } from 'electron';
 import os from 'os';
+import pTimeout from 'p-timeout';
 import { appConf } from './store';
 import { logMain } from './logger';
 
@@ -121,7 +122,7 @@ class Analytics {
       `${this.baseURL}${this.collectURL}?measurement_id=${this.trackingId}&api_secret=${this.secretKey}`,
       {
         json: payload,
-        timeout: 10 * 1000,
+        timeout: 30 * 1000,
       },
     );
   }
@@ -183,11 +184,14 @@ class Tracker {
   async beforeExit() {
     logMain.info('[track.beforeExit]');
     if (this.lastPageView) {
-      await this._event('page_view', {
-        page_location: this.lastPageView.page_location,
-        page_title: this.lastPageView.page_title,
-        engagement_time_msec: Date.now() - this.lastPageView._ts,
-      });
+      await pTimeout(
+        this._event('page_view', {
+          page_location: this.lastPageView.page_location,
+          page_title: this.lastPageView.page_title,
+          engagement_time_msec: Date.now() - this.lastPageView._ts,
+        }),
+        1000,
+      );
     }
   }
 
