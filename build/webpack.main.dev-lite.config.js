@@ -42,9 +42,6 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env.GA_TC': JSON.stringify(process.env.GA_TC || ''),
-    }),
     new webpack.IgnorePlugin({ resourceRegExp: /^@aws-sdk\/client-s3$/ }),
     new CopyWebpackPlugin({
       patterns: [

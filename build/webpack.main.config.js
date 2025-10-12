@@ -94,10 +94,12 @@ module.exports = merge.smart(baseConfig, {
     ],
   },
   plugins: [
-    // new webpack.DefinePlugin({
-    //   'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-    //   // __static: JSON.stringify(path.join(__dirname, '../static')),
-    // }),
+    new webpack.DefinePlugin({
+      // 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      // __static: JSON.stringify(path.join(__dirname, '../static')),
+      'process.env.GA_TC': JSON.stringify(process.env.GA_TC || ''),
+      'process.env.GA_MP': JSON.stringify(process.env.GA_MP || ''),
+    }),
     new webpack.IgnorePlugin({ resourceRegExp: /^@aws-sdk\/client-s3$/ }),
     new CopyWebpackPlugin({
       patterns: [
