@@ -193,7 +193,7 @@ class Tracker {
       logMain.info('[track.init] initializing GA');
       const publicIp = await this.fetchPublicIp();
       this.analytics = new Analytics(process.env.GA_TC, process.env.GA_MP, uid, uuidv4(), publicIp);
-      this.analytics.setUserProperties({
+      const userProperties = {
         app_version: {
           value: app.getVersion(),
         },
@@ -203,7 +203,9 @@ class Tracker {
         theme_source: {
           value: nativeTheme.themeSource,
         },
-      });
+      };
+      this.analytics.setUserProperties(userProperties);
+      logMain.info('[track.init] user properties:', userProperties);
       this.queue.forEach(({ eventName, params }) => {
         this._event(eventName, params);
       });
