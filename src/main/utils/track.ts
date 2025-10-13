@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import got from 'got';
 import { app, nativeTheme, screen } from 'electron';
 import os from 'os';
+import net from 'net';
 import pTimeout from 'p-timeout';
 import { appConf } from './store';
 import { logMain } from './logger';
@@ -28,15 +29,23 @@ class Analytics {
   private customParams: Record<string, unknown> = {};
   private userProperties: Record<string, unknown> | null = null;
   private device: DeviceInfo;
+  private publicIp: string = '';
 
   private baseURL = 'https://www.google-analytics.com/mp';
   private collectURL = '/collect';
 
-  constructor(trackingId: string, secretKey: string, clientId?: string, sessionId?: string) {
+  constructor(
+    trackingId: string,
+    secretKey: string,
+    clientId?: string,
+    sessionId?: string,
+    publicIp?: string,
+  ) {
     this.trackingId = trackingId;
     this.secretKey = secretKey;
     this.clientId = clientId;
     this.sessionId = sessionId;
+    this.publicIp = publicIp;
 
     const platformMap: Record<string, string> = {
       darwin: 'MacOS',
@@ -99,24 +108,26 @@ class Analytics {
   }
 
   event(eventName: string, params?: Record<string, unknown>) {
-    const payload = {
-      client_id: this.clientId,
-      events: [
-        {
-          name: eventName,
-          params: {
-            session_id: this.sessionId,
-            ...this.customParams,
-            ...params,
+    const payload = JSON.parse(
+      JSON.stringify({
+        client_id: this.clientId,
+        events: [
+          {
+            name: eventName,
+            params: {
+              session_id: this.sessionId,
+              ...this.customParams,
+              ...params,
+            },
           },
-        },
-      ],
-      device: this.device,
-    };
+        ],
+        user_properties: this.userProperties,
+        device: this.device,
+        ip_override: this.publicIp,
+      }),
+    );
 
-    if (this.userProperties) {
-      Object.assign(payload, { user_properties: this.userProperties });
-    }
+    console.log(' ??? payload:', payload);
 
     return got.post(
       `${this.baseURL}${this.collectURL}?measurement_id=${this.trackingId}&api_secret=${this.secretKey}`,
@@ -150,7 +161,27 @@ class Tracker {
     }
   }
 
-  init() {
+  private async fetchPublicIp() {
+    const services = ['https://api.ip.sb/ip', 'https://ifconfig.me/ip'];
+
+    for (const service of services) {
+      try {
+        const response = await got.get(service, { timeout: 10000 });
+        const ip = response.body.trim();
+        if (ip && net.isIP(ip)) {
+          logMain.info('[track.fetchPublicIp] success:', ip);
+          return ip;
+        }
+      } catch (err) {
+        logMain.warn(`[track.fetchPublicIp] failed from ${service}:`, err);
+        continue;
+      }
+    }
+    logMain.warn('[track.fetchPublicIp] all services failed');
+    return undefined;
+  }
+
+  async init() {
     let uid = appConf.get('uid');
     if (!uid) {
       uid = appConf.get('uid') || uuidv4();
@@ -160,7 +191,8 @@ class Tracker {
 
     if (process.env.GA_TC && process.env.GA_MP) {
       logMain.info('[track.init] initializing GA');
-      this.analytics = new Analytics(process.env.GA_TC, process.env.GA_MP, uid, uuidv4());
+      const publicIp = await this.fetchPublicIp();
+      this.analytics = new Analytics(process.env.GA_TC, process.env.GA_MP, uid, uuidv4(), publicIp);
       this.analytics.setUserProperties({
         app_version: {
           value: app.getVersion(),
