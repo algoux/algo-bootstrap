@@ -198,7 +198,7 @@ class Tracker {
           value: app.getVersion(),
         },
         use_dark: {
-          value: nativeTheme.shouldUseDarkColors,
+          value: nativeTheme.shouldUseDarkColors ? '1' : '0',
         },
         theme_source: {
           value: nativeTheme.themeSource,
