@@ -78,8 +78,8 @@ function createWindow() {
       contextIsolation: false,
       preload: path.join(__dirname, './preload.js'),
     },
-    title: `${constants.appName} v${app.getVersion()}`, // TODO revert
-    // title: `${constants.appName}`,
+    // title: `${constants.appName} v${app.getVersion()}`,
+    title: `${constants.appName}`, // TODO revert
     // show: false,
     ...(process.platform === 'darwin' && {
       vibrancy: 'sidebar',
@@ -242,6 +242,7 @@ const menuTemplate: MenuItem[] = [
             if (mainWindow.webContents.isDevToolsOpened()) {
               mainWindow.webContents.closeDevTools();
             } else {
+              track.event('app', 'openDevTools');
               mainWindow.webContents.openDevTools({
                 mode: 'detach',
               });
