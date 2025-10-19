@@ -25,9 +25,11 @@ A：你需要打开「任意来源」以安装。步骤如下：
 
 1. 在启动台 或 App 搜索「Terminal」，打开终端；
 2. 在终端中输入以下命令并按 `Enter`（你可以复制命令并粘贴）：
+
 ```bash
 sudo spctl --master-disable
 ```
+
 3. 输入当前用户的开机密码并按 `Enter`（输入过程不会回显字符）；
 4. 打开「系统设置」->「隐私与安全性」，找到「安全性」部分，将「允许以下来源的应用程序」选项调整为「任何来源」；
 5. 重新打开 Algo Bootstrap。
@@ -55,3 +57,20 @@ A：可能新打开的 VS Code 窗口使用了默认配置文件，而非 Algo B
 Q：Algo Bootstrap 是否适合算竞熟手使用？
 
 A：适合的。即使你已经是 VS Code 专业用户，依然可以使用 Algo Bootstrap 配置。对于已经安装过的编程环境（如 C/C++、Python），会跳过安装；对于 VS Code，它不会污染你已有的配置文件，而是通过注入独立的配置文件提供增强。仅 VS Code 扩展是全局安装的，因此诸如 `Error Lens` 等扩展可能会对你的默认配置造成影响，但你可以手动禁用它们。
+
+---
+
+Q：Windows 下，运行程序输出中文乱码怎么办？
+
+A：请跟随以下步骤：
+
+1. 如果没有创建过 PowerShell 配置，则打开一个 PowerShell 窗口，执行此命令新建配置：
+   ```powershell
+   New-Item $PROFILE -ItemType File -Force
+   ```
+
+2. 编辑配置（默认位置为 `文档` 目录下的 `WindowsPowerShell\Microsoft.PowerShell_profile.ps1`），追加以下内容并保存：
+   ```powershell
+   $OutputEncoding = [console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+   ```
+3. 关闭先前 VS Code 中已打开的 PowerShell 终端（如有），重新运行程序。
