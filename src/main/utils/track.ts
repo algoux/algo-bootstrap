@@ -48,7 +48,7 @@ class Analytics {
     this.publicIp = publicIp;
 
     const platformMap: Record<string, string> = {
-      darwin: 'MacOS',
+      darwin: 'Macintosh',
       win32: 'Windows',
       linux: 'Linux',
     };
