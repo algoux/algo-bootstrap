@@ -15,7 +15,7 @@ jobs:
             platform: darwin
             arch: x64
             artifact_name: darwin-x64
-          - os: macos-latest
+          - os: macos-26
             platform: darwin
             arch: arm64
             artifact_name: darwin-arm64
