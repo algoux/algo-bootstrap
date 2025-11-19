@@ -11,7 +11,7 @@
   "homepage": "https://ab.algoux.cn/",
   "private": true,
   "scripts": {
-    "postinstall": "node scripts/postinstall.js && patch-package && electron-builder --config electron-builder.config.js install-app-deps",
+    "postinstall": "node scripts/postinstall.js && patch-package && electron-builder install-app-deps",
     "start": "npm run build:main-dev && electron --enable-async-stack-traces ./dist/main/main.js",
     "start:renderer": "cross-env NODE_OPTIONS=--openssl-legacy-provider APP_ROOT=src/renderer umi dev",
     "start:main": "electron-webpack dev",
