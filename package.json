@@ -1,7 +1,7 @@
 {
   "name": "algo-bootstrap",
   "productName": "Algo Bootstrap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Bootstrap for programming beginners",
   "main": "./dist/main/main.js",
   "author": {
@@ -19,7 +19,8 @@
       "identity": null,
       "target": [
         "dmg"
-      ]
+      ],
+      "icon": "build/icon.icon"
     },
     "dmg": {
       "artifactName": "AlgoBootstrap-mac-${arch}-${version}.${ext}",
@@ -178,7 +179,7 @@
     "devtron": "^1.4.0",
     "dva": "2.5.0-beta.2",
     "electron": "^37.2.6",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "^26.3.0",
     "electron-debug": "^4.1.0",
     "electron-webpack": "^2.8.2",
     "electron-webpack-ts": "^4.0.1",
